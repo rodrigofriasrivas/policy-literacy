@@ -36,7 +36,7 @@ export default function TopicExploration() {
           </div>
         ) : allTopics && allTopics.length > 0 ? (
           <div className="grid gap-2">
-            {allTopics.map((t) => (
+            {[...allTopics].sort((a, b) => (a.topic_id ?? 0) - (b.topic_id ?? 0)).map((t) => (
               <Link
                 key={t.topic_id}
                 to={`/topic/${t.topic_id}`}

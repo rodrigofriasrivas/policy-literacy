@@ -59,7 +59,7 @@ export default function FieldOverview() {
           </div>
         ) : topics && topics.length > 0 ? (
           <div className="space-y-1">
-            {topics.map((topic) => {
+            {[...topics].sort((a, b) => (a.topic_id ?? 0) - (b.topic_id ?? 0)).map((topic) => {
               const paperCount = papersByTopic?.find(
                 (p) => p.topic_id === topic.topic_id
               )?.paper_count;
