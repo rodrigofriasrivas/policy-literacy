@@ -1,148 +1,204 @@
 
-# Plan: Add Topic Tags to Papers List View
+
+# Plan: Add Temporal Evolution Chart to Topic Exploration
 
 ## Overview
-Add topic tags to each paper in the Papers list view using existing data access patterns. Tags will follow the "Topic X: Topic Name" format and serve as orientation labels. Implementation will be minimal, contained to a single file, and reversible.
+Add a simple area chart within the Topic Exploration view that visualizes how the selected topic has evolved over time. The chart will serve as a reading aid, allowing non-technical users to intuitively understand whether a topic is emerging, growing, stabilizing, or declining.
 
-## Approach
-Use inline `useQuery` directly in the PaperList component to fetch topic associations, avoiding new hook files. Client-side deduplication and grouping will attach topics to papers for display.
-
-## Changes
-
-### File: `src/pages/PaperListing.tsx`
-
-#### New Imports
-```typescript
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { formatTopicName } from "@/lib/utils";
-```
-
-#### Data Fetching (inside PaperList component)
-Add a second query to fetch all topic-paper associations:
+## Placement
+The chart will appear as a new subsection directly below the topic title and definition, before the existing Key Bigrams and Temporal Trajectory cards. This ensures users see the temporal context immediately after understanding what the topic is about.
 
 ```text
-useQuery: "paper-topic-associations"
-  - Fetch from topic_paper_links joined with topics
-  - Select: paper_id, topic_id, topic_name
-  - No limit (need all associations for the displayed papers)
+┌────────────────────────────────────────────────────────────────┐
+│ ← All topics                                                    │
+├────────────────────────────────────────────────────────────────┤
+│ Topic X: Topic Name                                             │
+│ Definition text...                                              │
+├────────────────────────────────────────────────────────────────┤
+│ ┌────────────────────────────────────────────────────────────┐ │
+│ │              ▄▄▄▄▄▄▄▄▄████████████████████                 │ │
+│ │          ▄▄██████████████████████████████                  │ │
+│ │      ▄▄████████████████████████████████████                │ │
+│ │  ▄▄████████████████████████████████████████████████        │ │
+│ └────────────────────────────────────────────────────────────┘ │
+│ This timeline shows how this topic has evolved within the       │
+│ research corpus over time.                                      │
+├────────────────────────────────────────────────────────────────┤
+│ ┌─────────────────┐  ┌─────────────────┐                        │
+│ │  Key Bigrams    │  │  Temporal       │                        │
+│ │                 │  │  Trajectory     │                        │
+│ └─────────────────┘  └─────────────────┘                        │
+└────────────────────────────────────────────────────────────────┘
 ```
 
-#### Client-Side Processing
-1. Deduplicate topic-paper links (multiple rows exist per paper-topic due to bigrams)
-2. Group topics by paper_id into a Map for O(1) lookup
-3. Sort topics by topic_id (ascending) within each paper
+## Data Source
+The chart will derive temporal data by counting papers linked to the selected topic per year:
 
-#### Sorting Papers
-Sort the papers array client-side:
-- Primary: Year (descending)
-- Secondary: Title (A-Z ascending)
-
-#### Rendering Topic Tags
-For each paper, look up its topics from the Map and render Badge components:
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Paper Title                                                  │
-│ Authors · Year · Journal                                     │
-│ ┌──────────────────┐ ┌──────────────────┐ ┌───────────────┐ │
-│ │Topic 3: Gender...│ │Topic 7: Policy...│ │Topic 15: ...  │ │
-│ └──────────────────┘ └──────────────────┘ └───────────────┘ │
-└─────────────────────────────────────────────────────────────┘
+```sql
+SELECT year, COUNT(DISTINCT paper_id) as paper_count 
+FROM topic_paper_links 
+JOIN papers ON topic_paper_links.paper_id = papers.paper_id 
+WHERE topic_id = [selected_topic] AND year IS NOT NULL 
+GROUP BY year 
+ORDER BY year
 ```
 
-Badges will use `variant="outline"` for a neutral, minimal appearance.
+This uses existing tables (`topic_paper_links` and `papers`) with no new database changes required.
+
+## Visual Design
+
+| Element | Specification |
+|---------|---------------|
+| Chart type | Area chart with subtle fill |
+| X-axis | Years (minimal tick marks, no label) |
+| Y-axis | Hidden (no numerical labels) |
+| Color | Neutral grey fill (`hsl(0 0% 50% / 0.2)`) with darker stroke |
+| Height | Fixed, compact (approximately 120px) |
+| Legends | None |
+| Tooltips | Disabled (no interactivity needed) |
+| Grid lines | Hidden |
+
+The visual intent is a simple silhouette that shows the shape of change over time.
 
 ## Implementation Details
 
-### Topic Association Query
-```typescript
-const { data: topicLinks } = useQuery({
-  queryKey: ["paper-topic-associations"],
-  queryFn: async () => {
-    const { data, error } = await supabase
-      .from("topic_paper_links")
-      .select("paper_id, topic_id, topics!inner(topic_id, topic_name)");
-    if (error) throw error;
-    return data;
-  },
-});
-```
+### New Hook
+**File:** `src/hooks/useTopicTemporalData.ts`
 
-### Deduplication and Grouping
+A new hook that fetches paper counts by year for a given topic:
+
 ```typescript
-// Create Map: paper_id -> [{ topic_id, topic_name }, ...]
-const topicsByPaper = useMemo(() => {
-  if (!topicLinks) return new Map();
-  const map = new Map<number, Array<{ topic_id: number; topic_name: string }>>();
-  
-  topicLinks.forEach((link) => {
-    const paperId = link.paper_id;
-    const topic = { topic_id: link.topics.topic_id, topic_name: link.topics.topic_name };
-    
-    if (!map.has(paperId)) {
-      map.set(paperId, []);
-    }
-    // Deduplicate by checking if topic_id already exists
-    const existing = map.get(paperId)!;
-    if (!existing.some(t => t.topic_id === topic.topic_id)) {
-      existing.push(topic);
-    }
+export function useTopicTemporalData(topicId?: number) {
+  return useQuery({
+    queryKey: ["topic-temporal-data", topicId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("topic_paper_links")
+        .select("paper_id, papers!inner(year)")
+        .eq("topic_id", topicId!);
+      
+      if (error) throw error;
+      
+      // Deduplicate and count papers per year
+      const yearCounts = new Map<number, Set<number>>();
+      data.forEach((link) => {
+        const year = link.papers?.year;
+        if (year) {
+          if (!yearCounts.has(year)) yearCounts.set(year, new Set());
+          yearCounts.get(year)!.add(link.paper_id);
+        }
+      });
+      
+      return Array.from(yearCounts.entries())
+        .map(([year, papers]) => ({ year, count: papers.size }))
+        .sort((a, b) => a.year - b.year);
+    },
+    enabled: topicId !== undefined,
   });
-  
-  // Sort topics by topic_id within each paper
-  map.forEach((topics) => topics.sort((a, b) => a.topic_id - b.topic_id));
-  
-  return map;
-}, [topicLinks]);
+}
 ```
 
-### Paper Sorting
+### Chart Component
+**File:** `src/components/TopicTemporalChart.tsx`
+
+A minimal, self-contained component using recharts:
+
 ```typescript
-const sortedPapers = useMemo(() => {
-  if (!papers) return [];
-  return [...papers].sort((a, b) => {
-    // Primary: year descending
-    const yearDiff = (b.year ?? 0) - (a.year ?? 0);
-    if (yearDiff !== 0) return yearDiff;
-    // Secondary: title ascending
-    return (a.title ?? "").localeCompare(b.title ?? "");
-  });
-}, [papers]);
+import { AreaChart, Area, XAxis, ResponsiveContainer } from "recharts";
+
+interface TopicTemporalChartProps {
+  data: Array<{ year: number; count: number }>;
+}
+
+export function TopicTemporalChart({ data }: TopicTemporalChartProps) {
+  if (!data || data.length === 0) return null;
+
+  return (
+    <div className="h-[120px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+          <XAxis 
+            dataKey="year" 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+            interval="preserveStartEnd"
+          />
+          <Area
+            type="monotone"
+            dataKey="count"
+            stroke="hsl(0 0% 50%)"
+            fill="hsl(0 0% 50% / 0.2)"
+            strokeWidth={1.5}
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
 ```
 
-### Tag Rendering
+### Integration in TopicExploration
+**File:** `src/pages/TopicExploration.tsx`
+
+Add the chart section between the topic header and the existing cards:
+
 ```typescript
-{topicsByPaper.get(paper.paper_id)?.map((topic) => (
-  <Badge key={topic.topic_id} variant="outline" className="text-xs">
-    {formatTopicName(topic.topic_id, topic.topic_name)}
-  </Badge>
-))}
+// After the header section (line ~85), before isLoading check
+{/* Temporal evolution chart */}
+<section className="space-y-2">
+  {temporalLoading ? (
+    <Skeleton className="h-[120px]" />
+  ) : temporalData && temporalData.length > 0 ? (
+    <>
+      <TopicTemporalChart data={temporalData} />
+      <p className="text-xs text-muted-foreground">
+        This timeline shows how this topic has evolved within the research corpus over time.
+      </p>
+    </>
+  ) : null}
+</section>
 ```
 
-## What Changes
+## Files to Create/Modify
 
-| Aspect | Change |
-|--------|--------|
-| Papers list | Shows topic tags below metadata |
-| Sorting | Year (desc), then Title (A-Z) |
-| Header text | Updated to reflect sorting order |
+| File | Action | Purpose |
+|------|--------|---------|
+| `src/hooks/useTopicTemporalData.ts` | Create | Fetch paper counts by year for selected topic |
+| `src/components/TopicTemporalChart.tsx` | Create | Minimal area chart component |
+| `src/pages/TopicExploration.tsx` | Modify | Integrate chart section |
 
-## What Does NOT Change
+## What Will NOT Change
 
-- PaperDetail component (no changes)
-- No new hook files created
-- No changes to existing hooks
-- No changes to other views
-- No weights, rankings, or metrics displayed
-- Database queries unchanged
+- Temporal Evolution page (global matrix view) - untouched
+- Existing Key Bigrams and Temporal Trajectory cards - remain in place
+- Database structure - no migrations needed
+- Other views - Field Overview, Paper Listing unaffected
 
-## Summary
+## Constraints Satisfied
 
-Single file modification (`src/pages/PaperListing.tsx`) that:
-1. Adds inline query for topic associations
-2. Client-side deduplication and grouping
-3. Sorts papers by year (desc), title (asc)
-4. Renders topic tags as neutral Badge components
-5. Uses existing `formatTopicName` utility for consistent naming
+| Requirement | How Addressed |
+|-------------|---------------|
+| Placement within Topic Exploration | Chart appears below title/definition |
+| Not a new tab or page | Integrated as subsection |
+| Uses existing Supabase data | Derives from topic_paper_links + papers |
+| Simple visual (area chart) | AreaChart with minimal styling |
+| X-axis: years | Year labels shown |
+| Y-axis: no percentages | Y-axis completely hidden |
+| No legends | None rendered |
+| No multiple topic comparison | Single topic only |
+| No weights/scores shown | Only visual shape, no numbers |
+| Caption provided | Minimal explanatory text included |
+
+## User Experience Outcome
+
+A non-technical user viewing Topic 1: New Venture Creation will see:
+- A chart rising from the 1980s through 2024
+- Clear visual indication that this is a mature, established topic
+
+A user viewing Topic 20: Digital Business Models will see:
+- A chart starting around 2003 and rising steeply toward 2024
+- Clear visual indication that this is an emerging topic
+
+This enables immediate intuitive understanding without requiring statistical knowledge.
+
