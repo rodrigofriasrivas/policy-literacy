@@ -2,11 +2,12 @@ import { useParams, Link } from "react-router-dom";
 import { useTopic, useTopBigramsByTopic, useTopicsRanked } from "@/hooks/useTopics";
 import { usePapersByTopicId } from "@/hooks/usePapers";
 import { useTopicWeightsById } from "@/hooks/useTopicWeights";
+import { useTopicTemporalData } from "@/hooks/useTopicTemporalData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { formatTopicName } from "@/lib/utils";
-
+import { TopicTemporalChart } from "@/components/TopicTemporalChart";
 export default function TopicExploration() {
   const { topicId } = useParams<{ topicId: string }>();
   const numericTopicId = topicId ? parseInt(topicId, 10) : undefined;
@@ -16,6 +17,7 @@ export default function TopicExploration() {
   const { data: bigrams, isLoading: bigramsLoading } = useTopBigramsByTopic(numericTopicId);
   const { data: papers, isLoading: papersLoading } = usePapersByTopicId(numericTopicId);
   const { data: weights, isLoading: weightsLoading } = useTopicWeightsById(numericTopicId);
+  const { data: temporalData, isLoading: temporalLoading } = useTopicTemporalData(numericTopicId);
 
   // If no topic selected, show topic selector
   if (!topicId) {
@@ -83,6 +85,20 @@ export default function TopicExploration() {
           <p className="text-muted-foreground">Topic not found.</p>
         )}
       </header>
+
+      {/* Temporal evolution chart */}
+      <section className="space-y-2">
+        {temporalLoading ? (
+          <Skeleton className="h-[120px]" />
+        ) : temporalData && temporalData.length > 0 ? (
+          <>
+            <TopicTemporalChart data={temporalData} />
+            <p className="text-xs text-muted-foreground">
+              This timeline shows how this topic has evolved within the research corpus over time.
+            </p>
+          </>
+        ) : null}
+      </section>
 
       {isLoading ? (
         <div className="grid md:grid-cols-2 gap-6">
