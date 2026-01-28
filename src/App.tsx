@@ -3,7 +3,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { AppLayout } from "@/components/layout/AppLayout";
+import FieldOverview from "./pages/FieldOverview";
+import TemporalEvolution from "./pages/TemporalEvolution";
+import TopicExploration from "./pages/TopicExploration";
+import PaperListing from "./pages/PaperListing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -14,11 +18,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AppLayout>
+          <Routes>
+            <Route path="/" element={<FieldOverview />} />
+            <Route path="/temporal" element={<TemporalEvolution />} />
+            <Route path="/topic" element={<TopicExploration />} />
+            <Route path="/topic/:topicId" element={<TopicExploration />} />
+            <Route path="/papers" element={<PaperListing />} />
+            <Route path="/papers/:paperId" element={<PaperListing />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AppLayout>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
