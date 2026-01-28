@@ -3,6 +3,7 @@ import { useTopicsRanked, usePapersByTopic } from "@/hooks/useTopics";
 import { useCoverageSummary } from "@/hooks/useCoverageSummary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatTopicName } from "@/lib/utils";
 
 export default function FieldOverview() {
   const { data: topics, isLoading: topicsLoading } = useTopicsRanked();
@@ -88,7 +89,7 @@ export default function FieldOverview() {
                     {/* Topic info */}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground group-hover:underline">
-                        {topic.topic_name}
+                        {formatTopicName(topic.topic_id, topic.topic_name)}
                       </p>
                       {topic.topic_label && (
                         <p className="text-xs text-muted-foreground truncate">

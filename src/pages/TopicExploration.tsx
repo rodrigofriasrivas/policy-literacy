@@ -5,6 +5,7 @@ import { useTopicWeightsById } from "@/hooks/useTopicWeights";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { formatTopicName } from "@/lib/utils";
 
 export default function TopicExploration() {
   const { topicId } = useParams<{ topicId: string }>();
@@ -41,7 +42,7 @@ export default function TopicExploration() {
                 to={`/topic/${t.topic_id}`}
                 className="block p-3 border border-border rounded hover:bg-secondary/50 transition-colors"
               >
-                <p className="font-medium text-foreground">{t.topic_name}</p>
+                <p className="font-medium text-foreground">{formatTopicName(t.topic_id, t.topic_name)}</p>
                 {t.topic_label && (
                   <p className="text-sm text-muted-foreground">{t.topic_label}</p>
                 )}
@@ -73,7 +74,7 @@ export default function TopicExploration() {
           <Skeleton className="h-8 w-64" />
         ) : topic ? (
           <>
-            <h2 className="text-2xl font-normal text-foreground">{topic.topic_name}</h2>
+            <h2 className="text-2xl font-normal text-foreground">{formatTopicName(numericTopicId, topic.topic_name)}</h2>
             {topic.definition && (
               <p className="text-muted-foreground max-w-2xl">{topic.definition}</p>
             )}
