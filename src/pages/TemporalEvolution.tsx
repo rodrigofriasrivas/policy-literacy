@@ -3,6 +3,7 @@ import { useTopicWeights } from "@/hooks/useTopicWeights";
 import { useTopicsRanked } from "@/hooks/useTopics";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import { formatTopicName } from "@/lib/utils";
 
 export default function TemporalEvolution() {
   const { data: weights, isLoading: weightsLoading } = useTopicWeights();
@@ -83,7 +84,7 @@ export default function TemporalEvolution() {
                       to={`/topic/${topic.topic_id}`}
                       className="text-foreground hover:underline"
                     >
-                      {topic.topic_name}
+                      {formatTopicName(topic.topic_id, topic.topic_name)}
                     </Link>
                   </td>
                   {uniqueLabels.map((label) => {
@@ -102,7 +103,7 @@ export default function TemporalEvolution() {
                             opacity: Math.max(0.1, normalizedWeight),
                             backgroundColor: `hsl(0 0% ${20 + (1 - normalizedWeight) * 60}%)`,
                           }}
-                          title={`${topic.topic_name}: ${weight?.topic_weight ?? 0}`}
+                          title={`${formatTopicName(topic.topic_id, topic.topic_name)}: ${weight?.topic_weight ?? 0}`}
                         />
                       </td>
                     );
