@@ -1,7 +1,12 @@
+import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { usePapers, usePaper } from "@/hooks/usePapers";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { formatTopicName } from "@/lib/utils";
 
 export default function PaperListing() {
   const { paperId } = useParams<{ paperId: string }>();
@@ -17,7 +22,56 @@ export default function PaperListing() {
 }
 
 function PaperList() {
-  const { data: papers, isLoading } = usePapers(200);
+  const { data: papers, isLoading: papersLoading } = usePapers(200);
+
+  // Fetch topic-paper associations
+  const { data: topicLinks } = useQuery({
+    queryKey: ["paper-topic-associations"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("topic_paper_links")
+        .select("paper_id, topic_id, topics!inner(topic_id, topic_name)");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Deduplicate and group topics by paper_id
+  const topicsByPaper = useMemo(() => {
+    if (!topicLinks) return new Map<number, Array<{ topic_id: number; topic_name: string }>>();
+    const map = new Map<number, Array<{ topic_id: number; topic_name: string }>>();
+
+    topicLinks.forEach((link) => {
+      const paperId = link.paper_id;
+      const topic = { topic_id: link.topics.topic_id, topic_name: link.topics.topic_name };
+
+      if (!map.has(paperId)) {
+        map.set(paperId, []);
+      }
+      // Deduplicate by checking if topic_id already exists
+      const existing = map.get(paperId)!;
+      if (!existing.some((t) => t.topic_id === topic.topic_id)) {
+        existing.push(topic);
+      }
+    });
+
+    // Sort topics by topic_id within each paper
+    map.forEach((topics) => topics.sort((a, b) => a.topic_id - b.topic_id));
+
+    return map;
+  }, [topicLinks]);
+
+  // Sort papers: year (desc), then title (A-Z)
+  const sortedPapers = useMemo(() => {
+    if (!papers) return [];
+    return [...papers].sort((a, b) => {
+      // Primary: year descending
+      const yearDiff = (b.year ?? 0) - (a.year ?? 0);
+      if (yearDiff !== 0) return yearDiff;
+      // Secondary: title ascending
+      return (a.title ?? "").localeCompare(b.title ?? "");
+    });
+  }, [papers]);
 
   return (
     <div className="space-y-8">
@@ -25,32 +79,44 @@ function PaperList() {
         <h2 className="text-2xl font-normal text-foreground">Papers</h2>
         <p className="text-muted-foreground max-w-2xl">
           The scholarly corpus underlying this research artefact.
-          Papers are ordered by publication year.
+          Papers are ordered by year (most recent first), then by title.
         </p>
       </header>
 
-      {isLoading ? (
+      {papersLoading ? (
         <div className="space-y-2">
           {[...Array(10)].map((_, i) => (
-            <Skeleton key={i} className="h-16" />
+            <Skeleton key={i} className="h-20" />
           ))}
         </div>
-      ) : papers && papers.length > 0 ? (
+      ) : sortedPapers && sortedPapers.length > 0 ? (
         <div className="space-y-2">
-          {papers.map((paper) => (
-            <Link
-              key={paper.paper_id}
-              to={`/papers/${paper.paper_id}`}
-              className="block p-4 border border-border rounded hover:bg-secondary/50 transition-colors"
-            >
-              <p className="text-sm font-medium text-foreground">{paper.title}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {paper.authors && `${paper.authors} · `}
-                {paper.year && `${paper.year} · `}
-                {paper.journal}
-              </p>
-            </Link>
-          ))}
+          {sortedPapers.map((paper) => {
+            const paperTopics = topicsByPaper.get(paper.paper_id);
+            return (
+              <Link
+                key={paper.paper_id}
+                to={`/papers/${paper.paper_id}`}
+                className="block p-4 border border-border rounded hover:bg-secondary/50 transition-colors"
+              >
+                <p className="text-sm font-medium text-foreground">{paper.title}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {paper.authors && `${paper.authors} · `}
+                  {paper.year && `${paper.year} · `}
+                  {paper.journal}
+                </p>
+                {paperTopics && paperTopics.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {paperTopics.map((topic) => (
+                      <Badge key={topic.topic_id} variant="outline" className="text-xs">
+                        {formatTopicName(topic.topic_id, topic.topic_name)}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </Link>
+            );
+          })}
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">No papers found.</p>
