@@ -1,204 +1,283 @@
 
 
-# Plan: Add Temporal Evolution Chart to Topic Exploration
+# Plan: Multi-Line Bigram Temporal Chart
 
 ## Overview
-Add a simple area chart within the Topic Exploration view that visualizes how the selected topic has evolved over time. The chart will serve as a reading aid, allowing non-technical users to intuitively understand whether a topic is emerging, growing, stabilizing, or declining.
+Replace the current single-line temporal chart with a multi-line chart showing how each of the 5 bigrams associated with the selected topic evolves over time. This reveals the internal conceptual dynamics of each topic.
 
-## Placement
-The chart will appear as a new subsection directly below the topic title and definition, before the existing Key Bigrams and Temporal Trajectory cards. This ensures users see the temporal context immediately after understanding what the topic is about.
+## Data Structure
+
+Each topic has exactly 5 distinct bigrams. For each bigram, we need paper counts per year:
 
 ```text
-┌────────────────────────────────────────────────────────────────┐
-│ ← All topics                                                    │
-├────────────────────────────────────────────────────────────────┤
-│ Topic X: Topic Name                                             │
-│ Definition text...                                              │
-├────────────────────────────────────────────────────────────────┤
-│ ┌────────────────────────────────────────────────────────────┐ │
-│ │              ▄▄▄▄▄▄▄▄▄████████████████████                 │ │
-│ │          ▄▄██████████████████████████████                  │ │
-│ │      ▄▄████████████████████████████████████                │ │
-│ │  ▄▄████████████████████████████████████████████████        │ │
-│ └────────────────────────────────────────────────────────────┘ │
-│ This timeline shows how this topic has evolved within the       │
-│ research corpus over time.                                      │
-├────────────────────────────────────────────────────────────────┤
-│ ┌─────────────────┐  ┌─────────────────┐                        │
-│ │  Key Bigrams    │  │  Temporal       │                        │
-│ │                 │  │  Trajectory     │                        │
-│ └─────────────────┘  └─────────────────┘                        │
-└────────────────────────────────────────────────────────────────┘
+Example for Topic 24 (Digital Economy):
+- big_data: 2017→1, 2018→1, 2022→1, 2023→3, 2024→5
+- digital_economy: 2020→1, 2022→2, 2023→4, 2024→9
+- digital_transformation: 2019→1, 2022→1, 2023→6, 2024→18
+- informal_entrepreneurship: 2012→3, 2014→3, 2016→1, ...
+- technological_progress: 1994→1, 2004→1, 2009→1, ...
 ```
 
-## Data Source
-The chart will derive temporal data by counting papers linked to the selected topic per year:
+## Implementation Strategy
 
-```sql
-SELECT year, COUNT(DISTINCT paper_id) as paper_count 
-FROM topic_paper_links 
-JOIN papers ON topic_paper_links.paper_id = papers.paper_id 
-WHERE topic_id = [selected_topic] AND year IS NOT NULL 
-GROUP BY year 
-ORDER BY year
+### Fixed X-Axis Range
+All charts will use a fixed range of 1980–2025 (corpus spans 1981–2025). This ensures visual consistency across topics.
+
+### Forward-Fill Missing Years
+For years after a bigram's first appearance where no publications exist, extend the line horizontally using the last observed value. This prevents misleading "drops to zero" and shows persistence.
+
+```text
+Before (raw data):     After (forward-fill):
+2020 → 2               2020 → 2
+[no 2021]              2021 → 2  (carried forward)
+2022 → 4               2022 → 4
+[no 2023]              2023 → 4  (carried forward)
+2024 → 6               2024 → 6
 ```
 
-This uses existing tables (`topic_paper_links` and `papers`) with no new database changes required.
+### Data Transformation
+Transform bigram data into recharts format with all 5 bigrams as separate series:
+
+```typescript
+// Output structure for recharts
+[
+  { year: 1980, big_data: null, digital_economy: null, ... },
+  { year: 1981, big_data: null, digital_economy: null, ... },
+  ...
+  { year: 2017, big_data: 1, digital_economy: null, ... },
+  { year: 2018, big_data: 1, digital_economy: null, ... },
+  ...
+  { year: 2025, big_data: 5, digital_economy: 9, ... },
+]
+```
 
 ## Visual Design
 
 | Element | Specification |
 |---------|---------------|
-| Chart type | Area chart with subtle fill |
-| X-axis | Years (minimal tick marks, no label) |
+| Chart type | Multi-line chart (5 lines maximum) |
+| X-axis | Fixed range 1980–2025, minimal ticks |
 | Y-axis | Hidden (no numerical labels) |
-| Color | Neutral grey fill (`hsl(0 0% 50% / 0.2)`) with darker stroke |
-| Height | Fixed, compact (approximately 120px) |
-| Legends | None |
-| Tooltips | Disabled (no interactivity needed) |
+| Colors | 5 distinct neutral grey tones for each line |
+| Height | Increased to ~180px (more lines need more space) |
+| Legends | Simple legend showing bigram names below chart |
+| Tooltips | Disabled (visual reading aid only) |
 | Grid lines | Hidden |
 
-The visual intent is a simple silhouette that shows the shape of change over time.
+### Color Palette (5 grey tones)
+```text
+Line 1: hsl(0 0% 20%)  - darkest
+Line 2: hsl(0 0% 35%)
+Line 3: hsl(0 0% 50%)  - mid
+Line 4: hsl(0 0% 65%)
+Line 5: hsl(0 0% 80%)  - lightest
+```
 
-## Implementation Details
+## Files to Modify
 
-### New Hook
+| File | Changes |
+|------|---------|
+| `src/hooks/useTopicTemporalData.ts` | Update to fetch bigram-level data with forward-fill |
+| `src/components/TopicTemporalChart.tsx` | Replace with multi-line chart |
+| `src/pages/TopicExploration.tsx` | Update skeleton height (120px → 180px) |
+
+## Hook Changes
+
 **File:** `src/hooks/useTopicTemporalData.ts`
 
-A new hook that fetches paper counts by year for a given topic:
+New query and transformation logic:
 
 ```typescript
 export function useTopicTemporalData(topicId?: number) {
   return useQuery({
     queryKey: ["topic-temporal-data", topicId],
     queryFn: async () => {
+      // Fetch bigram-paper-year associations
       const { data, error } = await supabase
         .from("topic_paper_links")
-        .select("paper_id, papers!inner(year)")
-        .eq("topic_id", topicId!);
-      
+        .select("paper_id, bigram, papers!inner(year)")
+        .eq("topic_id", topicId!)
+        .not("bigram", "is", null);
+
       if (error) throw error;
+
+      // 1. Count papers per bigram per year
+      const bigramYearCounts = new Map<string, Map<number, Set<number>>>();
       
-      // Deduplicate and count papers per year
-      const yearCounts = new Map<number, Set<number>>();
       data.forEach((link) => {
+        const bigram = link.bigram;
         const year = link.papers?.year;
-        if (year) {
-          if (!yearCounts.has(year)) yearCounts.set(year, new Set());
-          yearCounts.get(year)!.add(link.paper_id);
+        if (!bigram || !year) return;
+        
+        if (!bigramYearCounts.has(bigram)) {
+          bigramYearCounts.set(bigram, new Map());
         }
+        const yearMap = bigramYearCounts.get(bigram)!;
+        if (!yearMap.has(year)) {
+          yearMap.set(year, new Set());
+        }
+        yearMap.get(year)!.add(link.paper_id);
       });
+
+      // 2. Get all unique bigrams
+      const bigrams = Array.from(bigramYearCounts.keys()).sort();
+
+      // 3. Build chart data with fixed x-axis 1980-2025
+      const years = Array.from({ length: 46 }, (_, i) => 1980 + i);
       
-      return Array.from(yearCounts.entries())
-        .map(([year, papers]) => ({ year, count: papers.size }))
-        .sort((a, b) => a.year - b.year);
+      const chartData = years.map((year) => {
+        const row: Record<string, number | null> = { year };
+        
+        bigrams.forEach((bigram) => {
+          const yearMap = bigramYearCounts.get(bigram);
+          const count = yearMap?.get(year)?.size ?? null;
+          row[bigram] = count;
+        });
+        
+        return row;
+      });
+
+      // 4. Forward-fill: carry last value forward for each bigram
+      bigrams.forEach((bigram) => {
+        let lastValue: number | null = null;
+        let hasStarted = false;
+        
+        chartData.forEach((row) => {
+          if (row[bigram] !== null) {
+            lastValue = row[bigram] as number;
+            hasStarted = true;
+          } else if (hasStarted && lastValue !== null) {
+            row[bigram] = lastValue;
+          }
+        });
+      });
+
+      return { chartData, bigrams };
     },
     enabled: topicId !== undefined,
   });
 }
 ```
 
-### Chart Component
+## Chart Component Changes
+
 **File:** `src/components/TopicTemporalChart.tsx`
 
-A minimal, self-contained component using recharts:
+Replace with multi-line chart:
 
 ```typescript
-import { AreaChart, Area, XAxis, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, ResponsiveContainer, Legend } from "recharts";
+
+const COLORS = [
+  "hsl(0 0% 20%)",
+  "hsl(0 0% 35%)",
+  "hsl(0 0% 50%)",
+  "hsl(0 0% 65%)",
+  "hsl(0 0% 80%)",
+];
 
 interface TopicTemporalChartProps {
-  data: Array<{ year: number; count: number }>;
+  data: Array<Record<string, number | null>>;
+  bigrams: string[];
 }
 
-export function TopicTemporalChart({ data }: TopicTemporalChartProps) {
-  if (!data || data.length === 0) return null;
+export function TopicTemporalChart({ data, bigrams }: TopicTemporalChartProps) {
+  if (!data || data.length === 0 || !bigrams || bigrams.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="h-[120px] w-full">
+    <div className="h-[180px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
-          <XAxis 
-            dataKey="year" 
+        <LineChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+          <XAxis
+            dataKey="year"
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-            interval="preserveStartEnd"
+            domain={[1980, 2025]}
+            ticks={[1980, 1990, 2000, 2010, 2020]}
           />
-          <Area
-            type="monotone"
-            dataKey="count"
-            stroke="hsl(0 0% 50%)"
-            fill="hsl(0 0% 50% / 0.2)"
-            strokeWidth={1.5}
+          {bigrams.map((bigram, index) => (
+            <Line
+              key={bigram}
+              type="monotone"
+              dataKey={bigram}
+              stroke={COLORS[index % COLORS.length]}
+              strokeWidth={1.5}
+              dot={false}
+              connectNulls={false}
+            />
+          ))}
+          <Legend
+            verticalAlign="bottom"
+            height={36}
+            iconType="line"
+            formatter={(value) => (
+              <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
+                {value.replace(/_/g, " ")}
+              </span>
+            )}
           />
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );
 }
 ```
 
-### Integration in TopicExploration
+## Integration Update
+
 **File:** `src/pages/TopicExploration.tsx`
 
-Add the chart section between the topic header and the existing cards:
+Update the chart section to pass new props:
 
 ```typescript
-// After the header section (line ~85), before isLoading check
 {/* Temporal evolution chart */}
 <section className="space-y-2">
   {temporalLoading ? (
-    <Skeleton className="h-[120px]" />
-  ) : temporalData && temporalData.length > 0 ? (
+    <Skeleton className="h-[180px]" />
+  ) : temporalData?.chartData && temporalData.chartData.length > 0 ? (
     <>
-      <TopicTemporalChart data={temporalData} />
+      <TopicTemporalChart 
+        data={temporalData.chartData} 
+        bigrams={temporalData.bigrams} 
+      />
       <p className="text-xs text-muted-foreground">
-        This timeline shows how this topic has evolved within the research corpus over time.
+        This timeline shows how the internal concepts of this topic have evolved 
+        within the research corpus over time.
       </p>
     </>
   ) : null}
 </section>
 ```
 
-## Files to Create/Modify
+## What Changes
 
-| File | Action | Purpose |
-|------|--------|---------|
-| `src/hooks/useTopicTemporalData.ts` | Create | Fetch paper counts by year for selected topic |
-| `src/components/TopicTemporalChart.tsx` | Create | Minimal area chart component |
-| `src/pages/TopicExploration.tsx` | Modify | Integrate chart section |
+| Aspect | Before | After |
+|--------|--------|-------|
+| Chart type | Single area (paper count) | 5 separate lines (per bigram) |
+| X-axis | Dynamic range | Fixed 1980–2025 |
+| Height | 120px | 180px |
+| Legend | None | Shows 5 bigram names |
+| Data source | Paper count per year | Bigram paper count per year |
+| Missing years | Gaps | Forward-filled |
 
-## What Will NOT Change
+## What Does NOT Change
 
-- Temporal Evolution page (global matrix view) - untouched
-- Existing Key Bigrams and Temporal Trajectory cards - remain in place
+- Temporal Evolution tab (global matrix view) - untouched
+- Other views (Field Overview, Paper Listing) - untouched
+- Key Bigrams and Temporal Trajectory cards - remain in place
 - Database structure - no migrations needed
-- Other views - Field Overview, Paper Listing unaffected
-
-## Constraints Satisfied
-
-| Requirement | How Addressed |
-|-------------|---------------|
-| Placement within Topic Exploration | Chart appears below title/definition |
-| Not a new tab or page | Integrated as subsection |
-| Uses existing Supabase data | Derives from topic_paper_links + papers |
-| Simple visual (area chart) | AreaChart with minimal styling |
-| X-axis: years | Year labels shown |
-| Y-axis: no percentages | Y-axis completely hidden |
-| No legends | None rendered |
-| No multiple topic comparison | Single topic only |
-| No weights/scores shown | Only visual shape, no numbers |
-| Caption provided | Minimal explanatory text included |
+- No weights, percentages, or statistical explanations displayed
 
 ## User Experience Outcome
 
-A non-technical user viewing Topic 1: New Venture Creation will see:
-- A chart rising from the 1980s through 2024
-- Clear visual indication that this is a mature, established topic
+A user viewing Topic 24: Digital Economy will see:
+- 5 distinct lines representing: big_data, digital_economy, digital_transformation, informal_entrepreneurship, technological_progress
+- technological_progress starting earliest (1994) as a persistent baseline
+- digital_transformation emerging later (2019) with steep recent growth
+- Clear visual indication of which concepts are emerging vs. established within the topic
 
-A user viewing Topic 20: Digital Business Models will see:
-- A chart starting around 2003 and rising steeply toward 2024
-- Clear visual indication that this is an emerging topic
-
-This enables immediate intuitive understanding without requiring statistical knowledge.
+This enables intuitive understanding of topic internal dynamics without statistical knowledge.
 
