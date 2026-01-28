@@ -1,31 +1,57 @@
-import { AreaChart, Area, XAxis, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, ResponsiveContainer, Legend } from "recharts";
+
+const COLORS = [
+  "hsl(0 0% 20%)",
+  "hsl(0 0% 35%)",
+  "hsl(0 0% 50%)",
+  "hsl(0 0% 65%)",
+  "hsl(0 0% 80%)",
+];
 
 interface TopicTemporalChartProps {
-  data: Array<{ year: number; count: number }>;
+  data: Array<Record<string, number | null>>;
+  bigrams: string[];
 }
 
-export function TopicTemporalChart({ data }: TopicTemporalChartProps) {
-  if (!data || data.length === 0) return null;
+export function TopicTemporalChart({ data, bigrams }: TopicTemporalChartProps) {
+  if (!data || data.length === 0 || !bigrams || bigrams.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="h-[120px] w-full">
+    <div className="h-[180px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
+        <LineChart data={data} margin={{ top: 5, right: 5, bottom: 5, left: 5 }}>
           <XAxis
             dataKey="year"
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-            interval="preserveStartEnd"
+            domain={[1980, 2025]}
+            ticks={[1980, 1990, 2000, 2010, 2020]}
           />
-          <Area
-            type="monotone"
-            dataKey="count"
-            stroke="hsl(0 0% 50%)"
-            fill="hsl(0 0% 50% / 0.2)"
-            strokeWidth={1.5}
+          {bigrams.map((bigram, index) => (
+            <Line
+              key={bigram}
+              type="monotone"
+              dataKey={bigram}
+              stroke={COLORS[index % COLORS.length]}
+              strokeWidth={1.5}
+              dot={false}
+              connectNulls={false}
+            />
+          ))}
+          <Legend
+            verticalAlign="bottom"
+            height={36}
+            iconType="line"
+            formatter={(value) => (
+              <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
+                {value.replace(/_/g, " ")}
+              </span>
+            )}
           />
-        </AreaChart>
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );

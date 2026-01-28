@@ -89,12 +89,16 @@ export default function TopicExploration() {
       {/* Temporal evolution chart */}
       <section className="space-y-2">
         {temporalLoading ? (
-          <Skeleton className="h-[120px]" />
-        ) : temporalData && temporalData.length > 0 ? (
+          <Skeleton className="h-[180px]" />
+        ) : temporalData?.chartData && temporalData.chartData.length > 0 ? (
           <>
-            <TopicTemporalChart data={temporalData} />
+            <TopicTemporalChart 
+              data={temporalData.chartData} 
+              bigrams={temporalData.bigrams} 
+            />
             <p className="text-xs text-muted-foreground">
-              This timeline shows how this topic has evolved within the research corpus over time.
+              This timeline shows how the internal concepts of this topic have evolved 
+              within the research corpus over time.
             </p>
           </>
         ) : null}
