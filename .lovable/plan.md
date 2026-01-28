@@ -1,78 +1,148 @@
 
-# Plan: Normalize Topic Naming Format
+# Plan: Add Topic Tags to Papers List View
 
 ## Overview
-Add a reusable utility function and update all topic name displays to use the format **"Topic X: Topic Name"** (e.g., "Topic 1: New Venture Creation"). All existing elements including `topic_label` displays, layouts, and visualizations remain unchanged.
+Add topic tags to each paper in the Papers list view using existing data access patterns. Tags will follow the "Topic X: Topic Name" format and serve as orientation labels. Implementation will be minimal, contained to a single file, and reversible.
+
+## Approach
+Use inline `useQuery` directly in the PaperList component to fetch topic associations, avoiding new hook files. Client-side deduplication and grouping will attach topics to papers for display.
 
 ## Changes
 
-### 1. Add Utility Function
-**File:** `src/lib/utils.ts`
+### File: `src/pages/PaperListing.tsx`
 
-Add a helper function after the existing `cn` function:
-
+#### New Imports
 ```typescript
-export function formatTopicName(topicId: number | null | undefined, topicName: string | null | undefined): string {
-  if (topicId == null || !topicName) return topicName ?? "";
-  return `Topic ${topicId}: ${topicName}`;
-}
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Badge } from "@/components/ui/badge";
+import { formatTopicName } from "@/lib/utils";
 ```
 
-This centralizes the formatting logic for consistent use across all views.
+#### Data Fetching (inside PaperList component)
+Add a second query to fetch all topic-paper associations:
 
----
+```text
+useQuery: "paper-topic-associations"
+  - Fetch from topic_paper_links joined with topics
+  - Select: paper_id, topic_id, topic_name
+  - No limit (need all associations for the displayed papers)
+```
 
-### 2. Update Field Overview
-**File:** `src/pages/FieldOverview.tsx`
+#### Client-Side Processing
+1. Deduplicate topic-paper links (multiple rows exist per paper-topic due to bigrams)
+2. Group topics by paper_id into a Map for O(1) lookup
+3. Sort topics by topic_id (ascending) within each paper
 
-| Line | Current | Updated |
-|------|---------|---------|
-| 91 | `{topic.topic_name}` | `{formatTopicName(topic.topic_id, topic.topic_name)}` |
+#### Sorting Papers
+Sort the papers array client-side:
+- Primary: Year (descending)
+- Secondary: Title (A-Z ascending)
 
-Add import: `import { formatTopicName } from "@/lib/utils";`
+#### Rendering Topic Tags
+For each paper, look up its topics from the Map and render Badge components:
 
-The `topic_label` display on lines 93-97 remains unchanged.
+```text
+┌─────────────────────────────────────────────────────────────┐
+│ Paper Title                                                  │
+│ Authors · Year · Journal                                     │
+│ ┌──────────────────┐ ┌──────────────────┐ ┌───────────────┐ │
+│ │Topic 3: Gender...│ │Topic 7: Policy...│ │Topic 15: ...  │ │
+│ └──────────────────┘ └──────────────────┘ └───────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
 
----
+Badges will use `variant="outline"` for a neutral, minimal appearance.
 
-### 3. Update Temporal Evolution
-**File:** `src/pages/TemporalEvolution.tsx`
+## Implementation Details
 
-| Line | Current | Updated |
-|------|---------|---------|
-| 86 | `{topic.topic_name}` | `{formatTopicName(topic.topic_id, topic.topic_name)}` |
-| 105 | `` `${topic.topic_name}: ${weight?.topic_weight ?? 0}` `` | `` `${formatTopicName(topic.topic_id, topic.topic_name)}: ${weight?.topic_weight ?? 0}` `` |
+### Topic Association Query
+```typescript
+const { data: topicLinks } = useQuery({
+  queryKey: ["paper-topic-associations"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("topic_paper_links")
+      .select("paper_id, topic_id, topics!inner(topic_id, topic_name)");
+    if (error) throw error;
+    return data;
+  },
+});
+```
 
-Add import: `import { formatTopicName } from "@/lib/utils";`
+### Deduplication and Grouping
+```typescript
+// Create Map: paper_id -> [{ topic_id, topic_name }, ...]
+const topicsByPaper = useMemo(() => {
+  if (!topicLinks) return new Map();
+  const map = new Map<number, Array<{ topic_id: number; topic_name: string }>>();
+  
+  topicLinks.forEach((link) => {
+    const paperId = link.paper_id;
+    const topic = { topic_id: link.topics.topic_id, topic_name: link.topics.topic_name };
+    
+    if (!map.has(paperId)) {
+      map.set(paperId, []);
+    }
+    // Deduplicate by checking if topic_id already exists
+    const existing = map.get(paperId)!;
+    if (!existing.some(t => t.topic_id === topic.topic_id)) {
+      existing.push(topic);
+    }
+  });
+  
+  // Sort topics by topic_id within each paper
+  map.forEach((topics) => topics.sort((a, b) => a.topic_id - b.topic_id));
+  
+  return map;
+}, [topicLinks]);
+```
 
----
+### Paper Sorting
+```typescript
+const sortedPapers = useMemo(() => {
+  if (!papers) return [];
+  return [...papers].sort((a, b) => {
+    // Primary: year descending
+    const yearDiff = (b.year ?? 0) - (a.year ?? 0);
+    if (yearDiff !== 0) return yearDiff;
+    // Secondary: title ascending
+    return (a.title ?? "").localeCompare(b.title ?? "");
+  });
+}, [papers]);
+```
 
-### 4. Update Topic Exploration
-**File:** `src/pages/TopicExploration.tsx`
+### Tag Rendering
+```typescript
+{topicsByPaper.get(paper.paper_id)?.map((topic) => (
+  <Badge key={topic.topic_id} variant="outline" className="text-xs">
+    {formatTopicName(topic.topic_id, topic.topic_name)}
+  </Badge>
+))}
+```
 
-| Line | Current | Updated |
-|------|---------|---------|
-| 44 | `{t.topic_name}` | `{formatTopicName(t.topic_id, t.topic_name)}` |
-| 76 | `{topic.topic_name}` | `{formatTopicName(numericTopicId, topic.topic_name)}` |
+## What Changes
 
-Add import: `import { formatTopicName } from "@/lib/utils";`
+| Aspect | Change |
+|--------|--------|
+| Papers list | Shows topic tags below metadata |
+| Sorting | Year (desc), then Title (A-Z) |
+| Header text | Updated to reflect sorting order |
 
-The `topic_label` display on lines 45-47 remains unchanged.
+## What Does NOT Change
 
----
+- PaperDetail component (no changes)
+- No new hook files created
+- No changes to existing hooks
+- No changes to other views
+- No weights, rankings, or metrics displayed
+- Database queries unchanged
 
-## Summary of Files
+## Summary
 
-| File | Modification |
-|------|--------------|
-| `src/lib/utils.ts` | Add `formatTopicName` function |
-| `src/pages/FieldOverview.tsx` | Add import, update 1 location (line 91) |
-| `src/pages/TemporalEvolution.tsx` | Add import, update 2 locations (lines 86, 105) |
-| `src/pages/TopicExploration.tsx` | Add import, update 2 locations (lines 44, 76) |
-
-## What Remains Unchanged
-
-- All `topic_label` displays
-- Database queries and filtering logic
-- Layout, ordering, and visualizations
-- All other UI elements and styling
+Single file modification (`src/pages/PaperListing.tsx`) that:
+1. Adds inline query for topic associations
+2. Client-side deduplication and grouping
+3. Sorts papers by year (desc), title (asc)
+4. Renders topic tags as neutral Badge components
+5. Uses existing `formatTopicName` utility for consistent naming
