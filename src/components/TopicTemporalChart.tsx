@@ -1,11 +1,11 @@
-import { LineChart, Line, XAxis, ResponsiveContainer, Legend, Tooltip, CartesianGrid } from "recharts";
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Legend, Tooltip, CartesianGrid } from "recharts";
 
 const COLORS = [
-  "hsl(0 0% 15%)",   // darkest
-  "hsl(0 0% 30%)",
-  "hsl(0 0% 45%)",
-  "hsl(0 0% 55%)",
-  "hsl(0 0% 65%)",   // lightest (still readable)
+  "hsl(0 0% 10%)",   // darkest
+  "hsl(0 0% 25%)",
+  "hsl(0 0% 40%)",
+  "hsl(0 0% 50%)",
+  "hsl(0 0% 60%)",   // lightest (still readable)
 ];
 
 interface TopicTemporalChartProps {
@@ -36,9 +36,9 @@ export function TopicTemporalChart({ data, bigrams }: TopicTemporalChartProps) {
   }
 
   return (
-    <div className="h-[180px] w-full">
+    <div className="h-[220px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 10, bottom: 5, left: 5 }}>
+        <LineChart data={data} margin={{ top: 10, right: 15, bottom: 5, left: 60 }}>
           <CartesianGrid 
             strokeDasharray="3 3" 
             stroke="hsl(var(--border))" 
@@ -53,7 +53,24 @@ export function TopicTemporalChart({ data, bigrams }: TopicTemporalChartProps) {
             axisLine={false}
             tickLine={false}
             tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-            ticks={[1980, 1990, 2000, 2010, 2020, 2025]}
+            ticks={[1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025]}
+          />
+          <YAxis
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+            width={50}
+            label={{
+              value: "Number of papers containing the bigram (per year)",
+              angle: -90,
+              position: "insideLeft",
+              style: { 
+                fontSize: 9, 
+                fill: "hsl(var(--muted-foreground))",
+                textAnchor: "middle"
+              },
+              offset: 0
+            }}
           />
           <Tooltip content={<CustomTooltip />} />
           {bigrams.map((bigram, index) => (
