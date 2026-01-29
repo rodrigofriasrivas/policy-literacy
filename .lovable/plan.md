@@ -1,151 +1,178 @@
 
 
-# Plan: Fix Topic Exploration Multi-Line Bigram Temporal Chart
+# Plan: Topic Temporal Chart (Final Update)
 
-## Issues Identified
+## Overview
+This update finalizes the Topic Exploration temporal chart to support responsible policy literacy by adding explicit axis labels, improved tick intervals, enhanced line contrast, and a mandatory interpretive text block that removes ambiguity for readers.
 
-1. **X-axis not numeric**: The current XAxis is categorical (default), so `domain={[1980, 2025]}` is ignored
-2. **Missing 2025 in ticks**: The ticks array stops at 2020, missing the end of the range
-3. **Lines too faint**: Current strokeWidth of 1.5 and light grey colors disappear on light backgrounds
-4. **No tooltip**: Tooltip was removed, making it impossible to see actual values
-5. **Forward-fill working**: The hook already implements forward-fill correctly, but the chart may not be rendering it properly due to the categorical x-axis issue
+## Changes Summary
 
-## Solution
+### A. X-Axis Updates
+- Expand ticks to show every 5 years: `[1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025]`
+- Maintain numeric axis with fixed domain 1980-2025
+- All ticks visible even when topic has no data in early years
 
-### File 1: `src/components/TopicTemporalChart.tsx`
+### B. Y-Axis Addition
+- Add visible YAxis component with label: "Number of papers containing the bigram (per year)"
+- Light tick styling (low visual weight)
+- Numerically explicit values
+- Increase left margin to accommodate label
 
-Replace the current implementation with a fixed version:
+### C. Line Styling Enhancement
+- Maintain strokeWidth at 2.5 (already compliant)
+- Darken grey palette slightly for better contrast
+- Keep existing 5-line structure and tooltip
 
-**Changes:**
-- Add `type="number"` to XAxis to make it truly numeric
-- Add `allowDataOverflow={true}` to respect the domain
-- Update ticks to `[1980, 1990, 2000, 2010, 2020, 2025]` (include both ends)
-- Increase strokeWidth from 1.5 to 2.5 for better readability
-- Adjust color palette to use darker, higher-contrast greys
-- Add subtle CartesianGrid for visual reference
-- Add Tooltip component with clean formatting
+### D. Interpretive Text Block
+Replace current caption with a structured "How to read this visual" block containing:
+- Plain language explanation of what each line represents
+- Explanation of horizontal axis (years)
+- Explanation of vertical axis (paper counts)
+- Disclaimer about what the chart does NOT measure
+- Statement of intended purpose
 
-**New implementation:**
+## File Changes
 
+| File | Changes |
+|------|---------|
+| `src/components/TopicTemporalChart.tsx` | Add YAxis, update X ticks, adjust margins, darken colors |
+| `src/pages/TopicExploration.tsx` | Replace caption with interpretive text block |
+
+---
+
+## Technical Details
+
+### TopicTemporalChart.tsx Changes
+
+**Imports:** Add `YAxis` from recharts
+
+**Colors:** Adjust to slightly darker greys:
 ```typescript
-import { LineChart, Line, XAxis, ResponsiveContainer, Legend, Tooltip, CartesianGrid } from "recharts";
-
 const COLORS = [
-  "hsl(0 0% 15%)",   // darkest
-  "hsl(0 0% 30%)",
-  "hsl(0 0% 45%)",
-  "hsl(0 0% 55%)",
-  "hsl(0 0% 65%)",   // lightest (still readable)
+  "hsl(0 0% 10%)",   // darkest (was 15%)
+  "hsl(0 0% 25%)",   // (was 30%)
+  "hsl(0 0% 40%)",   // (was 45%)
+  "hsl(0 0% 50%)",   // (was 55%)
+  "hsl(0 0% 60%)",   // lightest (was 65%)
 ];
-
-interface TopicTemporalChartProps {
-  data: Array<Record<string, number | null>>;
-  bigrams: string[];
-}
-
-// Custom tooltip component
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload || payload.length === 0) return null;
-
-  return (
-    <div className="bg-background border border-border rounded px-3 py-2 shadow-sm">
-      <p className="text-xs font-medium text-foreground mb-1">{label}</p>
-      {payload.map((entry: any, index: number) => (
-        <p key={index} className="text-xs text-muted-foreground">
-          <span style={{ color: entry.stroke }}>●</span>{" "}
-          {entry.dataKey.replace(/_/g, " ")}: {entry.value ?? "—"}
-        </p>
-      ))}
-    </div>
-  );
-};
-
-export function TopicTemporalChart({ data, bigrams }: TopicTemporalChartProps) {
-  if (!data || data.length === 0 || !bigrams || bigrams.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="h-[180px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 10, bottom: 5, left: 5 }}>
-          <CartesianGrid 
-            strokeDasharray="3 3" 
-            stroke="hsl(var(--border))" 
-            strokeOpacity={0.5}
-            vertical={false}
-          />
-          <XAxis
-            type="number"
-            dataKey="year"
-            domain={[1980, 2025]}
-            allowDataOverflow={true}
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-            ticks={[1980, 1990, 2000, 2010, 2020, 2025]}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          {bigrams.map((bigram, index) => (
-            <Line
-              key={bigram}
-              type="monotone"
-              dataKey={bigram}
-              stroke={COLORS[index % COLORS.length]}
-              strokeWidth={2.5}
-              dot={false}
-              connectNulls={false}
-            />
-          ))}
-          <Legend
-            verticalAlign="bottom"
-            height={36}
-            iconType="line"
-            formatter={(value) => (
-              <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>
-                {value.replace(/_/g, " ")}
-              </span>
-            )}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
 ```
 
-### File 2: `src/hooks/useTopicTemporalData.ts`
+**Chart Height:** Increase from 180px to 220px to accommodate Y-axis label
 
-The forward-fill logic is already correct, but ensure year values are always numbers:
+**Margins:** Adjust left margin for Y-axis label: `{ top: 10, right: 15, bottom: 5, left: 60 }`
 
-**Minor adjustment:** Explicitly cast year to number when building the row to guarantee numeric type:
-
+**X-Axis Ticks:**
 ```typescript
-const chartData = years.map((year) => {
-  const row: Record<string, number | null> = { year: Number(year) };
-  // ... rest unchanged
-});
+ticks={[1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025]}
 ```
 
-This is already correct in the current implementation (years array contains numbers from the start).
+**Y-Axis Addition:**
+```typescript
+<YAxis
+  axisLine={false}
+  tickLine={false}
+  tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+  width={50}
+  label={{
+    value: "Number of papers containing the bigram (per year)",
+    angle: -90,
+    position: "insideLeft",
+    style: { 
+      fontSize: 9, 
+      fill: "hsl(var(--muted-foreground))",
+      textAnchor: "middle"
+    },
+    offset: 0
+  }}
+/>
+```
 
-## Summary of Changes
+### TopicExploration.tsx Changes
 
-| Issue | Fix |
-|-------|-----|
-| X-axis categorical | Add `type="number"` to XAxis |
-| Domain ignored | Add `allowDataOverflow={true}` |
-| Missing 2025 tick | Add 2025 to ticks array |
-| Lines too faint | Increase strokeWidth to 2.5, use darker greys |
-| No visual grid | Add subtle horizontal CartesianGrid |
-| No tooltip | Add Tooltip with CustomTooltip component |
+**Replace caption (lines 99-102)** with the interpretive text block:
+
+```tsx
+<div className="mt-4 p-4 bg-muted/30 rounded border border-border">
+  <p className="text-xs font-medium text-foreground mb-2">
+    How to read this visual
+  </p>
+  <div className="space-y-2 text-xs text-muted-foreground">
+    <p>
+      Each line represents how often a key concept (bigram) appears in 
+      the research corpus over time.
+    </p>
+    <p>
+      The horizontal axis shows years (1980–2025).
+    </p>
+    <p>
+      The vertical axis shows the number of papers in which the concept 
+      appears in a given year.
+    </p>
+    <p className="pt-2 border-t border-border">
+      This chart does not measure importance, quality, or impact of research. 
+      It shows patterns of attention within the literature, helping compare 
+      how concepts emerge, persist, or fade over time.
+    </p>
+  </div>
+</div>
+```
+
+**Update skeleton height** to match new chart height: `h-[220px]`
+
+---
 
 ## Visual Result
 
-The chart will now:
-- Show a fixed range from 1980 to 2025 for every topic
-- Display 5 distinct lines with better contrast
-- Include a subtle horizontal grid for easier reading
-- Show a tooltip on hover with year and bigram counts
-- Properly forward-fill missing years (lines stay flat, never drop to zero)
+The updated chart will display:
+
+```text
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│ N │    ▄▄                                                       │
+│ u │   ████▄▄                                                    │
+│ m │  █████████▄▄▄                                               │
+│ b │ ██████████████████▄▄▄▄▄                                     │
+│ e │████████████████████████████████████████                     │
+│ r │                                                             │
+│   └────┬────┬────┬────┬────┬────┬────┬────┬────┬────→           │
+│      1980 1985 1990 1995 2000 2005 2010 2015 2020 2025          │
+│                                                                 │
+│ ─── bigram 1  ─── bigram 2  ─── bigram 3  ─── bigram 4  ─── 5   │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ How to read this visual                                         │
+│                                                                 │
+│ Each line represents how often a key concept (bigram) appears   │
+│ in the research corpus over time.                               │
+│                                                                 │
+│ The horizontal axis shows years (1980–2025).                    │
+│                                                                 │
+│ The vertical axis shows the number of papers in which the       │
+│ concept appears in a given year.                                │
+│ ─────────────────────────────────────────────────────────────── │
+│ This chart does not measure importance, quality, or impact of   │
+│ research. It shows patterns of attention within the literature, │
+│ helping compare how concepts emerge, persist, or fade over time.│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Design Principles Applied
+
+| Principle | Implementation |
+|-----------|----------------|
+| No free interpretation | Explicit Y-axis label with full description |
+| Plain language | "Number of papers" not "frequency" or "weight" |
+| Epistemic integrity | Disclaimer about what chart does NOT measure |
+| Reusable standard | Interpretive block can be adapted for future visuals |
+| Low cognitive load | Light tick styling, clear structure |
+
+## What Does NOT Change
+
+- Multi-line structure (5 bigrams per topic)
+- Tooltip functionality (already working)
+- Forward-fill logic in data hook
+- Legend at bottom
+- Fixed X-axis domain 1980-2025
+- Temporal Evolution tab (global view) - untouched
 
