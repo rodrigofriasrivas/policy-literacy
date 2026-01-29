@@ -89,17 +89,36 @@ export default function TopicExploration() {
       {/* Temporal evolution chart */}
       <section className="space-y-2">
         {temporalLoading ? (
-          <Skeleton className="h-[180px]" />
+          <Skeleton className="h-[220px]" />
         ) : temporalData?.chartData && temporalData.chartData.length > 0 ? (
           <>
             <TopicTemporalChart 
               data={temporalData.chartData} 
               bigrams={temporalData.bigrams} 
             />
-            <p className="text-xs text-muted-foreground">
-              This timeline shows how the internal concepts of this topic have evolved 
-              within the research corpus over time.
-            </p>
+            <div className="mt-4 p-4 bg-muted/30 rounded border border-border">
+              <p className="text-xs font-medium text-foreground mb-2">
+                How to read this visual
+              </p>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <p>
+                  Each line represents how often a key concept (bigram) appears in 
+                  the research corpus over time.
+                </p>
+                <p>
+                  The horizontal axis shows years (1980–2025).
+                </p>
+                <p>
+                  The vertical axis shows the number of papers in which the concept 
+                  appears in a given year.
+                </p>
+                <p className="pt-2 border-t border-border">
+                  This chart does not measure importance, quality, or impact of research. 
+                  It shows patterns of attention within the literature, helping compare 
+                  how concepts emerge, persist, or fade over time.
+                </p>
+              </div>
+            </div>
           </>
         ) : null}
       </section>
