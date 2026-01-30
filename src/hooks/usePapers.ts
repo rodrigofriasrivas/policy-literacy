@@ -10,6 +10,12 @@ interface Paper {
   abstract: string | null;
 }
 
+interface PaperByTopic extends Paper {
+  topic_id: number;
+  frequency: number | null;
+  pmi: number | null;
+}
+
 export function usePapers(limit = 100) {
   return useQuery({
     queryKey: ["papers", limit],
@@ -31,28 +37,25 @@ export function usePapersByTopicId(topicId?: number) {
     queryKey: ["papers-by-topic-id", topicId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("topic_paper_links")
+        .from("v_papers_by_topic")
         .select(
           `
-          paper_id,
+          id,
+          title,
+          authors,
+          year,
+          journal,
+          abstract,
+          topic_id,
           frequency,
-          pmi,
-          bigram,
-          papers!inner (
-            paper_id,
-            title,
-            authors,
-            year,
-            journal,
-            abstract
-          )
+          pmi
         `,
         )
         .eq("topic_id", topicId!)
         .order("frequency", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as PaperByTopic[];
     },
     enabled: topicId !== undefined,
   });
@@ -62,10 +65,10 @@ export function usePaper(paperId?: number) {
   return useQuery({
     queryKey: ["paper", paperId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("papers").select("*").eq("paper_id", paperId!).maybeSingle();
+      const { data, error } = await supabase.from("v_papers_unique").select("*").eq("id", paperId!).maybeSingle();
 
       if (error) throw error;
-      return data;
+      return data as Paper;
     },
     enabled: paperId !== undefined,
   });
