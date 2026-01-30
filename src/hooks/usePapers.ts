@@ -1,6 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Paper {
+  id: number | null;
+  title: string | null;
+  authors: string | null;
+  year: number | null;
+  journal: string | null;
+  abstract: string | null;
+}
+
 export function usePapers(limit = 100) {
   return useQuery({
     queryKey: ["papers", limit],
@@ -12,7 +21,7 @@ export function usePapers(limit = 100) {
         .limit(limit);
 
       if (error) throw error;
-      return data;
+      return data as Paper[];
     },
   });
 }

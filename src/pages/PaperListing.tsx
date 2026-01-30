@@ -64,13 +64,15 @@ function PaperList() {
   // Sort papers: year (desc), then title (A-Z)
   const sortedPapers = useMemo(() => {
     if (!papers) return [];
-    return [...papers].sort((a, b) => {
-      // Primary: year descending
-      const yearDiff = (b.year ?? 0) - (a.year ?? 0);
-      if (yearDiff !== 0) return yearDiff;
-      // Secondary: title ascending
-      return (a.title ?? "").localeCompare(b.title ?? "");
-    });
+    return [...papers]
+      .filter((p) => p.id !== null)
+      .sort((a, b) => {
+        // Primary: year descending
+        const yearDiff = (b.year ?? 0) - (a.year ?? 0);
+        if (yearDiff !== 0) return yearDiff;
+        // Secondary: title ascending
+        return (a.title ?? "").localeCompare(b.title ?? "");
+      });
   }, [papers]);
 
   return (
@@ -92,11 +94,12 @@ function PaperList() {
       ) : sortedPapers && sortedPapers.length > 0 ? (
         <div className="space-y-2">
           {sortedPapers.map((paper) => {
-            const paperTopics = topicsByPaper.get(paper.paper_id);
+            const paperId = paper.id!;
+            const paperTopics = topicsByPaper.get(paperId);
             return (
               <Link
-                key={paper.paper_id}
-                to={`/papers/${paper.paper_id}`}
+                key={paperId}
+                to={`/papers/${paperId}`}
                 className="block p-4 border border-border rounded hover:bg-secondary/50 transition-colors"
               >
                 <p className="text-sm font-medium text-foreground">{paper.title}</p>
