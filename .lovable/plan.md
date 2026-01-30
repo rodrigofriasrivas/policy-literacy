@@ -1,178 +1,118 @@
 
 
-# Plan: Topic Temporal Chart (Final Update)
+# Plan: Fix Linked Papers Query and TypeScript Errors
 
-## Overview
-This update finalizes the Topic Exploration temporal chart to support responsible policy literacy by adding explicit axis labels, improved tick intervals, enhanced line contrast, and a mandatory interpretive text block that removes ambiguity for readers.
+## Problem Analysis
 
-## Changes Summary
+The frontend is trying to query `v_papers_by_topic` for individual paper details, but this view only contains aggregate data:
 
-### A. X-Axis Updates
-- Expand ticks to show every 5 years: `[1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025]`
-- Maintain numeric axis with fixed domain 1980-2025
-- All ticks visible even when topic has no data in early years
+| Column | Type |
+|--------|------|
+| topic_id | integer |
+| topic_name | varchar |
+| paper_count | bigint |
 
-### B. Y-Axis Addition
-- Add visible YAxis component with label: "Number of papers containing the bigram (per year)"
-- Light tick styling (low visual weight)
-- Numerically explicit values
-- Increase left margin to accommodate label
+To display linked papers for a specific topic, we need to query `topic_paper_links` joined with `papers`.
 
-### C. Line Styling Enhancement
-- Maintain strokeWidth at 2.5 (already compliant)
-- Darken grey palette slightly for better contrast
-- Keep existing 5-line structure and tooltip
+## Solution
 
-### D. Interpretive Text Block
-Replace current caption with a structured "How to read this visual" block containing:
-- Plain language explanation of what each line represents
-- Explanation of horizontal axis (years)
-- Explanation of vertical axis (paper counts)
-- Disclaimer about what the chart does NOT measure
-- Statement of intended purpose
+### File 1: `src/hooks/usePapers.ts`
 
-## File Changes
+**Change:** Replace the `usePapersByTopicId` function to query `topic_paper_links` with a nested select to `papers`.
 
-| File | Changes |
-|------|---------|
-| `src/components/TopicTemporalChart.tsx` | Add YAxis, update X ticks, adjust margins, darken colors |
-| `src/pages/TopicExploration.tsx` | Replace caption with interpretive text block |
-
----
-
-## Technical Details
-
-### TopicTemporalChart.tsx Changes
-
-**Imports:** Add `YAxis` from recharts
-
-**Colors:** Adjust to slightly darker greys:
 ```typescript
-const COLORS = [
-  "hsl(0 0% 10%)",   // darkest (was 15%)
-  "hsl(0 0% 25%)",   // (was 30%)
-  "hsl(0 0% 40%)",   // (was 45%)
-  "hsl(0 0% 50%)",   // (was 55%)
-  "hsl(0 0% 60%)",   // lightest (was 65%)
-];
-```
+interface PaperLink {
+  paper_id: number;
+  topic_id: number;
+  frequency: number | null;
+  pmi: number | null;
+  papers: {
+    paper_id: number;
+    title: string;
+    authors: string | null;
+    year: number | null;
+    journal: string | null;
+  };
+}
 
-**Chart Height:** Increase from 180px to 220px to accommodate Y-axis label
+export function usePapersByTopicId(topicId?: number) {
+  return useQuery({
+    queryKey: ["papers-by-topic-id", topicId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("topic_paper_links")
+        .select(`
+          paper_id,
+          topic_id,
+          frequency,
+          pmi,
+          papers!inner(
+            paper_id,
+            title,
+            authors,
+            year,
+            journal
+          )
+        `)
+        .eq("topic_id", topicId!)
+        .order("frequency", { ascending: false });
 
-**Margins:** Adjust left margin for Y-axis label: `{ top: 10, right: 15, bottom: 5, left: 60 }`
-
-**X-Axis Ticks:**
-```typescript
-ticks={[1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025]}
-```
-
-**Y-Axis Addition:**
-```typescript
-<YAxis
-  axisLine={false}
-  tickLine={false}
-  tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
-  width={50}
-  label={{
-    value: "Number of papers containing the bigram (per year)",
-    angle: -90,
-    position: "insideLeft",
-    style: { 
-      fontSize: 9, 
-      fill: "hsl(var(--muted-foreground))",
-      textAnchor: "middle"
+      if (error) throw error;
+      
+      // Deduplicate by paper_id (a paper may appear multiple times via different bigrams)
+      const uniqueLinks = new Map<number, PaperLink>();
+      (data as unknown as PaperLink[]).forEach((link) => {
+        if (!uniqueLinks.has(link.paper_id)) {
+          uniqueLinks.set(link.paper_id, link);
+        }
+      });
+      
+      return Array.from(uniqueLinks.values());
     },
-    offset: 0
-  }}
-/>
+    enabled: topicId !== undefined,
+  });
+}
 ```
 
-### TopicExploration.tsx Changes
+### File 2: `src/pages/TopicExploration.tsx`
 
-**Replace caption (lines 99-102)** with the interpretive text block:
+**Change:** Update the Linked Papers section to correctly access nested paper properties.
 
-```tsx
-<div className="mt-4 p-4 bg-muted/30 rounded border border-border">
-  <p className="text-xs font-medium text-foreground mb-2">
-    How to read this visual
-  </p>
-  <div className="space-y-2 text-xs text-muted-foreground">
-    <p>
-      Each line represents how often a key concept (bigram) appears in 
-      the research corpus over time.
-    </p>
-    <p>
-      The horizontal axis shows years (1980–2025).
-    </p>
-    <p>
-      The vertical axis shows the number of papers in which the concept 
-      appears in a given year.
-    </p>
-    <p className="pt-2 border-t border-border">
-      This chart does not measure importance, quality, or impact of research. 
-      It shows patterns of attention within the literature, helping compare 
-      how concepts emerge, persist, or fade over time.
-    </p>
-  </div>
-</div>
+Lines 207-223 currently have:
+```typescript
+{papers.slice(0, 20).map((link) => {
+  const paper = link.papers;  // expects nested object
+  return (
+    <Link
+      key={link.paper_id}
+      to={`/papers/${link.paper_id}`}
+      ...
+    >
+      <p>{paper.title}</p>  // accesses nested properties
 ```
 
-**Update skeleton height** to match new chart height: `h-[220px]`
+This structure is actually correct for the nested select approach. The component expects:
+- `link.paper_id` - from the link row
+- `link.papers.title`, `link.papers.authors`, etc. - from the nested papers object
 
----
+The code at lines 207-223 is already correct for the new query structure. No changes needed here once the hook returns properly typed data.
 
-## Visual Result
+## Summary of Changes
 
-The updated chart will display:
+| File | Change |
+|------|--------|
+| `src/hooks/usePapers.ts` | Replace `v_papers_by_topic` query with `topic_paper_links` + nested `papers` select |
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
-│ N │    ▄▄                                                       │
-│ u │   ████▄▄                                                    │
-│ m │  █████████▄▄▄                                               │
-│ b │ ██████████████████▄▄▄▄▄                                     │
-│ e │████████████████████████████████████████                     │
-│ r │                                                             │
-│   └────┬────┬────┬────┬────┬────┬────┬────┬────┬────→           │
-│      1980 1985 1990 1995 2000 2005 2010 2015 2020 2025          │
-│                                                                 │
-│ ─── bigram 1  ─── bigram 2  ─── bigram 3  ─── bigram 4  ─── 5   │
-└─────────────────────────────────────────────────────────────────┘
+## What This Fixes
 
-┌─────────────────────────────────────────────────────────────────┐
-│ How to read this visual                                         │
-│                                                                 │
-│ Each line represents how often a key concept (bigram) appears   │
-│ in the research corpus over time.                               │
-│                                                                 │
-│ The horizontal axis shows years (1980–2025).                    │
-│                                                                 │
-│ The vertical axis shows the number of papers in which the       │
-│ concept appears in a given year.                                │
-│ ─────────────────────────────────────────────────────────────── │
-│ This chart does not measure importance, quality, or impact of   │
-│ research. It shows patterns of attention within the literature, │
-│ helping compare how concepts emerge, persist, or fade over time.│
-└─────────────────────────────────────────────────────────────────┘
-```
+1. **TS2352 error** - Removes incorrect cast of `v_papers_by_topic` to `PaperByTopic[]`
+2. **TS2339 errors** - The returned data now correctly has `paper_id` and nested `papers` object
+3. **Empty Linked Papers** - Query now returns actual paper details instead of aggregate counts
 
-## Design Principles Applied
+## What Stays the Same
 
-| Principle | Implementation |
-|-----------|----------------|
-| No free interpretation | Explicit Y-axis label with full description |
-| Plain language | "Number of papers" not "frequency" or "weight" |
-| Epistemic integrity | Disclaimer about what chart does NOT measure |
-| Reusable standard | Interpretive block can be adapted for future visuals |
-| Low cognitive load | Light tick styling, clear structure |
-
-## What Does NOT Change
-
-- Multi-line structure (5 bigrams per topic)
-- Tooltip functionality (already working)
-- Forward-fill logic in data hook
-- Legend at bottom
-- Fixed X-axis domain 1980-2025
-- Temporal Evolution tab (global view) - untouched
+- `usePapers()` and `usePaper()` functions continue using `v_papers_unique` 
+- Paper detail pages continue using `id` from `v_papers_unique`
+- No database changes required
+- The `topic_paper_links` table already has foreign key relationships set up
 
