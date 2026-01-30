@@ -6,7 +6,7 @@ export function usePapers(limit = 100) {
     queryKey: ["papers", limit],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("papers")
+        .from("v_papers_unique")
         .select("*")
         .order("year", { ascending: false })
         .limit(limit);
@@ -23,7 +23,8 @@ export function usePapersByTopicId(topicId?: number) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("topic_paper_links")
-        .select(`
+        .select(
+          `
           paper_id,
           frequency,
           pmi,
@@ -36,7 +37,8 @@ export function usePapersByTopicId(topicId?: number) {
             journal,
             abstract
           )
-        `)
+        `,
+        )
         .eq("topic_id", topicId!)
         .order("frequency", { ascending: false });
 
@@ -51,11 +53,7 @@ export function usePaper(paperId?: number) {
   return useQuery({
     queryKey: ["paper", paperId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("papers")
-        .select("*")
-        .eq("paper_id", paperId!)
-        .maybeSingle();
+      const { data, error } = await supabase.from("papers").select("*").eq("paper_id", paperId!).maybeSingle();
 
       if (error) throw error;
       return data;
