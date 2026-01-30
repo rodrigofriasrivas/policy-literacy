@@ -167,6 +167,13 @@ export type Database = {
             referencedColumns: ["paper_id"]
           },
           {
+            foreignKeyName: "topic_paper_links_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "v_papers_unique"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "topic_paper_links_topic_id_fkey"
             columns: ["topic_id"]
             isOneToOne: false
@@ -274,6 +281,33 @@ export type Database = {
           paper_count: number | null
           topic_id: number | null
           topic_name: string | null
+        }
+        Relationships: []
+      }
+      v_papers_unique: {
+        Row: {
+          abstract: string | null
+          authors: string | null
+          id: number | null
+          journal: string | null
+          title: string | null
+          year: number | null
+        }
+        Insert: {
+          abstract?: string | null
+          authors?: string | null
+          id?: number | null
+          journal?: string | null
+          title?: string | null
+          year?: number | null
+        }
+        Update: {
+          abstract?: string | null
+          authors?: string | null
+          id?: number | null
+          journal?: string | null
+          title?: string | null
+          year?: number | null
         }
         Relationships: []
       }
