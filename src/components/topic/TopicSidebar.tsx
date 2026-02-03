@@ -39,7 +39,7 @@ export function TopicSidebar({ topics, isLoading, selectedTopicId }: TopicSideba
               {sortedTopics.map((t) => (
                 <Link
                   key={t.topic_id}
-                  to={`/topic/${t.topic_id}`}
+                  to={`/evidence/topic/${t.topic_id}`}
                   className={cn(
                     "block px-3 py-2 text-sm rounded transition-colors",
                     selectedTopicId === t.topic_id

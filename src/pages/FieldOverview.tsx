@@ -65,9 +65,9 @@ export default function FieldOverview() {
               )?.paper_count;
 
               return (
-                <Link
+              <Link
                   key={topic.topic_id}
-                  to={`/topic/${topic.topic_id}`}
+                  to={`/evidence/topic/${topic.topic_id}`}
                   className="block group"
                 >
                   <div className="flex items-center gap-4 p-3 rounded border border-transparent hover:border-border hover:bg-secondary/50 transition-colors">

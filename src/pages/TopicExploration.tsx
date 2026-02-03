@@ -29,7 +29,7 @@ export default function TopicExploration() {
       const sortedTopics = [...allTopics].sort((a, b) => (a.topic_id ?? 0) - (b.topic_id ?? 0));
       const firstTopic = sortedTopics[0];
       if (firstTopic?.topic_id) {
-        navigate(`/topic/${firstTopic.topic_id}`, { replace: true });
+        navigate(`/evidence/topic/${firstTopic.topic_id}`, { replace: true });
       }
     }
   }, [topicId, allTopics, navigate]);

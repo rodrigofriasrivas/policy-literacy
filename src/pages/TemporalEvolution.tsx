@@ -81,7 +81,7 @@ export default function TemporalEvolution() {
                 <tr key={topic.topic_id} className="border-b border-border/50 hover:bg-secondary/30">
                   <td className="py-2 pr-4">
                     <Link
-                      to={`/topic/${topic.topic_id}`}
+                      to={`/evidence/topic/${topic.topic_id}`}
                       className="text-foreground hover:underline"
                     >
                       {formatTopicName(topic.topic_id, topic.topic_name)}
