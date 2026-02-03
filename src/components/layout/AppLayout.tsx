@@ -3,10 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { path: "/", label: "Field Overview" },
-  { path: "/temporal", label: "Temporal Evolution" },
-  { path: "/topic", label: "Topic Exploration" },
-  { path: "/papers", label: "Papers" },
+  { path: "/evidence/field", label: "Field Overview" },
+  { path: "/evidence/temporal", label: "Temporal Evolution" },
+  { path: "/evidence/topic", label: "Topic Exploration" },
+  { path: "/evidence/papers", label: "Papers" },
 ];
 
 interface AppLayoutProps {
@@ -16,17 +16,30 @@ interface AppLayoutProps {
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
 
+  const isActive = (path: string) => {
+    // Handle exact match for main routes and prefix match for nested routes
+    if (path === "/evidence/topic") {
+      return location.pathname.startsWith("/evidence/topic");
+    }
+    if (path === "/evidence/papers") {
+      return location.pathname.startsWith("/evidence/papers");
+    }
+    return location.pathname === path;
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <h1 className="text-xl font-normal tracking-tight text-foreground">
-            Enterprise Policy Literacy
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            A research artefact for navigating entrepreneurship policy scholarship
-          </p>
+          <Link to="/" className="block">
+            <h1 className="text-xl font-normal tracking-tight text-foreground">
+              Enterprise Policy Literacy
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              A research artefact for navigating entrepreneurship policy scholarship
+            </p>
+          </Link>
         </div>
       </header>
 
@@ -41,7 +54,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                   className={cn(
                     "inline-block px-4 py-3 text-sm transition-colors",
                     "hover:text-foreground",
-                    location.pathname === item.path
+                    isActive(item.path)
                       ? "text-foreground border-b-2 border-foreground -mb-px"
                       : "text-muted-foreground"
                   )}
