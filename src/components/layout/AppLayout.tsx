@@ -1,12 +1,14 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { SiteHeader } from "./SiteHeader";
 
-const navItems = [
-  { path: "/evidence/field", label: "Field Overview" },
-  { path: "/evidence/temporal", label: "Temporal Evolution" },
-  { path: "/evidence/topic", label: "Topic Exploration" },
+const dashboardTabs = [
+  { path: "/evidence/topic", label: "Evidence" },
+  { path: "/evidence/field", label: "Field overview" },
   { path: "/evidence/papers", label: "Papers" },
+  { path: "/evidence/temporal", label: "Temporal evolution" },
+  { path: "/evidence/experimental", label: "Experimental view" },
 ];
 
 interface AppLayoutProps {
@@ -17,7 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
 
   const isActive = (path: string) => {
-    // Handle exact match for main routes and prefix match for nested routes
+    // Handle prefix match for nested routes
     if (path === "/evidence/topic") {
       return location.pathname.startsWith("/evidence/topic");
     }
@@ -29,37 +31,26 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <Link to="/" className="block">
-            <h1 className="text-xl font-normal tracking-tight text-foreground">
-              Enterprise Policy Literacy
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              A research artefact for navigating entrepreneurship policy scholarship
-            </p>
-          </Link>
-        </div>
-      </header>
+      {/* Global Site Header */}
+      <SiteHeader variant="solid" />
 
-      {/* Navigation */}
+      {/* Dashboard Sub-Navigation */}
       <nav className="border-b border-border bg-secondary/30">
         <div className="max-w-7xl mx-auto px-6">
           <ul className="flex gap-1">
-            {navItems.map((item) => (
-              <li key={item.path}>
+            {dashboardTabs.map((tab) => (
+              <li key={tab.path}>
                 <Link
-                  to={item.path}
+                  to={tab.path}
                   className={cn(
                     "inline-block px-4 py-3 text-sm transition-colors",
                     "hover:text-foreground",
-                    isActive(item.path)
-                      ? "text-foreground border-b-2 border-foreground -mb-px"
+                    isActive(tab.path)
+                      ? "text-foreground border-b-2 border-foreground -mb-px font-medium"
                       : "text-muted-foreground"
                   )}
                 >
-                  {item.label}
+                  {tab.label}
                 </Link>
               </li>
             ))}

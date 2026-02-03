@@ -1,12 +1,5 @@
 import { ReactNode } from "react";
-import { Link } from "react-router-dom";
-
-const navItems = [
-  { path: "/evidence", label: "Explore the Data" },
-  { path: "/about", label: "About the project" },
-  { path: "/policy", label: "Policy engagement" },
-  { path: "/contact", label: "Contact" },
-];
+import { SiteHeader } from "./SiteHeader";
 
 interface HomeLayoutProps {
   children: ReactNode;
@@ -17,15 +10,7 @@ export function HomeLayout({ children, showFooter = true }: HomeLayoutProps) {
   return (
     <div className="home-page min-h-screen flex flex-col">
       {/* Transparent Header */}
-      <header className="transparent-header">
-        <nav className="home-nav">
-          {navItems.map((item) => (
-            <Link key={item.path} to={item.path}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </header>
+      <SiteHeader variant="transparent" />
 
       {/* Main content */}
       <main className="flex-1">
