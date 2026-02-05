@@ -169,19 +169,21 @@
   font-family: monospace;
   z-index: 1;
   position: relative;
+  font-weight: 500;
 }
 
 /* Colored word spans within the ASCII animation */
 .ascii-word {
-  opacity: 0.12;
+  opacity: 0.24;
   transition: opacity 0.3s ease;
+  text-shadow: 0 0 8px currentColor;
 }
 
-.ascii-word--cyan { color: hsl(185 70% 50%); }
-.ascii-word--purple { color: hsl(270 60% 55%); }
-.ascii-word--magenta { color: hsl(320 65% 55%); }
-.ascii-word--amber { color: hsl(40 80% 55%); }
-.ascii-word--green { color: hsl(150 60% 45%); }
+.ascii-word--cyan { color: hsl(185 75% 55%); }
+.ascii-word--purple { color: hsl(270 65% 60%); }
+.ascii-word--magenta { color: hsl(320 70% 60%); }
+.ascii-word--amber { color: hsl(40 85% 58%); }
+.ascii-word--green { color: hsl(150 65% 50%); }
 
 .ascii-container {
   display: flex;
@@ -192,6 +194,19 @@
   position: relative;
 }
 
+/* Subtle radial lightening behind bigrams */
+.ascii-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(30, 30, 35, 0.4) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+}
+
 .hero-overlay {
   position: absolute;
   top: 50%;
@@ -199,6 +214,9 @@
   transform: translate(-50%, -50%);
   text-align: center;
   z-index: 2;
+  padding: 60px 80px;
+  border-radius: 12px;
+  background: radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 50%, transparent 80%);
 }
 
 .hero-title {
@@ -368,6 +386,10 @@
     padding: 0 24px;
   }
 
+  .hero-overlay {
+    padding: 40px 30px;
+  }
+
   .home-nav {
     gap: 16px;
     font-size: 12px;
@@ -393,6 +415,10 @@
 
   .hero-subtitle {
     font-size: 14px;
+  }
+
+  .hero-overlay {
+    padding: 30px 20px;
   }
 
   .home-nav {
