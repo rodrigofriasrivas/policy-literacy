@@ -130,20 +130,32 @@
    Matches network visualization sphere palette
    ======================================== */
 
-/* Sphere palette tokens for homepage accents */
+/* Homepage design tokens */
 :root {
+  /* Sphere palette for bigram colors */
   --sphere-cyan: 185 70% 50%;
   --sphere-purple: 270 60% 55%;
   --sphere-magenta: 320 65% 55%;
   --sphere-amber: 40 80% 55%;
   --sphere-green: 150 60% 45%;
+  
+  /* Homepage semantic tokens */
+  --home-bg: #050607;
+  --home-fg: #F2F4F8;
+  --home-muted: rgba(242, 244, 248, 0.70);
+  --home-muted2: rgba(242, 244, 248, 0.55);
+  --home-stroke: rgba(242, 244, 248, 0.10);
+  
+  /* Typography stacks */
+  --font-display: Georgia, 'Times New Roman', ui-serif, serif;
+  --font-body: 'Inter', system-ui, -apple-system, ui-sans-serif, sans-serif;
 }
 
 .home-page {
-  background: #000;
-  font-family: 'Lato', sans-serif;
-  font-size: 11px;
-  line-height: 1.1;
+  background: var(--home-bg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
   overflow: hidden;
 }
 
@@ -207,6 +219,7 @@
   pointer-events: none;
 }
 
+/* Soft center vignette for readability (no box) */
 .hero-overlay {
   position: absolute;
   top: 50%;
@@ -214,35 +227,77 @@
   transform: translate(-50%, -50%);
   text-align: center;
   z-index: 2;
-  padding: 60px 80px;
-  border-radius: 12px;
-  background: radial-gradient(ellipse 100% 100% at 50% 50%, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 50%, transparent 80%);
+  padding: 40px;
+  max-width: 720px;
+  width: 90%;
+  /* Soft vignette - not a box */
+  background: radial-gradient(
+    circle at center,
+    rgba(5, 6, 7, 0.65) 0%,
+    rgba(5, 6, 7, 0.35) 40%,
+    rgba(5, 6, 7, 0.10) 65%,
+    transparent 100%
+  );
 }
 
+/* Editorial serif headline */
 .hero-title {
-  font-family: 'Lato', sans-serif;
-  font-weight: 700;
-  font-size: 52px;
-  color: rgba(255, 255, 255, 0.95);
-  letter-spacing: 1px;
-  line-height: 1.25;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
-}
-
-.hero-title em {
-  font-style: italic;
+  font-family: var(--font-display);
   font-weight: 400;
+  font-size: 48px;
+  color: var(--home-fg);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  margin: 0;
 }
 
+/* Subtitle: clean sans, muted */
 .hero-subtitle {
-  font-size: 20px;
+  font-family: var(--font-body);
+  font-size: 17px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--home-muted);
   margin-top: 16px;
-  font-family: 'Lato', sans-serif;
-  max-width: 500px;
+  line-height: 1.55;
+  max-width: 540px;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* Metrics row */
+.hero-metrics {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.hero-metric {
+  padding: 0 24px;
+  text-align: center;
+  border-right: 1px solid var(--home-stroke);
+}
+
+.hero-metric:last-child {
+  border-right: none;
+}
+
+.hero-metric-value {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--home-fg);
+  letter-spacing: -0.02em;
+}
+
+.hero-metric-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--home-muted2);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .cta-container {
@@ -377,17 +432,35 @@
 @media (max-width: 768px) {
   .hero-title {
     font-size: 32px;
-    letter-spacing: 0.5px;
-    padding: 0 20px;
   }
 
   .hero-subtitle {
-    font-size: 16px;
-    padding: 0 24px;
+    font-size: 15px;
+    padding: 0 12px;
   }
 
   .hero-overlay {
-    padding: 40px 30px;
+    padding: 30px 20px;
+  }
+
+  .hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 0;
+  }
+
+  .hero-metric {
+    border-right: none;
+    padding: 0 12px;
+  }
+
+  .hero-metric:nth-child(1),
+  .hero-metric:nth-child(3) {
+    border-right: 1px solid var(--home-stroke);
+  }
+
+  .hero-metric-value {
+    font-size: 24px;
   }
 
   .home-nav {
@@ -410,7 +483,7 @@
 
 @media (max-width: 480px) {
   .hero-title {
-    font-size: 26px;
+    font-size: 28px;
   }
 
   .hero-subtitle {
@@ -418,7 +491,15 @@
   }
 
   .hero-overlay {
-    padding: 30px 20px;
+    padding: 24px 16px;
+  }
+
+  .hero-metric-value {
+    font-size: 22px;
+  }
+
+  .hero-metric-label {
+    font-size: 11px;
   }
 
   .home-nav {
