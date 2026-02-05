@@ -27,8 +27,16 @@ const bigrams = [
   "startup ecosystem", "evidence fragmentation", "AI startups", "entrepreneurial culture", "spin-off policy"
 ];
 
+// Sphere palette color classes matching network visualization
+const colorClasses = ["cyan", "purple", "magenta", "amber", "green"];
+
+export interface AsciiWord {
+  text: string;
+  colorClass: string;
+}
+
 export function useAsciiAnimation() {
-  const [asciiText, setAsciiText] = useState("");
+  const [asciiWords, setAsciiWords] = useState<AsciiWord[][]>([]);
   const gridRef = useRef({ cols: 120, rows: 60 });
   
   // Check for reduced motion preference
@@ -40,7 +48,7 @@ export function useAsciiAnimation() {
   const calculateGridSize = useCallback(() => {
     if (typeof window === "undefined") return { cols: 120, rows: 60 };
     
-    const charWidth = 7; // approximate for monospace at 11px
+    const charWidth = 7;
     const charHeight = 12;
     const cols = Math.floor(window.innerWidth / charWidth);
     const rows = Math.floor((window.innerHeight - 60) / charHeight);
@@ -50,14 +58,14 @@ export function useAsciiAnimation() {
     };
   }, []);
 
-  // Generate ASCII frame using wave + distance algorithm
-  const generateAscii = useCallback((frame: number, cols: number, rows: number) => {
+  // Generate ASCII frame with colored words
+  const generateAscii = useCallback((frame: number, cols: number, rows: number): AsciiWord[][] => {
     const centerX = 0.5;
     const centerY = 0.5;
-    let result = "";
+    const result: AsciiWord[][] = [];
 
     for (let y = 0; y < rows; y++) {
-      let row = "";
+      const row: AsciiWord[] = [];
       for (let x = 0; x < cols; ) {
         const dx = x / cols - centerX;
         const dy = y / rows - centerY;
@@ -69,10 +77,17 @@ export function useAsciiAnimation() {
 
         const bigramIndex = Math.floor(Math.abs((wave + 2) * 10 + dist * 5)) % bigrams.length;
         const bigram = bigrams[bigramIndex].padEnd(28).slice(0, 28);
-        row += bigram;
+        
+        // Assign color based on position and wave for organic variation
+        const colorIndex = Math.floor(Math.abs(wave * 2 + x / 20 + y / 15)) % colorClasses.length;
+        
+        row.push({
+          text: bigram,
+          colorClass: colorClasses[colorIndex]
+        });
         x += 28;
       }
-      result += row + "\n";
+      result.push(row);
     }
     return result;
   }, []);
@@ -83,7 +98,7 @@ export function useAsciiAnimation() {
 
     // Static frame for reduced motion
     if (prefersReducedMotion) {
-      setAsciiText(generateAscii(0, cols, rows));
+      setAsciiWords(generateAscii(0, cols, rows));
       return;
     }
 
@@ -94,7 +109,7 @@ export function useAsciiAnimation() {
 
     const animate = (timestamp: number) => {
       if (timestamp - lastUpdate >= 33) { // ~30fps
-        setAsciiText(generateAscii(frame, gridRef.current.cols, gridRef.current.rows));
+        setAsciiWords(generateAscii(frame, gridRef.current.cols, gridRef.current.rows));
         frame++;
         lastUpdate = timestamp;
       }
@@ -117,5 +132,5 @@ export function useAsciiAnimation() {
     };
   }, [prefersReducedMotion, calculateGridSize, generateAscii]);
 
-  return asciiText;
+  return asciiWords;
 }
