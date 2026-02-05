@@ -5,6 +5,7 @@ const navItems = [
   { path: "/about", label: "About the project" },
   { path: "/policy", label: "Policy engagement" },
   { path: "/contact", label: "Contact" },
+  { path: "/artefact/index.html", label: "Network Visualization", external: true },
 ];
 
 interface SiteHeaderProps {
@@ -17,9 +18,15 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
       <header className="transparent-header">
         <nav className="home-nav">
           {navItems.map((item) => (
-            <Link key={item.path} to={item.path}>
-              {item.label}
-            </Link>
+            item.external ? (
+              <a key={item.path} href={item.path}>
+                {item.label}
+              </a>
+            ) : (
+              <Link key={item.path} to={item.path}>
+                {item.label}
+              </Link>
+            )
           ))}
         </nav>
       </header>
@@ -40,13 +47,27 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
           </Link>
           <nav className="flex gap-6">
             {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {item.label}
-              </Link>
+              {
+                navItems.map((item) => (
+                  item.external ? (
+                    <a
+                      key={item.path}
+                      href={item.path}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  )
+                ))
+              }
             ))}
           </nav>
         </div>
