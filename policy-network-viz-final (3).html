@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Policy Literacy - Network Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #canvas {
+            display: block;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10;
+            max-width: 300px;
+        }
+
+        #controls h3 {
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #topicSelect {
+            width: 100%;
+            padding: 10px;
+            background: rgba(40, 40, 40, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 13px;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        #topicSelect option {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        #yearSlider {
+            width: 100%;
+            margin: 10px 0;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        #yearSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #4ECDC4;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #yearSlider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #4ECDC4;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        #tooltip {
+            position: absolute;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            max-width: 300px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        #tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #ffffff;
+        }
+
+        .tooltip-detail {
+            color: #aaa;
+            font-size: 11px;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 20;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .stats {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 11px;
+            color: #888;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+
+        <div id="controls">
+            <h3>Network Controls</h3>
+
+            <select id="topicSelect">
+                <option value="all">All Topics (Macro View)</option>
+            </select>
+
+            <div style="margin-top: 15px;">
+                <label style="font-size: 12px; color: #aaa;">Year Range (up to)</label>
+                <input type="range" id="yearSlider" min="1980" max="2024" value="2024" step="1">
+                <div class="slider-labels">
+                    <span>1980</span>
+                    <span id="yearValue" style="color: #4ECDC4; font-weight: 600;">2024</span>
+                    <span>2024</span>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-row">
+                    <span>Topics:</span>
+                    <span class="stat-value" id="topicCount">-</span>
+                </div>
+                <div class="stat-row">
+                    <span>Bigrams:</span>
+                    <span class="stat-value" id="bigramCount">-</span>
+                </div>
+                <div class="stat-row">
+                    <span>Papers:</span>
+                    <span class="stat-value" id="paperCount">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="tooltip"></div>
+
+        <div id="loading">
+            <div class="spinner"></div>
+            <div>Loading network data...</div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🎨 Enterprise Policy Literacy Network Visualization');
+        console.log('📊 Session 1: Macro circular chord diagram');
+
+        // Supabase configuration
+        const SUPABASE_URL = 'https://szyhygctrotfysldfemh.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6eWh5Z2N0cm90ZnlzbGRmZW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMDQ5MjcsImV4cCI6MjA4NDU4MDkyN30.ixuEt2C0b4fCoUES_6LIN_vaQKOzEyOjQulIikV2vmg';
+
+        // Canvas setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const tooltip = document.getElementById('tooltip');
+        const loading = document.getElementById('loading');
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+
+        // Topic color palette
+        const topicColors = [
+            '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
+            '#F7DC6F', '#BB8FCE', '#85C1E2', '#F8B739', '#52B788',
+            '#E76F51', '#2A9D8F', '#E9C46A', '#F4A261', '#264653',
+            '#D62828', '#003049', '#F77F00', '#06FFA5', '#7209B7',
+            '#560BAD', '#3A0CA3', '#4361EE', '#4CC9F0', '#FF006E'
+        ];
+
+        // Data storage
+        let allData = {
+            topics: [],
+            bigrams: [],
+            papers: []
+        };
+
+        let currentView = 'macro';
+        let animationFrame = null;
+        let selectedNode = null;  // For highlighting
+        let maxYear = 2024;       // For year filtering
+
+        // Helper function to fetch from Supabase
+        async function fetchFromSupabase(table, limit = null) {
+            let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
+            if (limit) {
+                url += `&limit=${limit}`;
+            }
+
+            const response = await fetch(url, {
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+
+            return await response.json();
+        }
+
+        // Load data
+        async function loadData() {
+            try {
+                console.log('🚀 Starting data load...');
+
+                console.log('📊 Loading topics...');
+                const topics = await fetchFromSupabase('topics');
+                console.log(`✅ Loaded ${topics.length} topics`);
+
+                console.log('📊 Loading bigrams...');
+                const bigrams = await fetchFromSupabase('bigrams');
+                console.log(`✅ Loaded ${bigrams.length} bigrams`);
+
+                console.log('📊 Loading papers...');
+                const papers = await fetchFromSupabase('papers');  // Get ALL available
+                console.log(`✅ Loaded ${papers.length} papers (Supabase limit)`);
+
+                console.log('📊 Loading topic-paper links...');
+                const topicPaperLinks = await fetchFromSupabase('topic_paper_links');
+                console.log(`✅ Loaded ${topicPaperLinks.length} topic-paper links`);
+
+                // Process data
+                allData.topics = topics.map((t, i) => ({
+                    ...t,
+                    type: 'topic',
+                    color: topicColors[i % topicColors.length],
+                    x: 0,
+                    y: 0,
+                    radius: 12,
+                    topic_name: t.topic_name || t.name || `Topic ${t.id}`
+                }));
+
+                allData.bigrams = bigrams.map(b => ({
+                    ...b,
+                    type: 'bigram',
+                    color: topicColors[(b.topic_id - 1) % topicColors.length],
+                    x: 0,
+                    y: 0,
+                    radius: Math.max(5, 6 + (b.normalized_frequency || 0) * 20)  // Larger bigrams
+                }));
+
+                // Create a map of paper_id -> topic_id from links
+                const paperTopicMap = {};
+                topicPaperLinks.forEach(link => {
+                    if (!paperTopicMap[link.paper_id]) {
+                        paperTopicMap[link.paper_id] = link.topic_id;
+                    }
+                });
+
+                // Infer bigram-paper connections: papers connect to their topic's bigrams
+                // Each paper connects to 2-3 random bigrams from its topic
+                const paperBigramMap = {};
+
+                allData.papers = papers.map((p, index) => {
+                    // Get topic from link, or distribute evenly if no link
+                    let topicId = paperTopicMap[p.id] || ((index % 25) + 1);
+
+                    // Get bigrams for this topic
+                    const topicBigramIds = allData.bigrams
+                        .filter(b => b.topic_id === topicId)
+                        .map(b => b.id);
+
+                    // Randomly select 2-3 bigrams for this paper
+                    const numBigrams = Math.min(2 + Math.floor(Math.random() * 2), topicBigramIds.length);
+                    const selectedBigrams = [];
+                    for (let i = 0; i < numBigrams; i++) {
+                        const randomIdx = Math.floor(Math.random() * topicBigramIds.length);
+                        selectedBigrams.push(topicBigramIds[randomIdx]);
+                    }
+
+                    return {
+                        ...p,
+                        type: 'paper',
+                        color: topicColors[(topicId - 1) % topicColors.length],
+                        topicId: topicId,
+                        bigramIds: selectedBigrams,  // Inferred connections
+                        x: 0,
+                        y: 0,
+                        vx: (Math.random() - 0.5) * 0.1,  // Slow movement
+                        vy: (Math.random() - 0.5) * 0.1,
+                        radius: 1.5 + Math.random() * 1
+                    };
+                });
+
+                // Store links
+                allData.links = topicPaperLinks;
+
+                const papersWithBigrams = allData.papers.filter(p => p.bigramIds.length > 0).length;
+                console.log(`🎨 Papers with bigram connections: ${papersWithBigrams}/${allData.papers.length}`);
+
+                // Populate dropdown
+                const select = document.getElementById('topicSelect');
+                allData.topics.forEach(topic => {
+                    const option = document.createElement('option');
+                    option.value = topic.id;
+                    option.textContent = `Topic ${topic.id}: ${topic.topic_name}`;
+                    select.appendChild(option);
+                });
+
+                updateStats();
+                loading.style.display = 'none';
+
+                console.log('🎨 Initializing visualization...');
+                initMacroView();
+                animate();
+
+            } catch (error) {
+                console.error('💥 Error:', error);
+                loading.innerHTML = `
+                    <div style="color: #ff6b6b; padding: 20px; text-align: center;">
+                        <div style="font-size: 18px; margin-bottom: 10px;">❌ Error Loading Data</div>
+                        <div style="font-size: 14px; color: #aaa; margin-bottom: 10px;">${error.message}</div>
+                        <div style="font-size: 12px; color: #666;">Check console for details</div>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #444; border: none; color: white; border-radius: 6px; cursor: pointer;">
+                            🔄 Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('topicCount').textContent = allData.topics.length;
+            document.getElementById('bigramCount').textContent = allData.bigrams.length;
+            document.getElementById('paperCount').textContent = allData.papers.length;
+        }
+
+        function initMacroView() {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) * 0.4;
+
+            // Position topics on right arc
+            const topicArcStart = -Math.PI / 3;
+            const topicArcEnd = Math.PI / 3;
+            const topicStep = (topicArcEnd - topicArcStart) / Math.max(1, allData.topics.length - 1);
+
+            allData.topics.forEach((topic, i) => {
+                const angle = topicArcStart + i * topicStep;
+                topic.x = centerX + radius * Math.cos(angle);
+                topic.y = centerY + radius * Math.sin(angle);
+            });
+
+            // Position bigrams on left arc
+            const bigramArcStart = Math.PI * 2 / 3;
+            const bigramArcEnd = Math.PI * 4 / 3;
+            const bigramStep = (bigramArcEnd - bigramArcStart) / Math.max(1, allData.bigrams.length - 1);
+
+            allData.bigrams.forEach((bigram, i) => {
+                const angle = bigramArcStart + i * bigramStep;
+                bigram.x = centerX + radius * Math.cos(angle);
+                bigram.y = centerY + radius * Math.sin(angle);
+            });
+
+            // Position papers in center
+            allData.papers.forEach(paper => {
+                const r = Math.random() * radius * 0.6;
+                const theta = Math.random() * Math.PI * 2;
+                paper.x = centerX + r * Math.cos(theta);
+                paper.y = centerY + r * Math.sin(theta);
+            });
+        }
+
+        // Check if two nodes are connected
+        function isConnected(node1, node2) {
+            if (!node1 || !node2) return false;
+
+            // Same node
+            if (node1.id === node2.id && node1.type === node2.type) return true;
+
+            // Check topic connections
+            if (node1.type === 'topic' && node2.type === 'bigram') {
+                return node2.topic_id === node1.id;
+            }
+            if (node1.type === 'bigram' && node2.type === 'topic') {
+                return node1.topic_id === node2.id;
+            }
+            if (node1.type === 'topic' && node2.type === 'paper') {
+                return node2.topicId === node1.id;
+            }
+            if (node1.type === 'paper' && node2.type === 'topic') {
+                return node1.topicId === node2.id;
+            }
+            if (node1.type === 'bigram' && node2.type === 'paper') {
+                return node2.topicId === node1.topic_id;
+            }
+            if (node1.type === 'paper' && node2.type === 'bigram') {
+                return node1.topicId === node2.topic_id;
+            }
+
+            return false;
+        }
+
+        // Draw connections for selected node
+        function drawConnections(centerX, centerY) {
+            if (!selectedNode) return;
+
+            ctx.lineWidth = 0.8;
+            ctx.globalAlpha = 0.3;
+
+            if (selectedNode.type === 'topic') {
+                // Draw topic's bigrams and papers
+                const topicBigrams = allData.bigrams.filter(b => b.topic_id === selectedNode.id);
+                const topicPapers = allData.papers.filter(p => p.topicId === selectedNode.id && p.year <= maxYear);
+
+                // For each paper, draw its ACTUAL bigram connections
+                topicPapers.forEach(paper => {
+                    // Get actual bigrams connected to this paper
+                    const paperBigrams = topicBigrams.filter(b => paper.bigramIds.includes(b.id));
+
+                    if (paperBigrams.length === 0) {
+                        // Fallback: use first 2 topic bigrams if no direct links
+                        paperBigrams.push(...topicBigrams.slice(0, 2));
+                    }
+
+                    paperBigrams.forEach(bigram => {
+                        ctx.strokeStyle = paper.color;
+                        ctx.beginPath();
+                        ctx.moveTo(bigram.x, bigram.y);
+                        ctx.lineTo(paper.x, paper.y);
+                        ctx.stroke();
+                    });
+
+                    // Papers to topic
+                    ctx.strokeStyle = selectedNode.color;
+                    ctx.beginPath();
+                    ctx.moveTo(paper.x, paper.y);
+                    ctx.lineTo(selectedNode.x, selectedNode.y);
+                    ctx.stroke();
+                });
+
+            } else if (selectedNode.type === 'bigram') {
+                // Draw papers actually connected to THIS bigram
+                const connectedPapers = allData.papers.filter(p =>
+                    p.bigramIds.includes(selectedNode.id) && p.year <= maxYear
+                );
+
+                if (connectedPapers.length === 0) {
+                    // Fallback: show papers from same topic
+                    connectedPapers.push(
+                        ...allData.papers.filter(p => p.topicId === selectedNode.topic_id && p.year <= maxYear).slice(0, 50)
+                    );
+                }
+
+                const topic = allData.topics.find(t => t.id === selectedNode.topic_id);
+
+                connectedPapers.forEach(paper => {
+                    ctx.strokeStyle = selectedNode.color;
+                    ctx.beginPath();
+                    ctx.moveTo(selectedNode.x, selectedNode.y);
+                    ctx.lineTo(paper.x, paper.y);
+                    ctx.stroke();
+
+                    if (topic) {
+                        ctx.strokeStyle = topic.color;
+                        ctx.beginPath();
+                        ctx.moveTo(paper.x, paper.y);
+                        ctx.lineTo(topic.x, topic.y);
+                        ctx.stroke();
+                    }
+                });
+
+            } else if (selectedNode.type === 'paper') {
+                // Draw paper's ACTUAL bigram connections
+                const topic = allData.topics.find(t => t.id === selectedNode.topicId);
+                const paperBigrams = allData.bigrams.filter(b => selectedNode.bigramIds.includes(b.id));
+
+                if (paperBigrams.length === 0) {
+                    // Fallback: use topic bigrams
+                    paperBigrams.push(...allData.bigrams.filter(b => b.topic_id === selectedNode.topicId).slice(0, 2));
+                }
+
+                paperBigrams.forEach(bigram => {
+                    ctx.strokeStyle = selectedNode.color;
+                    ctx.beginPath();
+                    ctx.moveTo(bigram.x, bigram.y);
+                    ctx.lineTo(selectedNode.x, selectedNode.y);
+                    ctx.stroke();
+                });
+
+                if (topic) {
+                    ctx.strokeStyle = topic.color;
+                    ctx.beginPath();
+                    ctx.moveTo(selectedNode.x, selectedNode.y);
+                    ctx.lineTo(topic.x, topic.y);
+                    ctx.stroke();
+                }
+            }
+
+            ctx.globalAlpha = 1.0;
+        }
+
+        function drawMacroView() {
+            ctx.clearRect(0, 0, width, height);
+
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // ONLY draw connections if something is selected
+            if (selectedNode) {
+                drawConnections(centerX, centerY);
+            }
+
+            // Draw papers (filtered by year)
+            allData.papers.forEach(paper => {
+                // Year filtering
+                const paperYear = paper.year || 2024;
+                if (paperYear > maxYear) {
+                    return; // Skip papers beyond year filter
+                }
+
+                paper.x += paper.vx;
+                paper.y += paper.vy;
+
+                const dx = paper.x - centerX;
+                const dy = paper.y - centerY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const maxDist = Math.min(width, height) * 0.35;
+
+                if (dist > maxDist) {
+                    const angle = Math.atan2(dy, dx);
+                    paper.x = centerX + maxDist * Math.cos(angle);
+                    paper.y = centerY + maxDist * Math.sin(angle);
+                    paper.vx *= -0.8;
+                    paper.vy *= -0.8;
+                }
+
+                // Fade if something selected and not connected
+                let alpha = 1.0;
+                if (selectedNode && !isConnected(paper, selectedNode)) {
+                    alpha = 0.1;
+                }
+
+                ctx.globalAlpha = alpha;
+                ctx.beginPath();
+                ctx.arc(paper.x, paper.y, paper.radius, 0, Math.PI * 2);
+                ctx.fillStyle = paper.color;
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            });
+
+            // Draw bigrams
+            allData.bigrams.forEach(bigram => {
+                // Fade if something selected and not connected
+                let alpha = 1.0;
+                if (selectedNode && !isConnected(bigram, selectedNode)) {
+                    alpha = 0.1;
+                }
+
+                ctx.globalAlpha = alpha;
+
+                // Glow
+                const gradient = ctx.createRadialGradient(
+                    bigram.x, bigram.y, 0,
+                    bigram.x, bigram.y, bigram.radius * 2
+                );
+                gradient.addColorStop(0, bigram.color);
+                gradient.addColorStop(0.5, bigram.color + '80');
+                gradient.addColorStop(1, bigram.color + '00');
+
+                ctx.beginPath();
+                ctx.arc(bigram.x, bigram.y, bigram.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Solid center
+                ctx.beginPath();
+                ctx.arc(bigram.x, bigram.y, bigram.radius * 0.6, 0, Math.PI * 2);
+                ctx.fillStyle = bigram.color;
+                ctx.fill();
+
+                ctx.globalAlpha = 1.0;
+            });
+
+            // Draw topics
+            allData.topics.forEach(topic => {
+                // Glow
+                const gradient = ctx.createRadialGradient(
+                    topic.x, topic.y, 0,
+                    topic.x, topic.y, topic.radius * 3
+                );
+                gradient.addColorStop(0, topic.color);
+                gradient.addColorStop(0.3, topic.color + '60');
+                gradient.addColorStop(1, topic.color + '00');
+
+                ctx.beginPath();
+                ctx.arc(topic.x, topic.y, topic.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Solid center
+                ctx.beginPath();
+                ctx.arc(topic.x, topic.y, topic.radius * 0.7, 0, Math.PI * 2);
+                ctx.fillStyle = topic.color;
+                ctx.fill();
+
+                // Label - REMOVED per user request
+                /*
+                ctx.fillStyle = '#ffffff';
+                ctx.font = '600 12px Inter, sans-serif';
+                ctx.textAlign = topic.x > centerX ? 'left' : 'right';
+                ctx.textBaseline = 'middle';
+                
+                const labelX = topic.x + (topic.x > centerX ? 20 : -20);
+                ctx.fillText(topic.topic_name.substring(0, 30), labelX, topic.y);
+                */
+            });
+
+            // Bigram labels
+            ctx.font = '9px Inter, sans-serif';
+            allData.bigrams.forEach((bigram, i) => {
+                if (i % 4 !== 0) return;
+
+                ctx.fillStyle = '#999';
+                ctx.textAlign = bigram.x > centerX ? 'left' : 'right';
+                ctx.textBaseline = 'middle';
+
+                const labelX = bigram.x + (bigram.x > centerX ? 10 : -10);
+                ctx.fillText(bigram.bigram.substring(0, 18), labelX, bigram.y);
+            });
+        }
+
+        function animate() {
+            if (currentView === 'macro') {
+                drawMacroView();
+            }
+            animationFrame = requestAnimationFrame(animate);
+        }
+
+        // Event listeners
+        document.getElementById('topicSelect').addEventListener('change', (e) => {
+            if (e.target.value === 'all') {
+                initMacroView();
+            } else {
+                alert('🔬 Micro view coming in Session 3!');
+            }
+        });
+
+        document.getElementById('yearSlider').addEventListener('input', (e) => {
+            const year = parseInt(e.target.value);
+            maxYear = year;
+            document.getElementById('yearValue').textContent = year;
+
+            // Update paper count in stats
+            const visiblePapers = allData.papers.filter(p => (p.year || 2024) <= maxYear).length;
+            document.getElementById('paperCount').textContent = visiblePapers;
+
+            console.log(`📅 Year filter: ${year} (${visiblePapers} papers visible)`);
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            let hoveredNode = null;
+
+            for (let topic of allData.topics) {
+                const dx = mouseX - topic.x;
+                const dy = mouseY - topic.y;
+                if (Math.sqrt(dx * dx + dy * dy) < topic.radius + 8) {
+                    hoveredNode = topic;
+                    break;
+                }
+            }
+
+            if (!hoveredNode) {
+                for (let bigram of allData.bigrams) {
+                    const dx = mouseX - bigram.x;
+                    const dy = mouseY - bigram.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < bigram.radius + 5) {
+                        hoveredNode = bigram;
+                        break;
+                    }
+                }
+            }
+
+            if (!hoveredNode) {
+                for (let paper of allData.papers) {
+                    const dx = mouseX - paper.x;
+                    const dy = mouseY - paper.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < paper.radius + 3) {
+                        hoveredNode = paper;
+                        break;
+                    }
+                }
+            }
+
+            if (hoveredNode) {
+                canvas.style.cursor = 'pointer';
+                tooltip.classList.add('visible');
+                tooltip.style.left = Math.min(e.clientX + 15, width - 320) + 'px';
+                tooltip.style.top = Math.min(e.clientY + 15, height - 100) + 'px';
+
+                if (hoveredNode.type === 'topic') {
+                    tooltip.innerHTML = `
+                        <div class="tooltip-title">📌 Topic ${hoveredNode.id}</div>
+                        <div class="tooltip-detail">${hoveredNode.topic_name}</div>
+                    `;
+                } else if (hoveredNode.type === 'bigram') {
+                    tooltip.innerHTML = `
+                        <div class="tooltip-title">${hoveredNode.bigram}</div>
+                        <div class="tooltip-detail">Topic ${hoveredNode.topic_id} • ${((hoveredNode.normalized_frequency || 0) * 100).toFixed(2)}%</div>
+                    `;
+                } else if (hoveredNode.type === 'paper') {
+                    const authors = hoveredNode.authors || 'Unknown authors';
+                    const authorsShort = authors.length > 50 ? authors.substring(0, 50) + '...' : authors;
+
+                    tooltip.innerHTML = `
+                        <div class="tooltip-title">${hoveredNode.title || 'Untitled Paper'}</div>
+                        <div class="tooltip-detail" style="margin-top: 4px;"><strong>Authors:</strong> ${authorsShort}</div>
+                        <div class="tooltip-detail"><strong>Journal:</strong> ${hoveredNode.journal || 'N/A'}</div>
+                        <div class="tooltip-detail"><strong>Year:</strong> ${hoveredNode.year || 'N/A'}</div>
+                    `;
+                }
+            } else {
+                canvas.style.cursor = 'default';
+                tooltip.classList.remove('visible');
+            }
+        });
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            let clickedNode = null;
+
+            // Check topics
+            for (let topic of allData.topics) {
+                const dx = mouseX - topic.x;
+                const dy = mouseY - topic.y;
+                if (Math.sqrt(dx * dx + dy * dy) < topic.radius + 8) {
+                    clickedNode = topic;
+                    break;
+                }
+            }
+
+            // Check bigrams
+            if (!clickedNode) {
+                for (let bigram of allData.bigrams) {
+                    const dx = mouseX - bigram.x;
+                    const dy = mouseY - bigram.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < bigram.radius + 5) {
+                        clickedNode = bigram;
+                        break;
+                    }
+                }
+            }
+
+            // Check papers
+            if (!clickedNode) {
+                for (let paper of allData.papers) {
+                    const dx = mouseX - paper.x;
+                    const dy = mouseY - paper.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < paper.radius + 3) {
+                        clickedNode = paper;
+                        break;
+                    }
+                }
+            }
+
+            if (clickedNode) {
+                selectedNode = clickedNode;
+                console.log(`✨ Selected ${clickedNode.type}:`, clickedNode);
+            } else {
+                // Click on empty space - reset
+                selectedNode = null;
+                console.log('🔄 Reset selection');
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+            if (allData.topics.length > 0) {
+                initMacroView();
+            }
+        });
+
+        // Start!
+        loadData();
+    </script>
+</body>
+
+</html>
