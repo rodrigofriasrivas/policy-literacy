@@ -47,27 +47,23 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
           </Link>
           <nav className="flex gap-6">
             {navItems.map((item) => (
-              {
-                navItems.map((item) => (
-                  item.external ? (
-                    <a
-                      key={item.path}
-                      href={item.path}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {item.label}
-                    </a>
-                  ) : (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  )
-                ))
-              }
+              item.external ? (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.label}
+                </Link>
+              )
             ))}
           </nav>
         </div>
