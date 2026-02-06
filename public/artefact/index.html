@@ -2632,9 +2632,30 @@
                 const countLabel = document.getElementById('searchResultsCount');
 
                 // Refine constraints
-                const startYear = parseInt(document.getElementById('advYearSliderStart').value);
-                const endYear = parseInt(document.getElementById('advYearSliderEnd').value);
-                const topicConstraint = document.getElementById('advTopicSelect').value; // 'all' or ID
+                const startEl = document.getElementById('advYearSliderStart');
+                const endEl = document.getElementById('advYearSliderEnd');
+                let startYear = startEl ? parseInt(startEl.value) : 1980;
+                let endYear = endEl ? parseInt(endEl.value) : 2024;
+
+                // Fix swapped years logic (prevents 0 results when ranges cross)
+                if (startYear > endYear) {
+                    const temp = startYear;
+                    startYear = endYear;
+                    endYear = temp;
+                }
+
+                // Update Visual Progress Bar for Advanced Search
+                const advRangeProgress = document.getElementById('advRangeProgress');
+                if (advRangeProgress) {
+                    const total = 2024 - 1980;
+                    const leftPercent = ((startYear - 1980) / total) * 100;
+                    const widthPercent = ((endYear - startYear) / total) * 100;
+                    advRangeProgress.style.left = `${leftPercent}%`;
+                    advRangeProgress.style.width = `${widthPercent}%`;
+                }
+
+                const topicSelectEl = document.getElementById('advTopicSelect');
+                const topicConstraint = topicSelectEl ? topicSelectEl.value : 'all'; // 'all' or ID
 
                 // Get selected journals in Refine
                 const selectedAdvJournals = new Set();
@@ -2657,6 +2678,7 @@
                 const checkConstraints = (item) => {
                     // Type-specific checks
                     if (item.type === 'paper') {
+                        // Logic: Keep if WITHIN range
                         if (item.year < startYear || item.year > endYear) return false;
                         if (!ignoreJournalFilter && !selectedAdvJournals.has(item.journal || 'Unknown')) return false;
                         if (topicConstraint !== 'all' && item.topicId != topicConstraint) return false;
@@ -2721,13 +2743,29 @@
                 }
 
                 // Render Results
-                countLabel.textContent = `${results.length}${results.length > 100 ? '+' : ''} results`;
-                resultsList.innerHTML = '';
+                const countText = results.length === 0 ? 'No matching results found' : `${results.length}${results.length > 100 ? '+' : ''} results`;
+                countLabel.innerHTML = `<span>${countText}</span>`;
 
-                if (results.length === 0) {
-                    countLabel.textContent = 'No matching results found';
-                    return;
+                // Restore Clear Highlight Button if active spotlight exists
+                if (activeSpotlight && results.length > 0) {
+                    countLabel.innerHTML += `
+                        <span id="clearHighlightBtn" style="float: right; cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 10px; border: 1px solid var(--accent-color); padding: 2px 6px; border-radius: 4px;">× Clear highlight</span>
+                     `;
+                    setTimeout(() => {
+                        const btn = document.getElementById('clearHighlightBtn');
+                        if (btn) {
+                            btn.onclick = (e) => {
+                                e.stopPropagation();
+                                activeSpotlight = null;
+                                selectedNode = null;
+                                performAdvancedSearch(); // Re-render header to remove button
+                            };
+                        }
+                    }, 0);
                 }
+
+                resultsList.innerHTML = '';
+                if (results.length === 0) return;
 
                 results.slice(0, 100).forEach(item => {
                     const row = document.createElement('div');
