@@ -2612,7 +2612,15 @@
             let pulseStartTime = 0;
 
             function performAdvancedSearch() {
-                const query = document.getElementById('advSearchInput').value.trim().toLowerCase();
+                // GUARDS: Restore Search Functionality
+                if (!allData || !allData.papers) {
+                    console.warn('⚠️ Search interrupted: Data not ready.');
+                    return;
+                }
+                const searchInput = document.getElementById('advSearchInput');
+                if (!searchInput) return;
+
+                const query = searchInput.value.trim().toLowerCase();
                 const scope = document.getElementById('advSearchScope').value;
                 const matchType = document.querySelector('input[name="matchType"]:checked').value;
                 const resultsList = document.getElementById('searchResultsList');
@@ -2625,7 +2633,14 @@
 
                 // Get selected journals in Refine
                 const selectedAdvJournals = new Set();
-                document.querySelectorAll('#advJournalList input:checked').forEach(cb => selectedAdvJournals.add(cb.value));
+                const journalInputs = document.querySelectorAll('#advJournalList input');
+                let ignoreJournalFilter = false;
+
+                if (journalInputs.length === 0) {
+                    ignoreJournalFilter = true;
+                } else {
+                    document.querySelectorAll('#advJournalList input:checked').forEach(cb => selectedAdvJournals.add(cb.value));
+                }
 
                 if (!query) {
                     resultsList.innerHTML = '';
@@ -2638,7 +2653,7 @@
                     // Type-specific checks
                     if (item.type === 'paper') {
                         if (item.year < startYear || item.year > endYear) return false;
-                        if (!selectedAdvJournals.has(item.journal || 'Unknown')) return false;
+                        if (!ignoreJournalFilter && !selectedAdvJournals.has(item.journal || 'Unknown')) return false;
                         if (topicConstraint !== 'all' && item.topicId != topicConstraint) return false;
                     }
                     else if (item.type === 'bigram') {
@@ -2744,32 +2759,20 @@
                     `;
 
                     row.onclick = () => {
-                        // C1) Type-Correct Selection
+                        // Simple selection
+                        console.log('Result clicked:', item);
+                        selectedNode = item;
+
                         if (item.type === 'topic') {
-                            // Switch to topic view
-                            document.getElementById('topicSelect').value = item.id;
-                            document.getElementById('topicSelect').dispatchEvent(new Event('change'));
+                            const sel = document.getElementById('topicSelect');
+                            if (sel) { sel.value = item.id; sel.dispatchEvent(new Event('change')); }
                             switchTab('browse');
                         }
                         else if (item.type === 'paper') {
-                            // Check if papers are visible
-                            const paperToggle = document.getElementById('bigramPaperToggle');
-                            if (paperToggle && !paperToggle.checked) {
-                                // C3) Warning
-                                countLabel.innerHTML = `<span style="color:#ff6b6b">⚠️ Enable 'Terms linked to papers' to see this paper.</span>`;
-                                return;
+                            const pt = document.getElementById('bigramPaperToggle');
+                            if (pt && !pt.checked && countLabel) {
+                                countLabel.innerHTML = '<span style="color:#ff6b6b">Term layer required (check filters)</span>';
                             }
-
-                            // Locate Paper Node
-                            selectedNode = item; // Highlights connections
-                            initiateFlyTo(item);
-                        }
-                        else if (item.type === 'bigram') {
-                            // Locate Term Node
-                            // If we are in macro view, we might want to switch to topic view? Or just fly to it?
-                            // Current macro view shows bigrams.
-                            selectedNode = item;
-                            initiateFlyTo(item);
                         }
                     };
 
