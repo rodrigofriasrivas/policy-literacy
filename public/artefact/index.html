@@ -565,71 +565,63 @@
         <div id="topicTitle"></div>
 
         <div id="controls">
-            <h3>Network Controls</h3>
-
-            <div class="control-group">
-                <input type="text" id="searchInput" placeholder="Search topics or papers...">
-                <div id="searchFeedback"
-                    style="font-size: 10px; color: var(--accent-color); margin-top: 5px; height: 14px;"></div>
+            <!-- Header -->
+            <h3 style="margin-bottom: 8px; display: block; border: none; padding-bottom: 0;">
+                <span style="font-size: 14px; font-weight: 800; letter-spacing: 1px; color: #fff;">NETWORK PANEL</span>
+            </h3>
+            <div style="font-size: 11px; line-height: 1.4; color: #aaa; margin-bottom: 20px;">
+                You're exploring across 5,700+ papers, from 40+ journals, organised in 25 topics between 1980–2024.
             </div>
 
-            <div class="control-group">
-                <div class="control-group">
-                    <label>View</label>
+            <!-- 1) Start here - Explore mode (Tabs) -->
+            <div class="control-section" style="margin-bottom: 20px;">
+                <div class="section-label"
+                    style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                    1) Start here — Explore mode
+                    <span class="info-icon"
+                        title="Browse Topics is for exploration and Advanced Search is for targeted queries."
+                        style="cursor: help; opacity: 0.7;">ⓘ</span>
+                </div>
+                <div class="tabs-header"
+                    style="display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 2px;">
+                    <div id="tab-browse" class="tab-btn active" onclick="switchTab('browse')"
+                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff; transition: all 0.2s;">
+                        Browse Topics
+                    </div>
+                    <div id="tab-search" class="tab-btn" onclick="switchTab('search')"
+                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; color: #888; transition: all 0.2s;">
+                        Advanced Search
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Browse Topics -->
+            <div id="content-browse" class="tab-content" style="display: block;">
+
+                <!-- 2) Choose your lens -->
+                <div class="control-section">
+                    <div class="section-label"
+                        style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                        2) Choose your lens
+                        <span class="info-icon" title="Select what the network shows: all topics or a specific topic."
+                            style="cursor: help; opacity: 0.7;">ⓘ</span>
+                    </div>
+                    <!-- Existing ID -->
                     <select id="topicSelect">
                         <option value="all">Macro View (All Topics)</option>
                     </select>
-
-                    <!-- Journal Filter -->
-                    <div style="margin-top: 15px;">
-                        <label>Filter Journals</label>
-                        <div style="display: flex; gap: 5px; margin-bottom: 6px;">
-                            <button id="selectAllJournals" class="btn"
-                                style="flex:1; font-size: 10px; padding: 4px;">All</button>
-                            <button id="clearAllJournals" class="btn"
-                                style="flex:1; font-size: 10px; padding: 4px;">None</button>
-                        </div>
-                        <div id="journalList"
-                            style="max-height: 120px; overflow-y: auto; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 5px;">
-                            <div style="padding: 10px; color: #888; text-align: center; font-size: 11px;">Loading
-                                journals...</div>
-                        </div>
-                    </div>
-
-                    <!-- Bigram-Paper Connection Toggle -->
-                    <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
-                        <label for="bigramPaperToggle" style="margin: 0; font-size: 11px; cursor: pointer;">Show Bigrams
-                            with Papers</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="bigramPaperToggle" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-
-                    <!-- Bigram Interaction Toggle -->
-                    <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-                        <label for="bigramToggle" style="margin: 0; font-size: 11px; cursor: pointer;">Show Bigram
-                            Network</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="bigramToggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-
-                    <!-- Ring Layout Toggle -->
-                    <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-                        <label for="ringViewToggle" style="margin: 0; font-size: 11px; cursor: pointer;">Organize Topics
-                            (Ring View)</label>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="ringViewToggle">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
                 </div>
 
-                <div class="control-group">
-                    <label>Timeframe: <span id="yearValue" style="color: var(--accent-color);">1980 –
-                            2024</span></label>
+                <!-- 3) Define your scope -->
+                <div class="control-section">
+                    <div class="section-label"
+                        style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                        3) Define your scope
+                        <span class="info-icon" title="Narrow the time window to see how the landscape changes."
+                            style="cursor: help; opacity: 0.7;">ⓘ</span>
+                    </div>
+                    <label style="font-weight: 400; color: #aaa;">Timeframe: <span id="yearValue"
+                            style="color: var(--accent-color); font-weight: 600;">1980 – 2024</span></label>
                     <div class="range-slider">
                         <div class="range-track"></div>
                         <div class="range-progress" id="rangeProgress" style="left: 0%; width: 100%;"></div>
@@ -642,27 +634,169 @@
                     </div>
                 </div>
 
-                <button id="resetBtn" class="btn">
-                    <span>↺</span> Reset View
-                </button>
+                <!-- 4) What to show -->
+                <div class="control-section">
+                    <div class="section-label"
+                        style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                        4) What to show
+                        <span class="info-icon" title="These are visual layers, not ranking or recommendations."
+                            style="cursor: help; opacity: 0.7;">ⓘ</span>
+                    </div>
+                    <div
+                        style="margin-bottom: 10px; font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Layers:</div>
 
-                <div class="stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Topics</span>
-                        <span class="stat-value" id="topicCount">-</span>
+                    <!-- Terms linked to papers -->
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <label for="bigramPaperToggle"
+                            style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms linked to
+                            papers</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="bigramPaperToggle" checked>
+                            <span class="slider"></span>
+                        </label>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Bigrams</span>
-                        <span class="stat-value" id="bigramCount">-</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Papers</span>
-                        <span class="stat-value" id="paperCount">-</span>
+
+                    <!-- Terms-to-terms link -->
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <label for="bigramToggle"
+                            style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms-to-terms
+                            link</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="bigramToggle">
+                            <span class="slider"></span>
+                        </label>
                     </div>
                 </div>
 
-                <!-- Duplicate Zoom Controls with Indicator -->
-                <div style="margin-top: 20px; display: flex; align-items: center; gap: 8px;">
+                <!-- 5) Journals -->
+                <div class="control-section">
+                    <div class="section-label"
+                        style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
+                        5) Journals
+                        <span class="info-icon" title="Filter the evidence base without changing the topic model."
+                            style="cursor: help; opacity: 0.7;">ⓘ</span>
+                    </div>
+
+                    <!-- Multi-select Dropdown UI -->
+                    <div style="position: relative;">
+                        <div id="journalDropdownBtn" onclick="toggleJournalDropdown()"
+                            style="padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #ccc;">
+                            <span>Select Journals</span>
+                            <span style="font-size: 10px; opacity: 0.7;">▼</span>
+                        </div>
+
+                        <div id="journalDropdownContent"
+                            style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-top: 4px; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.5); padding: 8px;">
+                            <div style="display: flex; gap: 5px; margin-bottom: 8px;">
+                                <button id="selectAllJournals" class="btn"
+                                    style="flex:1; font-size: 10px; padding: 4px;">All</button>
+                                <button id="clearAllJournals" class="btn"
+                                    style="flex:1; font-size: 10px; padding: 4px;">None</button>
+                            </div>
+                            <div id="journalList" style="max-height: 150px; overflow-y: auto;">
+                                <div style="padding: 10px; color: #888; text-align: center; font-size: 11px;">Loading
+                                    journals...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- End Tab Content: Browse -->
+
+
+            <!-- Tab Content: Advanced Search -->
+            <div id="content-search" class="tab-content" style="display: none; height: 100%; flex-direction: column;">
+                <div style="font-size: 10px; color: #888; margin-bottom: 12px; font-style: italic; line-height: 1.4;">
+                    Search runs only within this corpus (papers, topics, and extracted terms). If a concept isn’t
+                    present in the corpus, it won’t appear.
+                </div>
+
+                <!-- A) Search Input -->
+                <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                    <input type="text" id="advSearchInput" placeholder="Search papers, authors..."
+                        style="flex: 2; font-size: 12px; padding: 8px;">
+                    <select id="advSearchScope" style="flex: 1; font-size: 11px; padding: 0 4px;">
+                        <option value="all">All</option>
+                        <option value="paper">Papers (title)</option>
+                        <option value="author">Authors</option>
+                        <option value="journal">Journals</option>
+                        <option value="term">Terms</option>
+                        <option value="topic">Topics</option>
+                    </select>
+                </div>
+
+                <!-- B) Match Toggle -->
+                <div style="display: flex; gap: 12px; margin-bottom: 16px; font-size: 11px; color: #ccc;">
+                    <label
+                        style="display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 400; cursor: pointer;">
+                        <input type="radio" name="matchType" value="contains" checked style="margin: 0;"> Contains
+                    </label>
+                    <label
+                        style="display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 400; cursor: pointer;">
+                        <input type="radio" name="matchType" value="exact" style="margin: 0;"> Exact
+                    </label>
+                </div>
+
+                <!-- C) Refine (Collapsible) -->
+                <div style="margin-bottom: 16px;">
+                    <div onclick="toggleRefine()"
+                        style="cursor: pointer; font-size: 11px; font-weight: 700; color: #aaa; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
+                        <span>Refine Filters</span>
+                        <span id="refineToggleIcon">+</span>
+                    </div>
+                    <div id="refineContent"
+                        style="display: none; padding-top: 10px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); margin-top: 4px;">
+
+                        <label style="font-size: 10px; color: #888;">Timeframe constraint</label>
+                        <div class="range-slider" style="margin-top: 2px; margin-bottom: 16px;">
+                            <div class="range-track"></div>
+                            <div class="range-progress" id="advRangeProgress" style="left: 0%; width: 100%;"></div>
+                            <input type="range" id="advYearSliderStart" min="1980" max="2024" value="1980" step="1">
+                            <input type="range" id="advYearSliderEnd" min="1980" max="2024" value="2024" step="1">
+                        </div>
+
+                        <label style="font-size: 10px; color: #888;">Select Topic</label>
+                        <select id="advTopicSelect" style="font-size: 11px; margin-bottom: 8px;">
+                            <option value="all">All Topics</option>
+                        </select>
+
+                        <!-- Simple Journal Multi-select for Refine -->
+                        <label style="font-size: 10px; color: #888;">Journals</label>
+                        <div id="advJournalList"
+                            style="max-height: 80px; overflow-y: auto; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px;">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- D) Results Panel -->
+                <label style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 4px;">Results</label>
+                <div id="searchResultsPanel"
+                    style="height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div id="searchResultsCount"
+                        style="font-size: 10px; color: #888; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        Enter search term to begin</div>
+                    <div id="searchResultsList" style="display: flex; flex-direction: column; gap: 4px;"></div>
+                </div>
+
+                <!-- E) Manual Toggle -->
+                <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <label style="font-size: 11px; color: #aaa; margin: 0;">How to navigate</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="navGuideToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <!-- End Tab Content: Search -->
+
+
+            <!-- Common Footer -->
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; align-items: center; gap: 8px;">
                     <button id="sidebarZoomIn" class="btn" style="flex: 1;">+ Zoom In</button>
                     <div id="zoomPercentage"
                         style="font-family: monospace; font-size: 12px; color: #888; width: 45px; text-align: center;">
@@ -670,16 +804,21 @@
                     <button id="sidebarZoomOut" class="btn" style="flex: 1;">- Zoom Out</button>
                 </div>
 
-                <!-- Theme Toggle (Modern Switch) -->
-                <div style="margin-top: 15px; display: flex; align-items: center; justify-content: space-between;">
-                    <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Background mode:
-                        Light/Dark</span>
+                <button id="resetBtn" class="btn" style="margin-top: 12px;">
+                    <span>↺</span> Reset View
+                </button>
+
+                <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Grey/Dark mode</span>
                     <label class="toggle-switch">
-                        <!-- Checked by default = Dark Mode -->
                         <input type="checkbox" id="themeToggle" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
+
+                <!-- Hidden original inputs required by JS if any -->
+                <!-- Note: searchInput was removed from UI. We will remap its ID to the new one or mock it in JS -->
+                <input type="hidden" id="searchInput" value="">
             </div>
         </div>
 
@@ -2195,8 +2334,6 @@
             // Theme Toggle Listener
             const themeToggle = document.getElementById('themeToggle');
             if (themeToggle) {
-                // Set initial state based on class (Default Dark, but checked=Dark)
-                // If body has theme-light, uncheck.
                 if (document.body.classList.contains('theme-light')) {
                     themeToggle.checked = false;
                 } else {
@@ -2204,7 +2341,6 @@
                 }
 
                 themeToggle.addEventListener('change', (e) => {
-                    // Logic: Checked = Dark Mode, Unchecked = Light Mode
                     if (!e.target.checked) {
                         document.body.classList.add('theme-light');
                         updateStatus('Switched to Light Mode');
@@ -2215,8 +2351,325 @@
                 });
             }
 
+            // --- NEW: UI Logic for Tabs & Advanced Search ---
+
+            function switchTab(tab) {
+                // Update Tabs UI
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.background = 'transparent';
+                    btn.style.color = '#888';
+                });
+
+                const activeBtn = document.getElementById(`tab-${tab}`);
+                activeBtn.classList.add('active');
+                activeBtn.style.background = 'rgba(255,255,255,0.1)';
+                activeBtn.style.color = '#fff';
+
+                // Show Content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+
+                const activeContent = document.getElementById(`content-${tab}`);
+                activeContent.style.display = 'flex'; // 'flex' for search, 'block' for browse?
+                // Actually search uses flex for layout, browse uses block components.
+                // Let's reset purely based on ID
+                if (tab === 'search') {
+                    activeContent.style.display = 'flex';
+                    // Initialize adv filters if needed (once)
+                    /* logic moved to populateAdvancedFilters */
+                } else {
+                    activeContent.style.display = 'block';
+                }
+            }
+
+            function toggleJournalDropdown() {
+                const content = document.getElementById('journalDropdownContent');
+                const isVisible = content.style.display === 'block';
+                content.style.display = isVisible ? 'none' : 'block';
+
+                // Rotate arrow?
+                // Optional polish
+            }
+
+            // Close dropdown if clicked outside
+            document.addEventListener('click', (e) => {
+                const btn = document.getElementById('journalDropdownBtn');
+                const content = document.getElementById('journalDropdownContent');
+                if (btn && content && !btn.contains(e.target) && !content.contains(e.target)) {
+                    content.style.display = 'none';
+                }
+            });
+
+            function toggleRefine() {
+                const content = document.getElementById('refineContent');
+                const icon = document.getElementById('refineToggleIcon');
+                const isVisible = content.style.display === 'block';
+                content.style.display = isVisible ? 'none' : 'block';
+                icon.textContent = isVisible ? '+' : '−';
+            }
+
+            // --- Advanced Search Logic ---
+
+            function populateAdvancedFilters() {
+                console.log('⚙️ Populating Advanced Search Filters...');
+
+                // 1. Topics
+                const advTopicSelect = document.getElementById('advTopicSelect');
+                if (advTopicSelect && allData.topics.length > 0) {
+                    advTopicSelect.innerHTML = '<option value="all">All Topics</option>';
+                    allData.topics.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t.id;
+                        opt.textContent = `Topic ${t.id}: ${t.topic_name}`;
+                        advTopicSelect.appendChild(opt);
+                    });
+
+                    // Add listener
+                    advTopicSelect.addEventListener('change', performAdvancedSearch);
+                }
+
+                // 2. Journals (Interactive Filter for Refine)
+                const advJournalList = document.getElementById('advJournalList');
+                if (advJournalList && allData.papers.length > 0) {
+                    advJournalList.innerHTML = '';
+                    const uniqueJournals = [...new Set(allData.papers.map(p => p.journal || 'Unknown'))].sort();
+
+                    uniqueJournals.forEach(j => {
+                        const div = document.createElement('div');
+                        div.style.cssText = "display: flex; gap: 6px; align-items: center; margin-bottom: 4px; color: #ccc;";
+                        div.innerHTML = `
+                            <input type="checkbox" id="adv-j-${j.replace(/\s+/g, '')}" value="${j}" checked style="accent-color: var(--accent-color);">
+                            <label for="adv-j-${j.replace(/\s+/g, '')}" style="margin:0; cursor:pointer; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${j}</label>
+                        `;
+                        // Listener
+                        div.querySelector('input').addEventListener('change', performAdvancedSearch);
+                        advJournalList.appendChild(div);
+                    });
+                }
+
+                // 3. Timeframe listeners
+                document.getElementById('advYearSliderStart').addEventListener('input', (e) => {
+                    // Sync specific UI for Adv slider if we want visual feedback numbers? 
+                    // For now just perform search
+                    performAdvancedSearch();
+                });
+                document.getElementById('advYearSliderEnd').addEventListener('input', performAdvancedSearch);
+
+                // 4. Manual Toggle
+                const manualToggle = document.getElementById('navGuideToggle');
+                if (manualToggle) {
+                    manualToggle.addEventListener('change', (e) => {
+                        // Show/Hide overlay
+                        matchManualOverlay(e.target.checked);
+                    });
+                }
+            }
+
+            function matchManualOverlay(show) {
+                let overlay = document.getElementById('manualOverlay');
+                if (!overlay) {
+                    // Create it on fly
+                    overlay = document.createElement('div');
+                    overlay.id = 'manualOverlay';
+                    overlay.style.cssText = "position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 999; pointer-events: none; display: none;";
+                    overlay.innerHTML = `
+                        <div style="position: absolute; top: 120px; left: 360px; color: #fff; font-family: Inter, sans-serif;">
+                            <div style="margin-bottom: 30px;">
+                                <div style="font-size: 14px; font-weight: 700; color: var(--accent-color);">1. Choose your lens</div>
+                                <div style="font-size: 12px; color: #ccc;">Select specific topics to isolate the network.</div>
+                                <div style="width: 50px; height: 1px; background: #fff; margin-top: 5px;"></div>
+                            </div>
+                            <div style="margin-bottom: 30px;">
+                                <div style="font-size: 14px; font-weight: 700; color: var(--accent-color);">2. Define scope</div>
+                                <div style="font-size: 12px; color: #ccc;">Slide the timeframe to filter papers by year.</div>
+                            </div>
+                            <div style="margin-bottom: 30px;">
+                                <div style="font-size: 14px; font-weight: 700; color: var(--accent-color);">3. Search</div>
+                                <div style="font-size: 12px; color: #ccc;">Use Advanced Search for targeted discovery.</div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(overlay);
+                }
+                overlay.style.display = show ? 'block' : 'none';
+            }
+
+            // Debounce Search
+            let advSearchTimeout;
+            document.getElementById('advSearchInput').addEventListener('input', (e) => {
+                clearTimeout(advSearchTimeout);
+                advSearchTimeout = setTimeout(performAdvancedSearch, 300);
+            });
+            document.getElementById('advSearchScope').addEventListener('change', performAdvancedSearch);
+            document.querySelectorAll('input[name="matchType"]').forEach(r => r.addEventListener('change', performAdvancedSearch));
+
+            function performAdvancedSearch() {
+                const query = document.getElementById('advSearchInput').value.trim().toLowerCase();
+                const scope = document.getElementById('advSearchScope').value;
+                const matchType = document.querySelector('input[name="matchType"]:checked').value;
+                const resultsList = document.getElementById('searchResultsList');
+                const countLabel = document.getElementById('searchResultsCount');
+
+                // Refine constraints
+                const startYear = parseInt(document.getElementById('advYearSliderStart').value);
+                const endYear = parseInt(document.getElementById('advYearSliderEnd').value);
+                const topicConstraint = document.getElementById('advTopicSelect').value; // 'all' or ID
+
+                // Get selected journals in Refine
+                const selectedAdvJournals = new Set();
+                document.querySelectorAll('#advJournalList input:checked').forEach(cb => selectedAdvJournals.add(cb.value));
+
+                if (!query) {
+                    resultsList.innerHTML = '';
+                    countLabel.textContent = '0 results';
+                    return;
+                }
+
+                // Helper: Check constraints
+                const checkConstraints = (item) => {
+                    // Type-specific checks
+                    if (item.type === 'paper') {
+                        if (item.year < startYear || item.year > endYear) return false;
+                        if (!selectedAdvJournals.has(item.journal || 'Unknown')) return false;
+                        if (topicConstraint !== 'all' && item.topicId != topicConstraint) return false;
+                    }
+                    else if (item.type === 'bigram') {
+                        if (topicConstraint !== 'all' && item.topic_id != topicConstraint) return false;
+                    }
+                    else if (item.type === 'topic') {
+                        if (topicConstraint !== 'all' && item.id != topicConstraint) return false;
+                    }
+                    return true;
+                };
+
+                // Helper: Match Text
+                const checkMatch = (text) => {
+                    if (!text) return false;
+                    const clean = text.toLowerCase();
+                    if (matchType === 'exact') return clean === query;
+                    return clean.includes(query);
+                };
+
+                let results = [];
+
+                // 1. Search Topics
+                if (scope === 'all' || scope === 'topic') {
+                    allData.topics.forEach(t => {
+                        if (!checkConstraints(t)) return;
+                        if (checkMatch(t.topic_name)) results.push(t);
+                    });
+                }
+
+                // 2. Search Bigrams (Terms)
+                if (scope === 'all' || scope === 'term') {
+                    allData.bigrams.forEach(b => {
+                        if (!checkConstraints(b)) return;
+                        if (checkMatch(b.bigram)) results.push(b);
+                    });
+                }
+
+                // 3. Search Papers (Title, Author, Journal)
+                // Limit to 100 to avoid freezing
+                let paperCount = 0;
+                for (let p of allData.papers) {
+                    if (paperCount > 100) break;
+                    if (!checkConstraints(p)) continue;
+
+                    let match = false;
+                    if (scope === 'all') {
+                        match = checkMatch(p.title) || checkMatch(p.authors) || checkMatch(p.journal);
+                    } else if (scope === 'paper') {
+                        match = checkMatch(p.title);
+                    } else if (scope === 'author') {
+                        match = checkMatch(p.authors);
+                    } else if (scope === 'journal') {
+                        match = checkMatch(p.journal);
+                    }
+
+                    if (match) {
+                        results.push(p);
+                        paperCount++;
+                    }
+                }
+
+                // Render Results
+                countLabel.textContent = `${results.length}${results.length > 100 ? '+' : ''} results`;
+                resultsList.innerHTML = '';
+
+                results.slice(0, 100).forEach(item => {
+                    const row = document.createElement('div');
+                    row.style.cssText = "padding: 6px; background: rgba(255,255,255,0.05); border-radius: 4px; cursor: pointer; border: 1px solid transparent; transition: all 0.1s;";
+                    row.onmouseover = () => { row.style.borderColor = 'var(--accent-color)'; row.style.background = 'rgba(255,255,255,0.1)'; };
+                    row.onmouseout = () => { row.style.borderColor = 'transparent'; row.style.background = 'rgba(255,255,255,0.05)'; };
+
+                    let label = '';
+                    let sub = '';
+                    let tag = item.type.toUpperCase();
+                    let tagColor = '#888';
+
+                    if (item.type === 'topic') {
+                        label = item.topic_name;
+                        sub = `Topic ${item.id}`;
+                        tagColor = item.color;
+                    } else if (item.type === 'bigram') {
+                        label = item.bigram;
+                        sub = `Term in Topic ${item.topic_id}`;
+                        tagColor = item.color;
+                    } else if (item.type === 'paper') {
+                        label = item.title;
+                        sub = `${item.year} · ${item.authors ? item.authors.substring(0, 20) + '...' : 'Unknown'}`;
+                        tagColor = '#fff';
+                    }
+
+                    row.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+                            <span style="font-size: 9px; font-weight: 700; background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 2px; color: ${tagColor}">${tag}</span>
+                            <span style="font-size: 9px; color: #666;">➥</span>
+                        </div>
+                        <div style="font-size: 11px; font-weight: 600; color: #ddd; line-height: 1.2; margin-bottom: 2px;">${label}</div>
+                        <div style="font-size: 10px; color: #888;">${sub}</div>
+                    `;
+
+                    row.onclick = () => {
+                        // Highlight
+                        selectedNode = item;
+                        // Center View?
+                        /*
+                        d3.select(canvas).transition().duration(750)
+                           .call(zoom.transform, d3.zoomIdentity.translate(width/2, height/2).scale(2).translate(-item.x, -item.y));
+                        */
+                        // Just trigger draw
+                        // Force tooltip
+                        /* We can't easily force the specific mouseover tooltip logic without spoofing an event 
+                           But we can set selectedNode which draws connections! */
+
+                        console.log('Jump to:', item);
+                    };
+
+                    resultsList.appendChild(row);
+                });
+            }
+
             // Start!
-            loadData();
+            loadData().then(() => {
+                populateAdvancedFilters();
+            });
+
+            // Override loadDemo to ensure filters populate
+            window.loadDemo = () => {
+                const loadingToUse = document.getElementById('loading') || document.querySelector('.loading-text')?.parentNode;
+                if (loadingToUse) loadingToUse.innerHTML = '<div class="spinner"></div><div class="loading-text">Generating Demo Data...</div>';
+                loadData(true).then(() => {
+                    populateAdvancedFilters();
+                });
+            };
+
+            // Expose reload for error screen
+            window.location.reload = () => {
+                window.location.href = window.location.href; // Force reload
+            };
         </script>
 </body>
 
