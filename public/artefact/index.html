@@ -2009,22 +2009,19 @@
 
             function drawPulse(ctx, node) {
                 if (!node) return;
-                const elapsed = Date.now() - pulseStartTime;
-                const duration = 2000; // 2 seconds
 
-                if (elapsed > duration) {
-                    pulseNode = null;
-                    return;
-                }
-
-                const progress = elapsed / duration;
-                const alpha = 1 - progress; // Fade out
+                // Continuous pulse animation based on time
+                const time = Date.now();
+                const period = 2000;
+                const progress = (time % period) / period;
+                const alpha = 1 - progress;
 
                 ctx.save();
                 ctx.translate(transform.x, transform.y);
                 ctx.scale(transform.k, transform.k);
 
-                const radius = 10 + (progress * 40); // 10 to 50
+                // Expanding ring
+                const radius = 10 + (progress * 40);
 
                 ctx.beginPath();
                 ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
@@ -2032,10 +2029,10 @@
                 ctx.lineWidth = 2 / transform.k;
                 ctx.stroke();
 
-                // Inner core
+                // Inner core halo
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, 5 / transform.k, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(78, 205, 196, ${alpha * 0.8})`;
+                ctx.arc(node.x, node.y, 8 / transform.k, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(78, 205, 196, 0.4)`;
                 ctx.fill();
 
                 ctx.restore();
@@ -2044,9 +2041,8 @@
             function animate() {
                 if (currentView === 'macro') {
                     drawMacroView();
-
-                    if (pulseNode) {
-                        drawPulse(ctx, pulseNode);
+                    if (activeSpotlight) {
+                        drawPulse(ctx, activeSpotlight);
                     }
                 }
                 animationFrame = requestAnimationFrame(animate);
@@ -2617,9 +2613,8 @@
                 overlay.style.display = show ? 'flex' : 'none';
             }
 
-            // Radar Pulse Effect State
-            let pulseNode = null;
-            let pulseStartTime = 0;
+            // Radar Pulse / Spotlight State
+            let activeSpotlight = null; // Persistent highlight node
 
             function performAdvancedSearch() {
                 // GUARDS: Restore Search Functionality
@@ -2781,18 +2776,35 @@
                             }
                             switchTab('browse');
                         }
-                        // 2. PAPER: Fly to node (if visible)
-                        else if (item.type === 'paper') {
-                            const paperToggle = document.getElementById('bigramPaperToggle');
-                            // Check visibility
-                            if (paperToggle && !paperToggle.checked) {
-                                if (countLabel) countLabel.innerHTML = '<span style="color:#ff6b6b">⚠️ Enable "Terms linked to papers" to locate this paper.</span>';
-                                return;
+                        // 2. PAPER & TERM: Fly to node with Persistent Spotlight
+                        else {
+                            if (item.type === 'paper') {
+                                const paperToggle = document.getElementById('bigramPaperToggle');
+                                if (paperToggle && !paperToggle.checked) {
+                                    if (countLabel) countLabel.innerHTML = '<span style="color:#ff6b6b">⚠️ Enable "Terms linked to papers" to locate this paper.</span>';
+                                    return;
+                                }
                             }
-                            initiateFlyTo(item);
-                        }
-                        // 3. TERM: Fly to node
-                        else if (item.type === 'bigram') {
+                            // Set persistent spotlight
+                            activeSpotlight = item;
+
+                            // Add Clear Button to header
+                            if (countLabel) {
+                                countLabel.innerHTML = `
+                                    <span>${results.length} results</span>
+                                    <span id="clearHighlightBtn" style="float: right; cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 10px; border: 1px solid var(--accent-color); padding: 2px 6px; border-radius: 4px;">× Clear highlight</span>
+                                `;
+                                const btn = document.getElementById('clearHighlightBtn');
+                                if (btn) {
+                                    btn.onclick = (e) => {
+                                        e.stopPropagation();
+                                        activeSpotlight = null;
+                                        selectedNode = null;
+                                        // Reset header text without button
+                                        countLabel.innerHTML = `${results.length}${results.length > 100 ? '+' : ''} results`;
+                                    };
+                                }
+                            }
                             initiateFlyTo(item);
                         }
                     };
@@ -2818,9 +2830,8 @@
                     .duration(1200)
                     .call(zoom.transform, d3.zoomIdentity.translate(targetX, targetY).scale(targetScale))
                     .on("end", () => {
-                        // 3. Trigger Pulse
-                        pulseNode = targetNode;
-                        pulseStartTime = Date.now();
+                        // 3. Trigger Persistent Spotlight
+                        activeSpotlight = targetNode;
                     });
             }
 
