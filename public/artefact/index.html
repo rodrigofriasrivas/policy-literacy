@@ -2769,20 +2769,31 @@
                     `;
 
                     row.onclick = () => {
-                        // Simple selection
                         console.log('Result clicked:', item);
                         selectedNode = item;
 
+                        // 1. TOPIC: Switch View
                         if (item.type === 'topic') {
                             const sel = document.getElementById('topicSelect');
-                            if (sel) { sel.value = item.id; sel.dispatchEvent(new Event('change')); }
+                            if (sel) {
+                                sel.value = item.id;
+                                sel.dispatchEvent(new Event('change'));
+                            }
                             switchTab('browse');
                         }
+                        // 2. PAPER: Fly to node (if visible)
                         else if (item.type === 'paper') {
-                            const pt = document.getElementById('bigramPaperToggle');
-                            if (pt && !pt.checked && countLabel) {
-                                countLabel.innerHTML = '<span style="color:#ff6b6b">Term layer required (check filters)</span>';
+                            const paperToggle = document.getElementById('bigramPaperToggle');
+                            // Check visibility
+                            if (paperToggle && !paperToggle.checked) {
+                                if (countLabel) countLabel.innerHTML = '<span style="color:#ff6b6b">⚠️ Enable "Terms linked to papers" to locate this paper.</span>';
+                                return;
                             }
+                            initiateFlyTo(item);
+                        }
+                        // 3. TERM: Fly to node
+                        else if (item.type === 'bigram') {
+                            initiateFlyTo(item);
                         }
                     };
 
