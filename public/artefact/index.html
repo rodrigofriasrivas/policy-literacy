@@ -761,10 +761,15 @@
                     Search runs only within this corpus (papers, topics, and extracted terms).
                 </div>
 
-                <!-- A) Search Input -->
-                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                    <input type="text" id="advSearchInput" placeholder="Search papers, authors..."
-                        style="flex: 2; font-size: 12px; padding: 8px;">
+                <!-- A) Search Input (Tag Enabled) -->
+                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                    <!-- Tag Container Wrapper -->
+                    <div
+                        style="flex: 2; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 4px; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; min-height: 32px;">
+                        <div id="advSearchTags" style="display: contents;"></div>
+                        <input type="text" id="advSearchInput" placeholder="Search..."
+                            style="border: none; background: transparent; color: #fff; font-size: 12px; outline: none; flex: 1; min-width: 60px; padding: 2px;">
+                    </div>
                     <select id="advSearchScope" style="flex: 1; font-size: 11px; padding: 0 4px;">
                         <option value="all">All</option>
                         <option value="paper">Papers (title)</option>
@@ -774,6 +779,7 @@
                         <option value="topic">Topics</option>
                     </select>
                 </div>
+                <div style="font-size: 10px; color: #888; margin-bottom: 16px;">Press Enter/Comma to add tag</div>
 
                 <!-- B) Match Toggle -->
                 <div class="row-align-center" style="justify-content: flex-start; gap: 16px; margin-bottom: 20px;">
@@ -1984,7 +1990,15 @@
                     // Let's show them.
 
                     let alpha = 1.0;
-                    if (selectedNode && !isConnected(bigram, selectedNode)) alpha = 0.1;
+                    if (activeSpotlights.size > 0) {
+                        // Check if bigram is connected to ANY active spotlight node
+                        let linked = false;
+                        for (let spot of activeSpotlights) {
+                            if (isConnected(bigram, spot)) { linked = true; break; }
+                        }
+                        if (!linked) alpha = 0.1;
+                    }
+                    else if (selectedNode && !isConnected(bigram, selectedNode)) alpha = 0.1;
 
                     ctx.globalAlpha = alpha;
                     ctx.globalAlpha = alpha;
@@ -2041,8 +2055,8 @@
             function animate() {
                 if (currentView === 'macro') {
                     drawMacroView();
-                    if (activeSpotlight) {
-                        drawPulse(ctx, activeSpotlight);
+                    if (activeSpotlights.size > 0) {
+                        activeSpotlights.forEach(node => drawPulse(ctx, node));
                     }
                 }
                 animationFrame = requestAnimationFrame(animate);
@@ -2532,7 +2546,28 @@
                 }
                 // 2b. Main Search Controls (Input, Scope, Match Type)
                 const advSearchInput = document.getElementById('advSearchInput');
-                if (advSearchInput) advSearchInput.addEventListener('input', performAdvancedSearch);
+                if (advSearchInput) {
+                    advSearchInput.addEventListener('input', performAdvancedSearch);
+
+                    // Tag Creation Listener
+                    advSearchInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const val = advSearchInput.value.trim().replace(/,/g, '');
+                            if (val) {
+                                searchTags.push(val);
+                                advSearchInput.value = '';
+                                renderTags();
+                                performAdvancedSearch();
+                            }
+                        } else if (e.key === 'Backspace' && !advSearchInput.value && searchTags.length > 0) {
+                            // Helper to remove last tag on backspace if clean
+                            searchTags.pop();
+                            renderTags();
+                            performAdvancedSearch();
+                        }
+                    });
+                }
 
                 const advSearchScope = document.getElementById('advSearchScope');
                 if (advSearchScope) advSearchScope.addEventListener('change', performAdvancedSearch);
@@ -2614,7 +2649,26 @@
             }
 
             // Radar Pulse / Spotlight State
-            let activeSpotlight = null; // Persistent highlight node
+            let activeSpotlights = new Set(); // Persistent highlight nodes (Set)
+            let searchTags = []; // Array of string tags
+
+            function renderTags() {
+                const container = document.getElementById('advSearchTags');
+                if (!container) return;
+                container.innerHTML = '';
+                searchTags.forEach((tag, idx) => {
+                    const chip = document.createElement('div');
+                    chip.style.cssText = "display: flex; align-items: center; gap: 4px; background: var(--accent-color); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;";
+                    chip.innerHTML = `<span>${tag}</span><span style="cursor: pointer; opacity: 0.6; font-size: 10px;">✕</span>`;
+                    chip.querySelector('span:last-child').onclick = (e) => {
+                        e.stopPropagation();
+                        searchTags.splice(idx, 1);
+                        renderTags();
+                        performAdvancedSearch();
+                    };
+                    container.appendChild(chip);
+                });
+            }
 
             function performAdvancedSearch() {
                 // GUARDS: Restore Search Functionality
@@ -2625,7 +2679,21 @@
                 const searchInput = document.getElementById('advSearchInput');
                 if (!searchInput) return;
 
-                const query = searchInput.value.trim().toLowerCase();
+                // Handle Input Text
+                let query = searchInput.value.trim().toLowerCase();
+
+                // If Tags exist, they become the primary source. Query is supplemental if present.
+                const hasTags = searchTags.length > 0;
+
+                // Only clear if empty
+                if (!query && !hasTags) {
+                    const resultsList = document.getElementById('searchResultsList');
+                    const countLabel = document.getElementById('searchResultsCount');
+                    if (resultsList) resultsList.innerHTML = '';
+                    if (countLabel) countLabel.textContent = 'Enter search term';
+                    return;
+                }
+
                 const scope = document.getElementById('advSearchScope').value;
                 const matchType = document.querySelector('input[name="matchType"]:checked').value;
                 const resultsList = document.getElementById('searchResultsList');
@@ -2668,12 +2736,6 @@
                     document.querySelectorAll('#advJournalList input:checked').forEach(cb => selectedAdvJournals.add(cb.value));
                 }
 
-                if (!query) {
-                    resultsList.innerHTML = '';
-                    countLabel.textContent = 'Enter search term';
-                    return;
-                }
-
                 // Helper: Check constraints
                 const checkConstraints = (item) => {
                     // Type-specific checks
@@ -2692,12 +2754,29 @@
                     return true;
                 };
 
-                // Helper: Match Text
+                // Helper: Match Text Against Query OR Tags
                 const checkMatch = (text) => {
                     if (!text) return false;
                     const clean = text.toLowerCase();
-                    if (matchType === 'exact') return clean === query;
-                    return clean.includes(query);
+
+                    // 1. Check current input query
+                    let matchInput = false;
+                    if (query) {
+                        if (matchType === 'exact') matchInput = (clean === query);
+                        else matchInput = clean.includes(query);
+                    }
+                    if (matchInput) return true;
+
+                    // 2. Check Tags (OR Logic)
+                    if (hasTags) {
+                        return searchTags.some(tag => {
+                            const t = tag.toLowerCase();
+                            if (matchType === 'exact') return clean === t;
+                            return clean.includes(t);
+                        });
+                    }
+
+                    return false;
                 };
 
                 let results = [];
@@ -2725,6 +2804,7 @@
                     if (paperCount > 100) break;
                     if (!checkConstraints(p)) continue;
 
+                    // Optimization: Check quick match first
                     let match = false;
                     if (scope === 'all') {
                         match = checkMatch(p.title) || checkMatch(p.authors) || checkMatch(p.journal);
@@ -2746,19 +2826,19 @@
                 const countText = results.length === 0 ? 'No matching results found' : `${results.length}${results.length > 100 ? '+' : ''} results`;
                 countLabel.innerHTML = `<span>${countText}</span>`;
 
-                // Restore Clear Highlight Button if active spotlight exists
-                if (activeSpotlight && results.length > 0) {
+                // Restore Clear Highlight Button if active spotlights exist
+                if (activeSpotlights.size > 0 && results.length > 0) { // Changed condition
                     countLabel.innerHTML += `
-                        <span id="clearHighlightBtn" style="float: right; cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 10px; border: 1px solid var(--accent-color); padding: 2px 6px; border-radius: 4px;">× Clear highlight</span>
+                        <span id="clearHighlightBtn" style="float: right; cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 10px; border: 1px solid var(--accent-color); padding: 2px 6px; border-radius: 4px;">× Clear selection</span>
                      `;
                     setTimeout(() => {
                         const btn = document.getElementById('clearHighlightBtn');
                         if (btn) {
                             btn.onclick = (e) => {
                                 e.stopPropagation();
-                                activeSpotlight = null;
+                                activeSpotlights.clear(); // Clear all
                                 selectedNode = null;
-                                performAdvancedSearch(); // Re-render header to remove button
+                                performAdvancedSearch(); // Re-render header to remove button and list highlight
                             };
                         }
                     }, 0);
@@ -2769,9 +2849,27 @@
 
                 results.slice(0, 100).forEach(item => {
                     const row = document.createElement('div');
-                    row.style.cssText = "padding: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; cursor: pointer; border: 1px solid transparent; transition: all 0.1s; margin-bottom: 6px;";
-                    row.onmouseover = () => { row.style.borderColor = 'var(--accent-color)'; row.style.background = 'rgba(255,255,255,0.1)'; };
-                    row.onmouseout = () => { row.style.borderColor = 'transparent'; row.style.background = 'rgba(255,255,255,0.05)'; };
+                    row.className = 'result-row'; // Marker class
+
+                    // Dynamic styling based on selection
+                    const isSelected = activeSpotlights.has(item);
+                    const baseBg = isSelected ? 'rgba(78, 205, 196, 0.2)' : 'rgba(255,255,255,0.05)';
+                    const baseBorder = isSelected ? 'var(--accent-color)' : 'transparent';
+
+                    row.style.cssText = `padding: 8px; background: ${baseBg}; border-radius: 4px; cursor: pointer; border: 1px solid ${baseBorder}; transition: all 0.1s; margin-bottom: 6px;`;
+
+                    row.onmouseover = () => {
+                        if (!activeSpotlights.has(item)) {
+                            row.style.borderColor = 'var(--accent-color)';
+                            row.style.background = 'rgba(255,255,255,0.1)';
+                        }
+                    };
+                    row.onmouseout = () => {
+                        if (!activeSpotlights.has(item)) {
+                            row.style.borderColor = 'transparent';
+                            row.style.background = 'rgba(255,255,255,0.05)';
+                        }
+                    };
 
                     let label = '';
                     let sub = '';
@@ -2803,9 +2901,9 @@
 
                     row.onclick = () => {
                         console.log('Result clicked:', item);
-                        selectedNode = item;
+                        selectedNode = item; // Still update last selected for certain logic
 
-                        // 1. TOPIC: Switch View
+                        // 1. TOPIC: Switch View (Keep behavior)
                         if (item.type === 'topic') {
                             const sel = document.getElementById('topicSelect');
                             if (sel) {
@@ -2813,38 +2911,29 @@
                                 sel.dispatchEvent(new Event('change'));
                             }
                             switchTab('browse');
+                            return;
                         }
-                        // 2. PAPER & TERM: Fly to node with Persistent Spotlight
-                        else {
-                            if (item.type === 'paper') {
-                                const paperToggle = document.getElementById('bigramPaperToggle');
-                                if (paperToggle && !paperToggle.checked) {
-                                    if (countLabel) countLabel.innerHTML = '<span style="color:#ff6b6b">⚠️ Enable "Terms linked to papers" to locate this paper.</span>';
-                                    return;
-                                }
-                            }
-                            // Set persistent spotlight
-                            activeSpotlight = item;
 
-                            // Add Clear Button to header
-                            if (countLabel) {
-                                countLabel.innerHTML = `
-                                    <span>${results.length} results</span>
-                                    <span id="clearHighlightBtn" style="float: right; cursor: pointer; color: var(--accent-color); font-weight: bold; font-size: 10px; border: 1px solid var(--accent-color); padding: 2px 6px; border-radius: 4px;">× Clear highlight</span>
-                                `;
-                                const btn = document.getElementById('clearHighlightBtn');
-                                if (btn) {
-                                    btn.onclick = (e) => {
-                                        e.stopPropagation();
-                                        activeSpotlight = null;
-                                        selectedNode = null;
-                                        // Reset header text without button
-                                        countLabel.innerHTML = `${results.length}${results.length > 100 ? '+' : ''} results`;
-                                    };
-                                }
+                        // 2. PAPER & TERM: Toggle Selection & Persistent Spotlight
+                        if (item.type === 'paper') {
+                            const paperToggle = document.getElementById('bigramPaperToggle');
+                            if (paperToggle && !paperToggle.checked) {
+                                if (countLabel) countLabel.innerHTML = '<span style="color:#ff6b6b">⚠️ Enable "Terms linked to papers" to locate this paper.</span>';
+                                return;
                             }
-                            initiateFlyTo(item);
                         }
+
+                        // Toggle Logic
+                        if (activeSpotlights.has(item)) {
+                            activeSpotlights.delete(item);
+                            // Visual update handled by re-render below or manual style update?
+                            // Re-running search is safest to update all row styles and header count
+                        } else {
+                            activeSpotlights.add(item);
+                            initiateFlyTo(item); // Only fly to newly added
+                        }
+
+                        performAdvancedSearch(); // Refresh UI State
                     };
 
                     resultsList.appendChild(row);
@@ -2869,7 +2958,7 @@
                     .call(zoom.transform, d3.zoomIdentity.translate(targetX, targetY).scale(targetScale))
                     .on("end", () => {
                         // 3. Trigger Persistent Spotlight
-                        activeSpotlight = targetNode;
+                        activeSpotlights.add(targetNode);
                     });
             }
 
