@@ -2534,6 +2534,16 @@
                         advJournalList.appendChild(div);
                     });
                 }
+                // 2b. Main Search Controls (Input, Scope, Match Type)
+                const advSearchInput = document.getElementById('advSearchInput');
+                if (advSearchInput) advSearchInput.addEventListener('input', performAdvancedSearch);
+
+                const advSearchScope = document.getElementById('advSearchScope');
+                if (advSearchScope) advSearchScope.addEventListener('change', performAdvancedSearch);
+
+                document.querySelectorAll('input[name="matchType"]').forEach(rb => {
+                    rb.addEventListener('change', performAdvancedSearch);
+                });
 
                 // 3. Timeframe listeners
                 document.getElementById('advYearSliderStart').addEventListener('input', (e) => {
