@@ -166,6 +166,7 @@
         }
 
         /* Premium Control Panel */
+        /* Sidebar Container */
         #controls {
             position: absolute;
             top: 24px;
@@ -175,47 +176,94 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 24px;
+            /* 3x8px */
             border-radius: var(--panel-radius);
             border: 1px solid var(--glass-border);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             z-index: 10;
-            opacity: 0;
-            animation: fadeIn 0.8s ease-out forwards;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 48px);
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Sidebar Typography & Grid */
+        .panel-header {
+            margin-bottom: 24px;
+            /* 3x8px */
+            flex-shrink: 0;
         }
 
-        #controls h3 {
-            margin-bottom: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-secondary);
+        .panel-title {
+            margin: 0 0 8px 0;
+            /* 1x8px bottom */
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+        }
+
+        .panel-summary {
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .control-section {
+            margin-bottom: 24px;
+            /* 3x8px */
+            position: relative;
+        }
+
+        .section-label {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            /* ~1.5x8px */
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-icon {
+            opacity: 0.5;
+            cursor: help;
+            transition: opacity 0.2s;
+            font-size: 12px;
+        }
+
+        .info-icon:hover {
+            opacity: 1;
+        }
+
+        .utilities-footer {
+            margin-top: auto;
+            /* Push to bottom if height limited, else just flows */
+            padding-top: 16px;
+            /* 2x8px */
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Utilities */
+        .row-align-center {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             gap: 8px;
         }
 
-        #controls h3::before {
-            content: '';
-            display: block;
-            width: 8px;
-            height: 8px;
-            background: var(--accent-color);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-color);
+        /* Adjust scrollable areas */
+        .scroll-y {
+            overflow-y: auto;
+            /* Custom scrollbar styling if needed */
         }
+
 
         /* Form Elements */
         .control-group {
@@ -565,31 +613,33 @@
         <div id="topicTitle"></div>
 
         <div id="controls">
-            <!-- Header -->
-            <h3 style="margin-bottom: 8px; display: block; border: none; padding-bottom: 0;">
-                <span style="font-size: 14px; font-weight: 800; letter-spacing: 1px; color: #fff;">NETWORK PANEL</span>
-            </h3>
-            <div style="font-size: 11px; line-height: 1.4; color: #aaa; margin-bottom: 20px;">
-                You're exploring across 5,700+ papers, from 40+ journals, organised in 25 topics between 1980–2024.
+            <!-- Header / Compass -->
+            <div class="panel-header">
+                <h3 class="panel-title">NETWORK PANEL</h3>
+                <p class="panel-summary">
+                    You're exploring across <strong style="color: var(--text-primary);"><span
+                            id="paperCount">5,700</span>+</strong> papers, from <strong
+                        style="color: var(--text-primary);">40+</strong> journals, organised in <strong
+                        style="color: var(--text-primary);"><span id="topicCount">25</span></strong> topics.
+                    <span id="bigramCount" style="display:none"></span> <!-- Prevent JS Crash -->
+                </p>
             </div>
 
             <!-- 1) Start here - Explore mode (Tabs) -->
-            <div class="control-section" style="margin-bottom: 20px;">
-                <div class="section-label"
-                    style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
-                    1) Start here — Explore mode
+            <div class="control-section" style="padding-top:0; margin-bottom: 24px;">
+                <div class="section-label">
+                    <span>1) Start here — Explore mode</span>
                     <span class="info-icon"
-                        title="Browse Topics is for exploration and Advanced Search is for targeted queries."
-                        style="cursor: help; opacity: 0.7;">ⓘ</span>
+                        title="Browse Topics is for exploration and Advanced Search is for targeted queries.">ⓘ</span>
                 </div>
                 <div class="tabs-header"
                     style="display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 2px;">
                     <div id="tab-browse" class="tab-btn active" onclick="switchTab('browse')"
-                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; background: rgba(255,255,255,0.1); color: #fff; transition: all 0.2s;">
+                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; background: rgba(255,255,255,0.1); color: var(--text-primary); transition: all 0.2s;">
                         Browse Topics
                     </div>
                     <div id="tab-search" class="tab-btn" onclick="switchTab('search')"
-                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; color: #888; transition: all 0.2s;">
+                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; color: var(--text-secondary); transition: all 0.2s;">
                         Advanced Search
                     </div>
                 </div>
@@ -600,11 +650,10 @@
 
                 <!-- 2) Choose your lens -->
                 <div class="control-section">
-                    <div class="section-label"
-                        style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
-                        2) Choose your lens
-                        <span class="info-icon" title="Select what the network shows: all topics or a specific topic."
-                            style="cursor: help; opacity: 0.7;">ⓘ</span>
+                    <div class="section-label">
+                        <span>2) Choose your lens</span>
+                        <span class="info-icon"
+                            title="Select what the network shows: all topics or a specific topic.">ⓘ</span>
                     </div>
                     <!-- Existing ID -->
                     <select id="topicSelect">
@@ -614,14 +663,14 @@
 
                 <!-- 3) Define your scope -->
                 <div class="control-section">
-                    <div class="section-label"
-                        style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
-                        3) Define your scope
-                        <span class="info-icon" title="Narrow the time window to see how the landscape changes."
-                            style="cursor: help; opacity: 0.7;">ⓘ</span>
+                    <div class="section-label">
+                        <span>3) Define your scope</span>
+                        <span class="info-icon"
+                            title="Narrow the time window to see how the landscape changes.">ⓘ</span>
                     </div>
-                    <label style="font-weight: 400; color: #aaa;">Timeframe: <span id="yearValue"
-                            style="color: var(--accent-color); font-weight: 600;">1980 – 2024</span></label>
+                    <label style="font-weight: 400; color: var(--text-secondary); margin-bottom: 4px;">Timeframe: <span
+                            id="yearValue" style="color: var(--accent-color); font-weight: 600;">1980 –
+                            2024</span></label>
                     <div class="range-slider">
                         <div class="range-track"></div>
                         <div class="range-progress" id="rangeProgress" style="left: 0%; width: 100%;"></div>
@@ -636,19 +685,17 @@
 
                 <!-- 4) What to show -->
                 <div class="control-section">
-                    <div class="section-label"
-                        style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
-                        4) What to show
-                        <span class="info-icon" title="These are visual layers, not ranking or recommendations."
-                            style="cursor: help; opacity: 0.7;">ⓘ</span>
+                    <div class="section-label">
+                        <span>4) What to show</span>
+                        <span class="info-icon"
+                            title="These are visual layers, not ranking or recommendations.">ⓘ</span>
                     </div>
                     <div
-                        style="margin-bottom: 10px; font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">
-                        Layers:</div>
+                        style="margin-bottom: 12px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                        Layers</div>
 
                     <!-- Terms linked to papers -->
-                    <div
-                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div class="row-align-center" style="margin-bottom: 8px;">
                         <label for="bigramPaperToggle"
                             style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms linked to
                             papers</label>
@@ -659,7 +706,7 @@
                     </div>
 
                     <!-- Terms-to-terms link -->
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div class="row-align-center">
                         <label for="bigramToggle"
                             style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms-to-terms
                             link</label>
@@ -672,11 +719,10 @@
 
                 <!-- 5) Journals -->
                 <div class="control-section">
-                    <div class="section-label"
-                        style="display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 8px;">
-                        5) Journals
-                        <span class="info-icon" title="Filter the evidence base without changing the topic model."
-                            style="cursor: help; opacity: 0.7;">ⓘ</span>
+                    <div class="section-label">
+                        <span>5) Journals</span>
+                        <span class="info-icon"
+                            title="Filter the evidence base without changing the topic model.">ⓘ</span>
                     </div>
 
                     <!-- Multi-select Dropdown UI -->
@@ -695,7 +741,7 @@
                                 <button id="clearAllJournals" class="btn"
                                     style="flex:1; font-size: 10px; padding: 4px;">None</button>
                             </div>
-                            <div id="journalList" style="max-height: 150px; overflow-y: auto;">
+                            <div id="journalList" class="scroll-y" style="max-height: 150px;">
                                 <div style="padding: 10px; color: #888; text-align: center; font-size: 11px;">Loading
                                     journals...</div>
                             </div>
@@ -708,14 +754,15 @@
 
 
             <!-- Tab Content: Advanced Search -->
-            <div id="content-search" class="tab-content" style="display: none; height: 100%; flex-direction: column;">
-                <div style="font-size: 10px; color: #888; margin-bottom: 12px; font-style: italic; line-height: 1.4;">
-                    Search runs only within this corpus (papers, topics, and extracted terms). If a concept isn’t
-                    present in the corpus, it won’t appear.
+            <div id="content-search" class="tab-content"
+                style="display: none; height: 100%; flex-direction: column; overflow: hidden;">
+                <div
+                    style="font-size: 10px; color: var(--text-secondary); margin-bottom: 12px; font-style: italic; line-height: 1.4;">
+                    Search runs only within this corpus (papers, topics, and extracted terms).
                 </div>
 
                 <!-- A) Search Input -->
-                <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
                     <input type="text" id="advSearchInput" placeholder="Search papers, authors..."
                         style="flex: 2; font-size: 12px; padding: 8px;">
                     <select id="advSearchScope" style="flex: 1; font-size: 11px; padding: 0 4px;">
@@ -729,28 +776,27 @@
                 </div>
 
                 <!-- B) Match Toggle -->
-                <div style="display: flex; gap: 12px; margin-bottom: 16px; font-size: 11px; color: #ccc;">
+                <div class="row-align-center" style="justify-content: flex-start; gap: 16px; margin-bottom: 20px;">
                     <label
-                        style="display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 400; cursor: pointer;">
+                        style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: #ccc; font-size: 11px;">
                         <input type="radio" name="matchType" value="contains" checked style="margin: 0;"> Contains
                     </label>
                     <label
-                        style="display: flex; align-items: center; gap: 4px; margin: 0; font-weight: 400; cursor: pointer;">
+                        style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: #ccc; font-size: 11px;">
                         <input type="radio" name="matchType" value="exact" style="margin: 0;"> Exact
                     </label>
                 </div>
 
                 <!-- C) Refine (Collapsible) -->
-                <div style="margin-bottom: 16px;">
+                <div style="margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">
                     <div onclick="toggleRefine()"
-                        style="cursor: pointer; font-size: 11px; font-weight: 700; color: #aaa; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
+                        style="cursor: pointer; font-size: 11px; font-weight: 700; color: var(--text-secondary); padding: 4px 0; display: flex; justify-content: space-between;">
                         <span>Refine Filters</span>
                         <span id="refineToggleIcon">+</span>
                     </div>
-                    <div id="refineContent"
-                        style="display: none; padding-top: 10px; padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); margin-top: 4px;">
+                    <div id="refineContent" style="display: none; padding-top: 12px;">
 
-                        <label style="font-size: 10px; color: #888;">Timeframe constraint</label>
+                        <label style="font-size: 10px; color: var(--text-secondary);">Timeframe constraint</label>
                         <div class="range-slider" style="margin-top: 2px; margin-bottom: 16px;">
                             <div class="range-track"></div>
                             <div class="range-progress" id="advRangeProgress" style="left: 0%; width: 100%;"></div>
@@ -758,33 +804,33 @@
                             <input type="range" id="advYearSliderEnd" min="1980" max="2024" value="2024" step="1">
                         </div>
 
-                        <label style="font-size: 10px; color: #888;">Select Topic</label>
-                        <select id="advTopicSelect" style="font-size: 11px; margin-bottom: 8px;">
+                        <label style="font-size: 10px; color: var(--text-secondary);">Select Topic</label>
+                        <select id="advTopicSelect" style="font-size: 11px; margin-bottom: 12px;">
                             <option value="all">All Topics</option>
                         </select>
 
                         <!-- Simple Journal Multi-select for Refine -->
-                        <label style="font-size: 10px; color: #888;">Journals</label>
-                        <div id="advJournalList"
-                            style="max-height: 80px; overflow-y: auto; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 4px;">
+                        <label style="font-size: 10px; color: var(--text-secondary);">Journals</label>
+                        <div id="advJournalList" class="scroll-y"
+                            style="max-height: 80px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
                             <!-- Populated via JS -->
                         </div>
                     </div>
                 </div>
 
                 <!-- D) Results Panel -->
-                <label style="font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 4px;">Results</label>
-                <div id="searchResultsPanel"
-                    style="height: 200px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                <div class="section-label" style="margin-bottom: 8px;">Results</div>
+                <div id="searchResultsPanel" class="scroll-y"
+                    style="flex: 1; min-height: 0; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; border: 1px solid rgba(255,255,255,0.05);">
                     <div id="searchResultsCount"
-                        style="font-size: 10px; color: #888; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                         Enter search term to begin</div>
                     <div id="searchResultsList" style="display: flex; flex-direction: column; gap: 4px;"></div>
                 </div>
 
                 <!-- E) Manual Toggle -->
-                <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between;">
-                    <label style="font-size: 11px; color: #aaa; margin: 0;">How to navigate</label>
+                <div class="row-align-center" style="margin-top: 16px;">
+                    <label style="font-size: 11px; color: var(--text-secondary); margin: 0;">How to navigate</label>
                     <label class="toggle-switch">
                         <input type="checkbox" id="navGuideToggle">
                         <span class="slider"></span>
@@ -795,20 +841,20 @@
 
 
             <!-- Common Footer -->
-            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="utilities-footer">
+                <div class="row-align-center">
                     <button id="sidebarZoomIn" class="btn" style="flex: 1;">+ Zoom In</button>
                     <div id="zoomPercentage"
-                        style="font-family: monospace; font-size: 12px; color: #888; width: 45px; text-align: center;">
+                        style="font-family: monospace; font-size: 12px; color: var(--text-secondary); width: 45px; text-align: center;">
                         100%</div>
                     <button id="sidebarZoomOut" class="btn" style="flex: 1;">- Zoom Out</button>
                 </div>
 
-                <button id="resetBtn" class="btn" style="margin-top: 12px;">
+                <button id="resetBtn" class="btn">
                     <span>↺</span> Reset View
                 </button>
 
-                <div style="margin-top: 16px; display: flex; align-items: center; justify-content: space-between;">
+                <div class="row-align-center">
                     <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Grey/Dark mode</span>
                     <label class="toggle-switch">
                         <input type="checkbox" id="themeToggle" checked>
