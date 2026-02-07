@@ -30,30 +30,36 @@
             --input-border: rgba(255, 255, 255, 0.1);
         }
 
-        /* Light Theme Overrides */
+        /* Light Theme Overrides (Polished High Contrast) */
         body.theme-light {
-            --bg-color: #f4f6f8;
-            --text-primary: #1a1a1a;
-            --text-secondary: #555555;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-            --glass-border: rgba(0, 0, 0, 0.1);
+            --bg-color: #f0f2f5;
+            /* Off-white page background */
+            --text-primary: #111111;
+            --text-secondary: #444444;
+            /* Darker grey for readability */
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(0, 0, 0, 0.08);
 
             /* L-Shape Light */
             --l-sidebar-bg: #ffffff;
+            /* Pure white panel */
             --l-header-bg: rgba(255, 255, 255, 0.95);
-            --l-border: rgba(0, 0, 0, 0.1);
-            --tab-text: #666;
-            --tab-text-active: #111;
-            --tab-underline: #000;
-            --breadcrumb-text: #666;
+            /* Semi-transparent white */
+            --l-border: rgba(0, 0, 0, 0.08);
+            /* Subtle separator */
+            --tab-text: #555555;
+            --tab-text-active: #000000;
+            --tab-underline: #111111;
+            --breadcrumb-text: #555555;
 
             /* Inputs Light */
-            --input-bg: rgba(0, 0, 0, 0.05);
-            --input-border: rgba(0, 0, 0, 0.1);
+            --input-bg: #f7f9fa;
+            --input-border: #e1e4e8;
         }
 
         body.theme-light #container {
-            background: radial-gradient(circle at 50% 50%, #ffffff 0%, #dbe0e5 100%);
+            background: #f0f2f5;
+            /* Flat off-white to improve rendering contrast */
         }
 
         body.theme-light .btn {
@@ -970,8 +976,9 @@
         /* Sticky footer inside controls */
         .utilities-sticky-footer {
             padding: 16px 24px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(10, 10, 10, 0.98);
+            border-top: 1px solid var(--l-border);
+            background: var(--l-sidebar-bg);
+            /* Themed background */
             /* Opaque to cover scrolling content */
             flex-shrink: 0;
         }
