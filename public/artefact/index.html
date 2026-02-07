@@ -824,42 +824,61 @@
             min-width: 0;
             /* Flexbox text truncation fix */
             pointer-events: none;
+            /* Align content header with sidebar panel title (24px padding) */
+            padding-top: 24px;
+            padding-left: 32px;
+            /* Gap between sidebar and content */
         }
 
         /* Dashboard Header (Submenu + Breadcrumbs) */
         .dashboard-header-row {
-            /* Sits at top of content col */
             pointer-events: auto;
             display: flex;
             flex-direction: column;
-            background: rgba(0, 0, 0, 0.0);
-            /* Transparent by default, or match BG? */
+            align-items: flex-start;
+            margin-bottom: 24px;
+            /* Space before canvas interaction starts */
+            z-index: 10;
+            /* Ensure active clicking */
         }
 
-        /* Submenu - now part of content flow */
+        /* Submenu - aligned as text baseline */
         .stitch-sub-bar {
-            height: 48px;
             display: flex;
             align-items: center;
             gap: 32px;
-            padding: 0 24px;
-            /* Match sidebar margin if needed, or keeping visual flow */
-            /* Stitch reference: Background seems to span full width? 
-               User says: "submenu belongs inside the dashboard content area" 
-               But visual reference usually has a full band.
-               If full band, it needs to be behind sidebar? No, sidebar is on top.
-               Let's make it span the content column. */
-            background-color: transparent;
+            margin-bottom: 4px;
+            /* Tight grouping with breadcrumbs */
+            padding: 0;
+            /* Alignment handled by content col */
         }
 
-        /* Breadcrumbs - part of content flow */
+        .stitch-sub-link {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #888;
+            text-decoration: none;
+            transition: color 0.2s;
+            padding-bottom: 4px;
+            /* Touch target */
+        }
+
+        .stitch-sub-link.active {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Breadcrumbs - directly below submenu */
         .stitch-breadcrumbs {
-            padding: 16px 24px;
             font-family: 'Inter', sans-serif;
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
-            color: #555;
+            color: #666;
+            margin-top: 4px;
+            padding: 0;
+            /* Alignment handled by content col */
         }
 
         /* Controls Panel Adjustment */
