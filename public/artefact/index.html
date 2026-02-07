@@ -15,6 +15,19 @@
             --glass-bg: rgba(20, 20, 20, 0.6);
             --glass-border: rgba(255, 255, 255, 0.08);
             --panel-radius: 16px;
+
+            /* L-Shape Theme */
+            --l-sidebar-bg: rgba(10, 10, 10, 0.95);
+            --l-header-bg: rgba(5, 5, 5, 0.85);
+            --l-border: rgba(255, 255, 255, 0.08);
+            --tab-text: #888;
+            --tab-text-active: #fff;
+            --tab-underline: #fff;
+            --breadcrumb-text: #555;
+
+            /* Inputs */
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --input-border: rgba(255, 255, 255, 0.1);
         }
 
         /* Light Theme Overrides */
@@ -24,6 +37,19 @@
             --text-secondary: #555555;
             --glass-bg: rgba(255, 255, 255, 0.85);
             --glass-border: rgba(0, 0, 0, 0.1);
+
+            /* L-Shape Light */
+            --l-sidebar-bg: #ffffff;
+            --l-header-bg: rgba(255, 255, 255, 0.95);
+            --l-border: rgba(0, 0, 0, 0.1);
+            --tab-text: #666;
+            --tab-text-active: #111;
+            --tab-underline: #000;
+            --breadcrumb-text: #666;
+
+            /* Inputs Light */
+            --input-bg: rgba(0, 0, 0, 0.05);
+            --input-border: rgba(0, 0, 0, 0.1);
         }
 
         body.theme-light #container {
@@ -282,8 +308,8 @@
         input[type="text"] {
             width: 100%;
             padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
             border-radius: 8px;
             color: var(--text-primary);
             font-size: 13px;
@@ -806,16 +832,13 @@
         /* Left Sidebar Frame - Flush L-Shape */
         .dashboard-sidebar-col {
             width: 320px;
-            /* Fixed width, no padding around panel */
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
             pointer-events: auto;
-            background: rgba(10, 10, 10, 0.95);
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            /* Vertical separator */
+            background: var(--l-sidebar-bg);
+            border-right: 1px solid var(--l-border);
             z-index: 20;
-            /* Layer above canvas */
         }
 
         /* Right Content Column */
@@ -838,17 +861,15 @@
             justify-content: center;
             align-items: flex-start;
 
-            /* Visuals: Subtle Glass Strip */
-            background: rgba(10, 10, 10, 0.85);
+            /* Visuals: Themed Glass Strip */
+            background: var(--l-header-bg);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            /* Matches sidebar border */
+            border-bottom: 1px solid var(--l-border);
 
             /* Layout */
             width: 100%;
             padding: 12px 32px;
-            /* Compact */
             margin-bottom: 0;
             z-index: 10;
         }
@@ -860,14 +881,16 @@
             gap: 32px;
             margin-bottom: 4px;
             padding: 0;
+            background: transparent !important;
+            /* Force single layer */
+            box-shadow: none !important;
         }
 
         .stitch-sub-link {
             font-family: 'Inter', sans-serif;
             font-size: 13px;
-            /* Slightly smaller/cleaner */
             font-weight: 500;
-            color: #888;
+            color: var(--tab-text);
             text-decoration: none;
             position: relative;
             padding-bottom: 4px;
@@ -875,11 +898,11 @@
         }
 
         .stitch-sub-link:hover {
-            color: #ccc;
+            color: var(--text-primary);
         }
 
         .stitch-sub-link.active {
-            color: #fff;
+            color: var(--tab-text-active);
             font-weight: 600;
         }
 
@@ -891,7 +914,7 @@
             left: 0;
             width: 100%;
             height: 1px;
-            background-color: #fff;
+            background-color: var(--tab-underline);
             box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
         }
 
@@ -901,7 +924,7 @@
             font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: #555;
+            color: var(--breadcrumb-text);
             margin-top: 4px;
             padding: 0;
             /* Alignment handled by content col */
