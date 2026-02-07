@@ -824,44 +824,56 @@
             min-width: 0;
             /* Flexbox text truncation fix */
             pointer-events: none;
-            /* Align content header with sidebar panel title (24px padding) */
-            padding-top: 24px;
-            padding-left: 32px;
-            /* Gap between sidebar and content */
+            padding: 0;
+            /* Header strip handles spacing now */
         }
 
-        /* Dashboard Header (Submenu + Breadcrumbs) */
+        /* Dashboard Header Strip - Integrated Glass Bar */
         .dashboard-header-row {
             pointer-events: auto;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             align-items: flex-start;
-            margin-bottom: 24px;
-            /* Space before canvas interaction starts */
+
+            /* Visuals: Dark Glass Strip */
+            background: rgba(5, 5, 5, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+            /* Layout & Spacing */
+            width: 100%;
+            padding: 16px 32px;
+            /* Balanced strip spacing */
+            margin-bottom: 0;
+            /* Sits flush top, canvas flows below */
             z-index: 10;
-            /* Ensure active clicking */
         }
 
-        /* Submenu - aligned as text baseline */
+        /* Submenu - integrated tabs */
         .stitch-sub-bar {
             display: flex;
             align-items: center;
             gap: 32px;
             margin-bottom: 4px;
-            /* Tight grouping with breadcrumbs */
             padding: 0;
-            /* Alignment handled by content col */
         }
 
         .stitch-sub-link {
             font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
+            /* Slightly smaller/cleaner */
             font-weight: 500;
             color: #888;
             text-decoration: none;
-            transition: color 0.2s;
+            position: relative;
             padding-bottom: 4px;
-            /* Touch target */
+            transition: all 0.2s ease;
+        }
+
+        .stitch-sub-link:hover {
+            color: #ccc;
         }
 
         .stitch-sub-link.active {
@@ -869,13 +881,25 @@
             font-weight: 600;
         }
 
-        /* Breadcrumbs - directly below submenu */
+        /* Active Underline */
+        .stitch-sub-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: #fff;
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Breadcrumbs - Muted secondary line */
         .stitch-breadcrumbs {
             font-family: 'Inter', sans-serif;
             font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #666;
+            letter-spacing: 0.06em;
+            color: #555;
             margin-top: 4px;
             padding: 0;
             /* Alignment handled by content col */
