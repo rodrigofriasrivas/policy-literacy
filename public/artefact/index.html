@@ -870,9 +870,11 @@
             left: auto !important;
             width: 320px !important;
             /* Height management */
+            height: 100% !important;
+            /* Fill available sidebar height */
             max-height: 100% !important;
             /* Fill available sidebar height */
-            height: auto;
+            /* height: auto; REMOVED */
             overflow-y: hidden;
             /* We'll scroll inner content if needed */
             display: flex;
@@ -893,6 +895,7 @@
             padding: 24px;
             overflow-y: auto;
             flex: 1;
+            min-height: 0;
             /* Take available space */
             /* Hide scrollbar visually but keep function */
             scrollbar-width: thin;
@@ -1234,6 +1237,7 @@
                                         <span class="slider"></span>
                                     </label>
                                 </div>
+                                <input type="hidden" id="searchInput" value="">
                             </div>
                         </div>
                     </div> <!-- End #controls -->
