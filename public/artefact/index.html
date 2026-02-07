@@ -803,17 +803,19 @@
             position: relative;
         }
 
-        /* Left Sidebar Column */
+        /* Left Sidebar Frame - Flush L-Shape */
         .dashboard-sidebar-col {
-            width: 368px;
-            /* 320px panel + 24px margin/gap space */
-            padding: 24px 0 24px 24px;
-            /* Top/Bottom padding, Left padding */
+            width: 320px;
+            /* Fixed width, no padding around panel */
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            pointer-events: none;
-            /* Let clicks pass through gaps */
+            pointer-events: auto;
+            background: rgba(10, 10, 10, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            /* Vertical separator */
+            z-index: 20;
+            /* Layer above canvas */
         }
 
         /* Right Content Column */
@@ -836,18 +838,18 @@
             justify-content: center;
             align-items: flex-start;
 
-            /* Visuals: Dark Glass Strip */
-            background: rgba(5, 5, 5, 0.85);
+            /* Visuals: Subtle Glass Strip */
+            background: rgba(10, 10, 10, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            /* Matches sidebar border */
 
-            /* Layout & Spacing */
+            /* Layout */
             width: 100%;
-            padding: 16px 32px;
-            /* Balanced strip spacing */
+            padding: 12px 32px;
+            /* Compact */
             margin-bottom: 0;
-            /* Sits flush top, canvas flows below */
             z-index: 10;
         }
 
@@ -905,32 +907,29 @@
             /* Alignment handled by content col */
         }
 
-        /* Controls Panel Adjustment */
+        /* Controls Panel - Docked (No Card Style) */
         #controls {
             /* Reset absolute positioning */
             position: relative !important;
             top: auto !important;
             left: auto !important;
-            width: 320px !important;
+            width: 100% !important;
+            /* Fill sidebar frame */
+
             /* Height management */
             height: 100% !important;
-            /* Fill available sidebar height */
             max-height: 100% !important;
-            /* Fill available sidebar height */
-            /* height: auto; REMOVED */
             overflow-y: hidden;
-            /* We'll scroll inner content if needed */
             display: flex;
             flex-direction: column;
             pointer-events: auto;
 
-            /* Visuals */
-            background: rgba(10, 10, 10, 0.95) !important;
-            backdrop-filter: blur(20px);
-            border-radius: 2px !important;
+            /* Visuals - Reset Card */
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            backdrop-filter: none;
             padding: 0 !important;
-            /* Move padding to inner containers to handle scroll nicely */
-            border: 1px solid rgba(255, 255, 255, 0.05) !important;
         }
 
         /* Inner scroll container for controls */
