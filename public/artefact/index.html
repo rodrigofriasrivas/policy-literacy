@@ -147,26 +147,30 @@
         /* Checked (Right) = Dark Mode. Unchecked (Left) = Light Mode. */
 
         body.theme-light .slider {
-            background-color: #ccc;
-            border-color: rgba(0, 0, 0, 0.1);
+            background-color: #e0e0e0;
+            border-color: rgba(0, 0, 0, 0.15);
         }
 
         body.theme-light .slider:before {
             background-color: #fff;
             transform: translateX(0px);
-            /* Unchecked/Left position */
         }
 
+        /* Dark Mode ON */
         input:checked+.slider {
             background-color: var(--glass-bg);
-            /* Dark background state */
             border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Light Mode ON - Ensure visible stroke */
+        body.theme-light input:checked+.slider {
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            background-color: #f0f0f0;
         }
 
         input:checked+.slider:before {
             background-color: var(--accent-color);
             transform: translateX(16px);
-            /* Checked/Right position */
         }
 
         * {
@@ -1050,9 +1054,9 @@
                                         title="Browse Topics is for exploration and Advanced Search is for targeted queries.">i</span>
                                 </div>
                                 <div class="tabs-header"
-                                    style="display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 2px;">
+                                    style="display: flex; background: var(--input-bg); border-radius: 8px; padding: 2px; border: 1px solid var(--input-border);">
                                     <div id="tab-browse" class="tab-btn active" onclick="switchTab('browse')"
-                                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; background: rgba(255,255,255,0.1); color: var(--text-primary); transition: all 0.2s;">
+                                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; background: var(--glass-bg); color: var(--text-primary); transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
                                         Browse Topics
                                     </div>
                                     <div id="tab-search" class="tab-btn" onclick="switchTab('search')"
@@ -1151,13 +1155,13 @@
                                     <!-- Multi-select Dropdown UI -->
                                     <div style="position: relative;">
                                         <div id="journalDropdownBtn" onclick="toggleJournalDropdown()"
-                                            style="padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #ccc;">
+                                            style="padding: 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary);">
                                             <span>Select Journals</span>
                                             <span style="font-size: 10px; opacity: 0.7;">▼</span>
                                         </div>
 
                                         <div id="journalDropdownContent"
-                                            style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; margin-top: 4px; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.5); padding: 8px;">
+                                            style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--l-sidebar-bg); border: 1px solid var(--l-border); border-radius: 8px; margin-top: 4px; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 8px;">
                                             <div style="display: flex; gap: 5px; margin-bottom: 8px;">
                                                 <button id="selectAllJournals" class="btn"
                                                     style="flex:1; font-size: 10px; padding: 4px;">All</button>
@@ -2630,24 +2634,35 @@
 
             document.getElementById('resetBtn').addEventListener('click', () => {
                 searchTerm = '';
-                document.getElementById('searchInput').value = '';
-                document.getElementById('searchFeedback').textContent = '';
+                const searchInp = document.getElementById('searchInput');
+                if (searchInp) searchInp.value = '';
+                const searchFeed = document.getElementById('searchFeedback');
+                if (searchFeed) searchFeed.textContent = '';
 
                 selectedNode = null;
                 minYear = 1980;
                 maxYear = 2024;
-                document.getElementById('yearSliderStart').value = 1980;
-                document.getElementById('yearSliderEnd').value = 2024;
-                updateYearRange();
-                document.getElementById('yearValue').textContent = '1980 – 2024';
 
-                document.getElementById('topicSelect').value = 'all';
+                const ysStart = document.getElementById('yearSliderStart');
+                if (ysStart) ysStart.value = 1980;
+                const ysEnd = document.getElementById('yearSliderEnd');
+                if (ysEnd) ysEnd.value = 2024;
+
+                if (typeof updateYearRange === 'function') updateYearRange();
+
+                const yVal = document.getElementById('yearValue');
+                if (yVal) yVal.textContent = '1980 – 2024';
+
+                const tSelect = document.getElementById('topicSelect');
+                if (tSelect) tSelect.value = 'all';
 
                 // Reset Zoom
-                d3.select(canvas).transition().duration(750)
-                    .call(zoom.transform, d3.zoomIdentity);
+                if (canvas && zoom) {
+                    d3.select(canvas).transition().duration(750)
+                        .call(zoom.transform, d3.zoomIdentity);
+                }
 
-                initMacroView(); // Reset positions
+                if (typeof initMacroView === 'function') initMacroView(); // Reset positions
                 console.log('🔄 View Reset');
             });
 
