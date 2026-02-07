@@ -604,11 +604,197 @@
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
+
+        /* --- STITCH UI UPDATES --- */
+        .stitch-header-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 200;
+            /* Above controls */
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Bar */
+        .stitch-top-bar {
+            height: 64px;
+            background-color: #050505;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto;
+        }
+
+        .stitch-brand {
+            font-family: 'Times New Roman', serif;
+            /* Editorial feel */
+            font-size: 22px;
+            color: #fff;
+            letter-spacing: -0.01em;
+            line-height: 1;
+        }
+
+        .stitch-menu {
+            display: flex;
+            gap: 32px;
+        }
+
+        .stitch-menu-link {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: #888;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .stitch-menu-link.active,
+        .stitch-menu-link:hover {
+            color: #fff;
+        }
+
+        .stitch-menu-link.active {
+            border-bottom: 1px solid #fff;
+            padding-bottom: 4px;
+        }
+
+        /* Submenu */
+        .stitch-sub-bar {
+            height: 48px;
+            background-color: #0a0a0a;
+            /* Slightly lighter than top */
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 32px;
+            pointer-events: auto;
+        }
+
+        .stitch-sub-link {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .stitch-sub-link.active {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .stitch-sub-link:hover {
+            color: #ccc;
+        }
+
+        /* Breadcrumbs */
+        .stitch-breadcrumbs {
+            padding: 16px 24px;
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #555;
+            pointer-events: auto;
+        }
+
+        .stitch-bc-current {
+            color: #999;
+        }
+
+        /* Info Icon Update */
+        .info-icon {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff !important;
+            font-size: 10px !important;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            cursor: help;
+            margin-left: 6px;
+            opacity: 0.7;
+        }
+
+        .info-icon:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Override Controls Position */
+        #controls {
+            top: 154px !important;
+            /* 64 + 48 + 32 + 10 margin */
+            left: 24px;
+            border-radius: 2px !important;
+            /* Sharper */
+            background: rgba(10, 10, 10, 0.95) !important;
+            /* Darker, less glass */
+            border: none !important;
+            /* Remove border, cleaner */
+            box-shadow: none !important;
+            /* Cleaner */
+            backdrop-filter: blur(20px);
+        }
+
+        /* Typography refinements for Controls */
+        .panel-title {
+            font-family: 'Times New Roman', serif !important;
+            font-size: 18px !important;
+            font-weight: 400 !important;
+            letter-spacing: 0.02em !important;
+            text-transform: uppercase;
+        }
+
+        .section-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px !important;
+            font-weight: 600 !important;
+            letter-spacing: 1px !important;
+            color: #666 !important;
+        }
+
+        /* Override Topic Title Position (top center label) */
+        #topicTitle {
+            top: 160px !important;
+        }
+
+        /* Hide breadcrumb/nav during loading? No, nice to see context */
     </style>
 </head>
 
 <body>
     <div id="container">
+        <!-- Stitch header structure -->
+        <div class="stitch-header-container">
+            <div class="stitch-top-bar">
+                <div class="stitch-brand">Enterprise Policy Literacy Tool</div>
+                <nav class="stitch-menu">
+                    <a href="#" class="stitch-menu-link active">Visualise the data</a>
+                    <a href="#" class="stitch-menu-link">About the project</a>
+                    <a href="#" class="stitch-menu-link">Policy engagement</a>
+                    <a href="#" class="stitch-menu-link">Contact</a>
+                </nav>
+            </div>
+            <div class="stitch-sub-bar">
+                <a href="#" class="stitch-sub-link active">Network View</a>
+                <a href="#" class="stitch-sub-link">Field Structure</a>
+                <a href="#" class="stitch-sub-link">Temporal Evolution</a>
+                <a href="#" class="stitch-sub-link">Paper Library</a>
+            </div>
+            <div class="stitch-breadcrumbs">
+                VISUALISE THE DATA <span style="margin: 0 6px;">→</span> <span class="stitch-bc-current">NETWORK
+                    VIEW</span>
+            </div>
+        </div>
         <canvas id="canvas"></canvas>
         <div id="topicTitle"></div>
 
@@ -630,7 +816,7 @@
                 <div class="section-label">
                     <span>1) Start here — Explore mode</span>
                     <span class="info-icon"
-                        title="Browse Topics is for exploration and Advanced Search is for targeted queries.">ⓘ</span>
+                        title="Browse Topics is for exploration and Advanced Search is for targeted queries.">i</span>
                 </div>
                 <div class="tabs-header"
                     style="display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 2px;">
@@ -653,7 +839,7 @@
                     <div class="section-label">
                         <span>2) Choose your lens</span>
                         <span class="info-icon"
-                            title="Select what the network shows: all topics or a specific topic.">ⓘ</span>
+                            title="Select what the network shows: all topics or a specific topic.">i</span>
                     </div>
                     <!-- Existing ID -->
                     <select id="topicSelect">
@@ -666,7 +852,7 @@
                     <div class="section-label">
                         <span>3) Define your scope</span>
                         <span class="info-icon"
-                            title="Narrow the time window to see how the landscape changes.">ⓘ</span>
+                            title="Narrow the time window to see how the landscape changes.">i</span>
                     </div>
                     <label style="font-weight: 400; color: var(--text-secondary); margin-bottom: 4px;">Timeframe: <span
                             id="yearValue" style="color: var(--accent-color); font-weight: 600;">1980 –
@@ -688,7 +874,7 @@
                     <div class="section-label">
                         <span>4) What to show</span>
                         <span class="info-icon"
-                            title="These are visual layers, not ranking or recommendations.">ⓘ</span>
+                            title="These are visual layers, not ranking or recommendations.">i</span>
                     </div>
                     <div
                         style="margin-bottom: 12px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
@@ -722,7 +908,7 @@
                     <div class="section-label">
                         <span>5) Journals</span>
                         <span class="info-icon"
-                            title="Filter the evidence base without changing the topic model.">ⓘ</span>
+                            title="Filter the evidence base without changing the topic model.">i</span>
                     </div>
 
                     <!-- Multi-select Dropdown UI -->
