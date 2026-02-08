@@ -9,6 +9,7 @@ WITH years AS (
 counts AS (
     SELECT year, COUNT(*) AS papers_count
     FROM public.papers
+    WHERE year BETWEEN 1980 AND 2025
     GROUP BY year
 )
 SELECT 
@@ -16,7 +17,10 @@ SELECT
     COALESCE(c.papers_count, 0) AS papers_count
 FROM years y
 LEFT JOIN counts c ON y.year = c.year
-ORDER BY y.year;
+ORDER BY y.year ASC;
+
+GRANT SELECT ON public.v_chart1_corpus_growth TO anon;
+GRANT SELECT ON public.v_chart1_corpus_growth TO authenticated;
 
 -- View: v_topic_trends_10yr_v1
 -- Description: Comparison of topic share in period 2015-2024 vs 2005-2014.
@@ -76,3 +80,9 @@ SELECT
 FROM ranked
 WHERE rnk <= 10
 ORDER BY direction DESC, ABS(share_change_pp) DESC;
+
+GRANT SELECT ON public.v_topic_trends_10yr_v1 TO anon;
+GRANT SELECT ON public.v_topic_trends_10yr_v1 TO authenticated;
+
+-- Refresh Schema Cache (Required for PostgREST to see new views immediately)
+NOTIFY pgrst, 'reload schema';

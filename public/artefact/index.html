@@ -3699,7 +3699,7 @@
                     .on('mouseover', function (event, d) {
                         d3.select(this).attr('opacity', 1.0);
                         const tt = d3.select('#temporal-tooltip');
-                        tt.style('opacity', 1).html(`<strong>${d.year}</strong><br>Papers: ${d.count}`)
+                        tt.style('opacity', 1).html(`Year: ${d.year}<br>Papers: ${d.count}`)
                             .style('left', (event.pageX + 10) + 'px').style('top', (event.pageY - 20) + 'px');
                     })
                     .on('mouseout', function () {
@@ -3716,7 +3716,7 @@
 
                 // Labels
                 svg.append('text').attr('x', width / 2).attr('y', height).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Year');
-                svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Number of papers');
+                svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers');
             }
 
             async function fetchAndRenderEmergence() {
