@@ -17,10 +17,11 @@ FROM years y
 LEFT JOIN counts c ON y.year = c.year
 ORDER BY y.year;
 
--- View: v_topic_trend_10y_share_change_v1
+-- View: v_topic_trends_10yr_v1
 -- Description: Comparison of topic share in period 2015-2024 vs 2005-2014.
+-- Returns top 10 rising and top 10 declining topics.
 
-CREATE OR REPLACE VIEW public.v_topic_trend_10y_share_change_v1 AS
+CREATE OR REPLACE VIEW public.v_topic_trends_10yr_v1 AS
 WITH base_counts AS (
   SELECT year, COUNT(*) AS year_total
   FROM public.papers
@@ -64,13 +65,13 @@ ranked AS (
     FROM calculated
 )
 SELECT 
-    trend_direction,
+    trend_direction as direction,
     topic_id,
     topic_name,
-    prev_10y_share_pct,
-    last_10y_share_pct,
-    share_delta_pp,
+    2005 as start_year,
+    2024 as end_year,
+    share_delta_pp as share_change_pp,
     series_color
 FROM ranked
 WHERE rnk <= 10
-ORDER BY trend_direction DESC, ABS(share_delta_pp) DESC;
+ORDER BY direction DESC, ABS(share_change_pp) DESC;
