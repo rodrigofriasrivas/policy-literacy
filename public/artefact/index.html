@@ -3655,9 +3655,12 @@
                 container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading...</div>';
 
                 try {
-                    const url = `${SUPABASE_URL}/rest/v1/v_corpus_growth_by_year_v1?select=year,papers_count&order=year.asc`;
+                    const url = `${SUPABASE_URL}/rest/v1/v_chart1_corpus_growth?select=year,papers_count&order=year.asc`;
                     const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                    if (!response.ok) throw new Error('View not found');
+                    if (!response.ok) {
+                        console.error('Fetch error:', response.status, response.statusText, 'URL:', url);
+                        throw new Error(`Status ${response.status}: ${response.statusText}`);
+                    }
                     const data = await response.json();
 
                     // Ensure 1980-2025 range
@@ -3668,8 +3671,8 @@
                     }
                     renderCorpusChartD3(container, fullData);
                 } catch (e) {
-                    console.warn('Corpus Growth Error:', e);
-                    container.innerHTML = '<div style="color:var(--text-secondary); font-style:italic; padding:20px;">Data unavailable.<br>Run SQL script v1.</div>';
+                    console.error('Corpus Growth Error:', e);
+                    container.innerHTML = '<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">Data unavailable.<br>Check v_chart1_corpus_growth.</div>';
                 }
             }
 

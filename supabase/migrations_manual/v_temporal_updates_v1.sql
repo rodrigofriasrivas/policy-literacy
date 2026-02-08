@@ -1,7 +1,8 @@
--- View: v_corpus_growth_by_year_v1
+-- View: v_chart1_corpus_growth
 -- Description: Annual count of papers from 1980 to 2025, filling missing years with 0.
+-- Required for Chart 1 (Corpus Growth)
 
-CREATE OR REPLACE VIEW public.v_corpus_growth_by_year_v1 AS
+CREATE OR REPLACE VIEW public.v_chart1_corpus_growth AS
 WITH years AS (
     SELECT generate_series(1980, 2025) AS year
 ),
@@ -19,7 +20,7 @@ ORDER BY y.year;
 
 -- View: v_topic_trends_10yr_v1
 -- Description: Comparison of topic share in period 2015-2024 vs 2005-2014.
--- Returns top 10 rising and top 10 declining topics.
+-- Required for Chart 3 (Emerging vs Declining Topics)
 
 CREATE OR REPLACE VIEW public.v_topic_trends_10yr_v1 AS
 WITH base_counts AS (
