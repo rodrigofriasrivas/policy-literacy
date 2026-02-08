@@ -3602,11 +3602,12 @@
                 }
 
                 try {
-                    const viewName = 'v_topic_prevalence_top8_other_by_year_v2';
+                    const viewName = 'v_topic_prevalence_top8_other_by_year_v3';
                     const select = 'year,series_key,series_rank,series_name,papers_count,series_color';
                     const order = 'year.asc';
 
                     const url = `${SUPABASE_URL}/rest/v1/${viewName}?select=${select}&order=${order}`;
+                    console.log('Fetching Temporal URL:', url);
 
                     const response = await fetch(url, {
                         headers: {
@@ -3623,6 +3624,7 @@
                     }
 
                     const data = await response.json();
+                    if (data && data.length > 0) console.log('First Temporal Row:', data[0]);
 
                     if (!data || data.length === 0) {
                         chartDiv.innerHTML = '<div style="text-align:center; padding:100px; color:var(--text-secondary);">No data returned for the selected timeframe.</div>';
