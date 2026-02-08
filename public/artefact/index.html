@@ -1324,9 +1324,11 @@
                     <!-- Dashboard Helper Header -->
                     <div class="dashboard-header-row">
                         <div class="stitch-sub-bar">
-                            <a href="#" class="stitch-sub-link active">Network View</a>
+                            <a href="#" id="nav-network" class="stitch-sub-link active"
+                                onclick="switchView('network'); return false;">Network View</a>
                             <a href="#" class="stitch-sub-link">Field Structure</a>
-                            <a href="#" class="stitch-sub-link">Temporal Evolution</a>
+                            <a href="#" id="nav-temporal" class="stitch-sub-link"
+                                onclick="switchView('temporal'); return false;">Temporal Evolution</a>
                             <a href="#" class="stitch-sub-link">Paper Library</a>
                         </div>
                         <div class="stitch-breadcrumbs">
@@ -1337,6 +1339,56 @@
 
                     <!-- Canvas Interaction Layer (Empty, just reserves space if needed, 
                  but canvas is bg so we let it be) -->
+                </div>
+
+                <!-- Temporal View Overlay -->
+                <div id="view-temporal" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                    <div style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
+
+                        <!-- Card 1: Corpus Growth (Placeholder) -->
+                        <div class="stitch-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div class="stitch-card-title">Corpus Growth</div>
+                                <div
+                                    style="font-size:10px; border:1px solid var(--l-border); padding:2px 6px; border-radius:4px;">
+                                    ANNUAL</div>
+                            </div>
+                            <div class="stitch-card-subtitle">Shows how the volume of policy research has expanded over
+                                the analysis period.</div>
+                            <div
+                                style="height: 200px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); color:var(--text-secondary); border-radius:4px;">
+                                [Corpus Growth Bar Chart Placeholder]
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Topic Prevalence -->
+                        <div class="stitch-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div class="stitch-card-title">Topic Prevalence Over Time</div>
+                                <span style="font-size:16px; cursor:pointer; color:var(--text-secondary);">⛶</span>
+                            </div>
+                            <div class="stitch-card-subtitle">Longitudinal shift in thematic priorities as a percentage
+                                of total annual corpus.</div>
+
+                            <div id="topic-prevalence-chart"></div> <!-- Chart renders here -->
+
+                            <!-- Legend Container -->
+                            <div id="topic-prevalence-legend"
+                                style="display:flex; flex-wrap:wrap; gap:16px; margin-top:24px; justify-content:center; padding-top:16px; border-top:1px solid var(--l-border);">
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Emerging vs Declining (Placeholder) -->
+                        <div class="stitch-card">
+                            <div class="stitch-card-title">Emerging vs Declining Topics</div>
+                            <div class="stitch-card-subtitle">Comparative shift in topic share between the first and
+                                last decade of the dataset.</div>
+                            <div
+                                style="height: 200px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); color:var(--text-secondary); border-radius:4px;">
+                                [Emerging/Declining Table Placeholder]
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div> <!-- End Dashboard Area -->
@@ -1391,6 +1443,71 @@
 
             .zoom-btn:active {
                 transform: scale(0.95);
+            }
+
+            .zoom-btn:active {
+                transform: scale(0.95);
+            }
+
+            /* Temporal View Styles */
+            .dashboard-view-section {
+                flex: 1;
+                overflow-y: auto;
+                padding: 32px;
+                position: absolute;
+                /* Cover canvas */
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--bg-color);
+                z-index: 50;
+            }
+
+            /* Custom Scrollbar for view */
+            .dashboard-view-section::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .dashboard-view-section::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            .dashboard-view-section::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 4px;
+            }
+
+            .stitch-card {
+                background: var(--l-sidebar-bg);
+                border: 1px solid var(--l-border);
+                border-radius: var(--panel-radius);
+                padding: 32px;
+                margin-bottom: 24px;
+                box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+                /* Subtle lift */
+            }
+
+            .stitch-card-title {
+                font-family: 'Inter', sans-serif;
+                font-size: 20px;
+                font-weight: 600;
+                margin-bottom: 4px;
+                color: var(--text-primary);
+                letter-spacing: -0.02em;
+            }
+
+            .stitch-card-subtitle {
+                font-size: 13px;
+                color: var(--text-secondary);
+                margin-bottom: 24px;
+                font-style: italic;
+                line-height: 1.4;
+            }
+
+            #topic-prevalence-chart {
+                width: 100%;
+                height: 400px;
             }
         </style>
 
@@ -3462,6 +3579,178 @@
             // Expose reload for error screen
             window.location.reload = () => {
                 window.location.href = window.location.href; // Force reload
+            };
+
+            // --- TEMPORAL VIEW LOGIC ---
+            let temporalDataLoaded = false;
+            let temporalData = null;
+
+            async function loadTemporalView() {
+                if (temporalDataLoaded) return;
+
+                const chartDiv = document.getElementById('topic-prevalence-chart');
+                if (!chartDiv) return;
+
+                chartDiv.innerHTML = '<div style="text-align:center; padding:100px; color:var(--text-secondary); font-style:italic;">Loading temporal data...</div>';
+
+                if (typeof supabase === 'undefined') {
+                    chartDiv.innerHTML = '<div style="color:red; text-align:center; padding:50px;">Supabase not initialized.</div>';
+                    return;
+                }
+
+                try {
+                    const { data, error } = await supabase
+                        .from('v_topic_prevalence_top8_other_by_year_v2')
+                        .select('year, series_key, series_name, papers_count, series_color')
+                        .order('year', { ascending: true });
+
+                    if (error) throw error;
+
+                    temporalData = data;
+                    renderTemporalChart(data);
+                    temporalDataLoaded = true;
+
+                } catch (e) {
+                    console.error('Temporal Load Error:', e);
+                    chartDiv.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading data: ${e.message}</div>`;
+                }
+            }
+
+            function renderTemporalChart(data) {
+                const container = document.getElementById('topic-prevalence-chart');
+                const legendContainer = document.getElementById('topic-prevalence-legend');
+                if (!container) return;
+
+                container.innerHTML = '';
+                legendContainer.innerHTML = '';
+
+                // Group Data
+                const years = Array.from(new Set(data.map(d => d.year))).sort((a, b) => a - b);
+                const seriesKeys = Array.from(new Set(data.map(d => d.series_key)));
+
+                // Maps
+                const colorMap = {};
+                const nameMap = {};
+                data.forEach(d => {
+                    colorMap[d.series_key] = d.series_color;
+                    nameMap[d.series_key] = d.series_name;
+                });
+
+                // Pivot
+                const dataset = years.map(y => {
+                    const row = { year: y };
+                    seriesKeys.forEach(k => row[k] = 0);
+                    data.filter(d => d.year === y).forEach(d => {
+                        row[d.series_key] = d.papers_count;
+                    });
+                    return row;
+                });
+
+                // Sort Keys: "other" first (bottom of stack)
+                seriesKeys.sort((a, b) => {
+                    if (a === 'other') return -1;
+                    if (b === 'other') return 1;
+                    return 0; // Default order
+                });
+
+                // D3 Setup
+                const width = container.clientWidth;
+                const height = 400;
+                const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+
+                const svg = d3.select(container).append('svg')
+                    .attr('width', width)
+                    .attr('height', height)
+                    .attr('viewBox', `0 0 ${width} ${height}`)
+                    .style('overflow', 'visible');
+
+                const x = d3.scaleLinear()
+                    .domain(d3.extent(years))
+                    .range([margin.left, width - margin.right]);
+
+                const stack = d3.stack()
+                    .keys(seriesKeys)
+                    .order(d3.stackOrderNone)
+                    .offset(d3.stackOffsetNone);
+
+                const series = stack(dataset);
+
+                const yMax = d3.max(series, s => d3.max(s, d => d[1]));
+                const y = d3.scaleLinear()
+                    .domain([0, yMax])
+                    .range([height - margin.bottom, margin.top]);
+
+                const area = d3.area()
+                    .x(d => x(d.data.year))
+                    .y0(d => y(d[0]))
+                    .y1(d => y(d[1]))
+                    .curve(d3.curveBasis);
+
+                // Paths
+                svg.append('g')
+                    .selectAll('path')
+                    .data(series)
+                    .join('path')
+                    .attr('fill', d => colorMap[d.key])
+                    .attr('d', area)
+                    .attr('opacity', 0.85)
+                    .attr('stroke', 'rgba(255,255,255,0.1)')
+                    .attr('stroke-width', 0.5)
+                    .on('mouseover', function (event, d) {
+                        d3.select(this).attr('opacity', 1).attr('stroke', '#fff').attr('stroke-width', 1);
+                    })
+                    .on('mouseout', function (event, d) {
+                        d3.select(this).attr('opacity', 0.85).attr('stroke', 'rgba(255,255,255,0.1)').attr('stroke-width', 0.5);
+                    });
+
+                // Axes
+                const xAxis = d3.axisBottom(x).tickFormat(d3.format('d')).ticks(years.length / 5);
+                const yAxis = d3.axisLeft(y).ticks(5);
+
+                const axisGroupX = svg.append('g')
+                    .attr('transform', `translate(0,${height - margin.bottom})`)
+                    .call(xAxis);
+
+                const axisGroupY = svg.append('g')
+                    .attr('transform', `translate(${margin.left},0)`)
+                    .call(yAxis);
+
+                // Style Axes
+                svg.selectAll('.domain, .tick line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.3);
+                svg.selectAll('.tick text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
+
+                // 3. Legend
+                // Reverse order for legend (Top first)
+                seriesKeys.slice().reverse().forEach(key => {
+                    const color = colorMap[key];
+                    const name = nameMap[key];
+                    const item = document.createElement('div');
+                    item.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary);';
+                    item.innerHTML = `<div style="width:12px; height:12px; background:${color}; border-radius:2px;"></div><span>${name}</span>`;
+                    legendContainer.appendChild(item);
+                });
+            }
+
+            // Global Switch View Function
+            window.switchView = function (view) {
+                // Update Nav Active State
+                document.querySelectorAll('.stitch-sub-link').forEach(el => el.classList.remove('active'));
+                const nav = document.getElementById('nav-' + view);
+                if (nav) nav.classList.add('active');
+
+                // Update Breadcrumb
+                const bc = document.querySelector('.stitch-bc-current');
+                if (bc) bc.textContent = view === 'network' ? 'NETWORK VIEW' :
+                    view === 'temporal' ? 'TEMPORAL EVOLUTION' : view.toUpperCase();
+
+                // Toggle Views
+                const tView = document.getElementById('view-temporal');
+                if (view === 'temporal') {
+                    if (tView) tView.style.display = 'block';
+                    loadTemporalView();
+                } else {
+                    if (tView) tView.style.display = 'none';
+                }
             };
         </script>
 </body>
