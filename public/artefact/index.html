@@ -1354,7 +1354,7 @@
                                 <div class="stitch-card-subtitle">Shows how the volume of policy research has expanded
                                     over
                                     the analysis period.</div>
-                                <div
+                                <div id="corpus-growth-chart"
                                     style="height: 200px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); color:var(--text-secondary); border-radius:4px;">
                                     [Corpus Growth Bar Chart Placeholder]
                                 </div>
@@ -1383,8 +1383,8 @@
                                 <div class="stitch-card-title">Emerging vs Declining Topics</div>
                                 <div class="stitch-card-subtitle">Comparative shift in topic share between the first and
                                     last decade of the dataset.</div>
-                                <div
-                                    style="height: 200px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); color:var(--text-secondary); border-radius:4px;">
+                                <div id="emerging-declining-container"
+                                    style="height: 200px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); color:var(--text-secondary); border-radius:4px; gap: 16px;">
                                     [Emerging/Declining Table Placeholder]
                                 </div>
                             </div>
@@ -3629,12 +3629,91 @@
                     }
 
                     renderTemporalChart(data);
+                    renderCorpusGrowth(data);
+                    fetchAndRenderEmergence();
                     temporalDataLoaded = true;
 
                 } catch (e) {
                     console.error('Temporal Load Error:', e);
                     chartDiv.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading data: ${e.message}</div>`;
                 }
+            }
+
+            function renderCorpusGrowth(data) {
+                const container = document.getElementById('corpus-growth-chart');
+                if (!container) return;
+
+                const annualTotals = {};
+                data.forEach(d => {
+                    annualTotals[d.year] = (annualTotals[d.year] || 0) + d.papers_count;
+                });
+                const years = Object.keys(annualTotals).map(Number).sort((a, b) => a - b);
+                const chartData = years.map(y => ({ year: y, count: annualTotals[y] }));
+
+                container.innerHTML = '';
+                if (chartData.length === 0) { container.innerHTML = 'No data.'; return; }
+
+                const width = container.clientWidth;
+                const height = 200;
+                const margin = { top: 20, right: 10, bottom: 20, left: 40 };
+
+                const svg = d3.select(container).append('svg')
+                    .attr('width', width).attr('height', height).style('overflow', 'visible');
+
+                const x = d3.scaleBand().domain(years).range([margin.left, width - margin.right]).padding(0.2);
+                const y = d3.scaleLinear().domain([0, d3.max(chartData, d => d.count)]).range([height - margin.bottom, margin.top]);
+
+                svg.append('g').selectAll('rect').data(chartData).join('rect')
+                    .attr('x', d => x(d.year)).attr('y', d => y(d.count))
+                    .attr('height', d => y(0) - y(d.count)).attr('width', x.bandwidth())
+                    .attr('fill', 'var(--accent-color)').attr('opacity', 0.7);
+
+                const xAxis = d3.axisBottom(x).tickValues(x.domain().filter((d, i) => !(i % 5)));
+                const yAxis = d3.axisLeft(y).ticks(5);
+
+                svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(xAxis).selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
+                svg.append('g').attr('transform', `translate(${margin.left},0)`).call(yAxis).selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
+                svg.selectAll('.domain, .tick line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.2);
+            }
+
+            async function fetchAndRenderEmergence() {
+                const container = document.getElementById('emerging-declining-container');
+                if (!container) return;
+                container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading trends...</div>';
+                try {
+                    const url = `${SUPABASE_URL}/rest/v1/v_topic_emergence_decline?select=*&limit=50`;
+                    const response = await fetch(url, {
+                        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' }
+                    });
+                    if (!response.ok) throw new Error('View not found');
+                    const data = await response.json();
+                    renderEmergenceTables(data);
+                } catch (e) {
+                    console.warn('Emergence Error:', e);
+                    container.innerHTML = '<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">Trend data unavailable.<br>Run SQL script.</div>';
+                }
+            }
+
+            function renderEmergenceTables(data) {
+                const container = document.getElementById('emerging-declining-container');
+                if (!container) return;
+
+                const rising = data.filter(d => d.share_delta_pp > 0).sort((a, b) => b.share_delta_pp - a.share_delta_pp).slice(0, 10);
+                const declining = data.filter(d => d.share_delta_pp < 0).sort((a, b) => a.share_delta_pp - b.share_delta_pp).slice(0, 10);
+
+                function makeTable(title, rows, isRising) {
+                    let html = `<div style="flex:1; min-width:300px;"><div style="font-size:12px; font-weight:600; margin-bottom:8px; color:var(--text-primary); border-bottom:1px solid var(--l-border); padding-bottom:4px;">${title}</div><table style="width:100%; border-collapse:collapse; font-size:11px;"><tr style="color:var(--text-secondary); text-align:left;"><th style="padding:4px;">Topic</th><th style="padding:4px; text-align:right;">Change</th></tr>`;
+                    rows.forEach(r => {
+                        const val = r.share_delta_pp.toFixed(1) + '%';
+                        const col = isRising ? '#4ECDC4' : '#FF6B6B';
+                        html += `<tr style="border-bottom:1px solid var(--l-border);"><td style="padding:6px 4px; display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:50%; background:${r.topic_color || '#999'}"></div><span style="color:var(--text-primary);">${r.topic_name}</span></td><td style="padding:6px 4px; text-align:right; color:${col}; font-weight:500;">${isRising ? '+' : ''}${val}</td></tr>`;
+                    });
+                    html += `</table></div>`;
+                    return html;
+                }
+                container.innerHTML = '';
+                container.innerHTML += makeTable('Rising Themes (Last 10y)', rising, true);
+                container.innerHTML += makeTable('Declining Themes (Last 10y)', declining, false);
             }
 
             function renderTemporalChart(data) {
