@@ -1404,6 +1404,21 @@
                                     [Emerging/Declining Table Placeholder]
                                 </div>
                             </div>
+
+                            <!-- Card 4: Topic Trends (All Topics) -->
+                            <div class="stitch-card">
+                                <div class="stitch-card-title">Topic trends over time (all topics)</div>
+                                <div class="stitch-card-subtitle">1980–2025 (hover to isolate a topic)</div>
+                                <div id="topic-trends-chart" style="height: 350px; width: 100%; position: relative;">
+                                    <div
+                                        style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
+                                        Loading trends...
+                                    </div>
+                                </div>
+                                <div id="topic-trends-legend"
+                                    style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
+                                    &nbsp;</div>
+                            </div>
                         </div>
                     </div>
 
@@ -3670,6 +3685,7 @@
                     renderTemporalChart(data);
                     fetchAndRenderCorpusGrowth(); // Uses v_corpus_growth_by_year_v1
                     fetchAndRenderEmergence();    // Uses v_topic_trend_10y_share_change_v1
+                    fetchAndRenderTopicTrends();  // Uses v_chart4_topic_trends
                     temporalDataLoaded = true;
 
                     // Init Tooltip if missing
@@ -4065,6 +4081,215 @@
                 }
             }
 
+            // Chart 4: Topic Trends (Spaghetti)
+            async function fetchAndRenderTopicTrends() {
+                const container = document.getElementById('topic-trends-chart');
+                const legend = document.getElementById('topic-trends-legend');
+                if (!container) return;
+
+                try {
+                    // UPDATED URL as requested
+                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc`;
+                    console.log('Fetching Chart 4 URL:', url);
+
+                    const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                    if (!response.ok) {
+                        const errText = await response.text();
+                        console.error('Chart 4 Fetch Error:', response.status, response.statusText, 'Output:', errText);
+                        throw new Error(`HTTP ${response.status}: ${errText}`);
+                    }
+
+                    const data = await response.json();
+                    if (!data || data.length === 0) {
+                        container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);">No data returned.</div>';
+                        return;
+                    }
+                    // Debug sample
+                    console.log('Chart 4 Trend Data Sample:', data[0]);
+
+                    // Clear loading
+                    container.innerHTML = '';
+
+                    // D3 Setup
+                    const width = container.clientWidth || 800;
+                    const height = 350;
+                    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+
+                    const svg = d3.select(container).append('svg')
+                        .attr('width', width)
+                        .attr('height', height)
+                        .attr('viewBox', `0 0 ${width} ${height}`)
+                        .style('overflow', 'visible');
+
+                    // Process Data: Group by Topic
+                    const topicsMap = d3.group(data, d => d.topic_id);
+                    const topicIds = Array.from(topicsMap.keys());
+
+                    // Scales
+                    const x = d3.scaleLinear()
+                        .domain([1980, 2025])
+                        .range([margin.left, width - margin.right]);
+
+                    const yMax = d3.max(data, d => Number(d.papers_count)) || 10;
+                    const y = d3.scaleLinear()
+                        .domain([0, yMax])
+                        .range([height - margin.bottom, margin.top]);
+
+                    // Axes
+                    const xAxis = d3.axisBottom(x).tickFormat(d3.format('d')).tickValues(d3.range(1980, 2026, 5));
+                    const yAxis = d3.axisLeft(y).ticks(5);
+
+                    // Style Axes
+                    const gx = svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(xAxis);
+                    const gy = svg.append('g').attr('transform', `translate(${margin.left},0)`).call(yAxis);
+
+                    gx.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
+                    gy.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
+                    gx.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.3);
+                    gy.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.3);
+
+                    // Labels
+                    svg.append('text').attr('x', width / 2).attr('y', height).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Year');
+                    svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers');
+
+                    // Line Generator
+                    const line = d3.line()
+                        .x(d => x(Number(d.year)))
+                        .y(d => y(Number(d.papers_count)))
+                        .curve(d3.curveMonotoneX);
+
+                    // Draw all lines
+                    const pathGroup = svg.append('g');
+
+                    pathGroup.selectAll('path')
+                        .data(topicIds)
+                        .join('path')
+                        .attr('class', 'trend-line')
+                        .attr('id', d => 'trend-line-' + d)
+                        .attr('d', id => line(topicsMap.get(id)))
+                        .attr('fill', 'none')
+                        .attr('stroke', id => {
+                            const tData = topicsMap.get(id)[0];
+                            return tData.series_color || topicColors[(id - 1) % topicColors.length] || '#999';
+                        })
+                        .attr('stroke-width', 1.5)
+                        .attr('opacity', 0.6)
+                        .attr('stroke-linejoin', 'round')
+                        .attr('stroke-linecap', 'round');
+
+                    // Interaction Layer
+                    const overlay = svg.append('rect')
+                        .attr('width', width)
+                        .attr('height', height)
+                        .attr('fill', 'transparent')
+                        .style('cursor', 'crosshair');
+
+                    let pinnedId = null;
+
+                    overlay.on('mousemove', function (event) {
+                        if (pinnedId) return; // If pinned, ignore hover
+
+                        const [mx, my] = d3.pointer(event);
+
+                        // 1. Find Year
+                        const year = Math.round(x.invert(mx));
+                        if (year < 1980 || year > 2025) return;
+
+                        // 2. Find closest topic at this year
+                        let bestTopic = null;
+                        let minDiff = Infinity;
+
+                        topicIds.forEach(id => {
+                            const rows = topicsMap.get(id);
+                            // Simple find for row
+                            const row = rows.find(r => Number(r.year) === year);
+                            if (row) {
+                                const py = y(Number(row.papers_count));
+                                const diff = Math.abs(py - my);
+                                if (diff < minDiff) {
+                                    minDiff = diff;
+                                    bestTopic = row;
+                                }
+                            }
+                        });
+
+                        if (bestTopic) {
+                            highlightTopic(bestTopic.topic_id, bestTopic);
+                        }
+                    })
+                        .on('mouseleave', function () {
+                            if (!pinnedId) resetHighlight();
+                        })
+                        .on('click', function (event) {
+                            const [mx, my] = d3.pointer(event);
+                            const year = Math.round(x.invert(mx));
+                            if (year < 1980 || year > 2025) return;
+
+                            let bestTopic = null;
+                            let minDiff = Infinity;
+                            topicIds.forEach(id => {
+                                const rows = topicsMap.get(id);
+                                const row = rows.find(r => Number(r.year) === year);
+                                if (row) {
+                                    const diff = Math.abs(y(Number(row.papers_count)) - my);
+                                    if (diff < minDiff) { minDiff = diff; bestTopic = row; }
+                                }
+                            });
+
+                            if (bestTopic) {
+                                if (pinnedId === bestTopic.topic_id) {
+                                    pinnedId = null; // Unpin
+                                    resetHighlight();
+                                } else {
+                                    pinnedId = bestTopic.topic_id;
+                                    highlightTopic(pinnedId, bestTopic);
+                                }
+                            } else {
+                                pinnedId = null;
+                                resetHighlight();
+                            }
+                        });
+
+                    function highlightTopic(tId, pointData) {
+                        // Fade all
+                        pathGroup.selectAll('.trend-line')
+                            .attr('opacity', 0.1)
+                            .attr('stroke-width', 1);
+
+                        // Highlight active
+                        const activePath = pathGroup.select('#trend-line-' + tId);
+                        activePath
+                            .attr('opacity', 1)
+                            .attr('stroke-width', 3)
+                            .raise();
+
+                        // Legend Update
+                        if (pointData) {
+                            legend.innerHTML = `<span style="font-weight:700; color:${pointData.series_color || '#fff'}">Topic ${tId}: ${pointData.topic_label}</span> &bull; ${pointData.year}: ${pointData.papers_count} papers`;
+
+                            // Tooltip
+                            const tooltip = d3.select('#temporal-tooltip');
+                            tooltip.style('opacity', 1)
+                                .style('left', (event.pageX + 15) + 'px')
+                                .style('top', (event.pageY - 15) + 'px')
+                                .html(`<strong>Topic ${tId}: ${pointData.topic_label}</strong><br>Year: ${pointData.year}<br>Papers: ${pointData.papers_count}`);
+                        }
+                    }
+
+                    function resetHighlight() {
+                        pathGroup.selectAll('.trend-line')
+                            .attr('opacity', 0.6)
+                            .attr('stroke-width', 1.5);
+                        legend.innerHTML = '&nbsp;';
+                        d3.select('#temporal-tooltip').style('opacity', 0);
+                    }
+
+                } catch (e) {
+                    console.error('Error loading Chart 4:', e);
+                    container.innerHTML = `<div style="color:red;padding:20px;">Error: ${e.message}</div>`;
+                }
+            }
+
             // Global Switch View Function
             window.switchView = function (view) {
                 // Update Nav Active State
@@ -4094,6 +4319,7 @@
                 if (!modal || !window.temporalData) return;
 
                 modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // Lock scroll
                 // Render chart in modal with slight delay to ensure flex layout is calcualted
                 setTimeout(() => {
                     renderTemporalChart(
@@ -4107,7 +4333,10 @@
 
             window.closeTemporalModal = function () {
                 const modal = document.getElementById('temporal-modal');
-                if (modal) modal.style.display = 'none';
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scroll
+                }
             };
 
             // Close on outside click or ESC
