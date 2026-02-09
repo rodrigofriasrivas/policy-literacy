@@ -3813,14 +3813,17 @@
                 const declining = data.filter(d => d.direction === 'declining').slice(0, 10);
 
                 function makeTable(title, rows, isRising) {
-                    let html = `<div style="flex:1; min-width:300px;">
-                        <div style="font-size:12px; font-weight:600; margin-bottom:2px; color:var(--text-primary);">${title}</div>
-                        <div style="font-size:10px; color:var(--text-secondary); margin-bottom:8px; border-bottom:1px solid var(--l-border); padding-bottom:4px;">1980–1989 vs 2016–2025</div>
-                        <table style="width:100%; border-collapse:collapse; font-size:11px;">
-                            <tr style="color:var(--text-secondary); text-align:left;">
-                                <th style="padding:4px;">Topic</th>
-                                <th style="padding:4px; text-align:right;">Change</th>
-                            </tr>`;
+                    let html = `<div style="flex:1; min-width:320px; padding: 0 12px;">
+                        <div style="font-size:14px; font-weight:700; margin-bottom:4px; color:var(--text-primary); text-transform:uppercase; letter-spacing:0.5px;">${title}</div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:16px; border-bottom:1px solid var(--l-border); padding-bottom:8px;">1980–1989 vs 2016–2025 (Share Change)</div>
+                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                            <thead>
+                                <tr style="color:var(--text-secondary); text-align:left; border-bottom:1px solid var(--l-border);">
+                                    <th style="padding:8px 4px; font-weight:600; font-size:11px; text-transform:uppercase;">Topic</th>
+                                    <th style="padding:8px 4px; text-align:right; font-weight:600; font-size:11px; text-transform:uppercase; width:80px;">Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
 
                     rows.forEach(r => {
                         const val = r.share_change_pp > 0 ? '+' + r.share_change_pp.toFixed(1) : r.share_change_pp.toFixed(1);
@@ -3850,14 +3853,18 @@
                             <td style="padding:6px 4px; text-align:right; color:${col}; font-weight:500;">${val}pp</td>
                         </tr>`;
                     });
-                    html += `</table></div>`;
+                    html += `</tbody></table></div>`;
                     return html;
                 }
 
+                container.style.display = 'flex';
+                container.style.flexWrap = 'wrap';
+                container.style.gap = '32px';
+                container.style.justifyContent = 'space-between';
+
                 container.innerHTML = '';
-                container.innerHTML += makeTable('Rising Themes (Top 10)', rising, true);
-                container.innerHTML += '<div style="width:24px; height:24px;"></div>'; // Spacer
-                container.innerHTML += makeTable('Declining Themes (Top 10)', declining, false);
+                container.innerHTML += makeTable('Rising Themes', rising, true);
+                container.innerHTML += makeTable('Declining Themes', declining, false);
             }
 
             function renderTemporalChart(data) {
