@@ -3789,6 +3789,13 @@
                 const container = document.getElementById('emerging-declining-container');
                 if (!container) return;
 
+                // Ensure numeric fields are parsed safely
+                data.forEach(d => {
+                    d.share_change_pp = parseFloat(d.share_change_pp) || 0;
+                    d.first_decade_share = parseFloat(d.first_decade_share) || 0;
+                    d.last_decade_share = parseFloat(d.last_decade_share) || 0;
+                });
+
                 // Sort by magnitude of change (descending)
                 data.sort((a, b) => Math.abs(b.share_change_pp) - Math.abs(a.share_change_pp));
 
@@ -3818,7 +3825,7 @@
                            To keep it clean, we'll assign a class and use a small helper script or inline JS.
                            Inline JS is easiest given the constraints:
                         */
-                        const tooltipText = `<strong>${r.topic_name}</strong><br>1980s: ${r.first_decade_share}%<br>2016-25: ${r.last_decade_share}%<br>Delta: ${val}pp`;
+                        const tooltipText = `<strong>${r.topic_name}</strong><br>1980s share: ${r.first_decade_share.toFixed(1)}%<br>2016-2025 share: ${r.last_decade_share.toFixed(1)}%<br>Delta: ${val}pp`;
 
                         // We need to escape single quotes in topic name for the inline handler
                         const safeName = r.topic_name.replace(/'/g, "&apos;");
