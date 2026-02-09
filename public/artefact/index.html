@@ -1376,7 +1376,9 @@
                             <div class="stitch-card">
                                 <div style="display:flex; justify-content:space-between; align-items:center;">
                                     <div class="stitch-card-title">Topic Prevalence Over Time</div>
-                                    <span style="font-size:16px; cursor:pointer; color:var(--text-secondary);">⛶</span>
+                                    <div onclick="openTemporalModal()"
+                                        style="font-size:16px; cursor:pointer; color:var(--text-secondary); padding:4px;"
+                                        title="Expand View">⛶</div>
                                 </div>
                                 <div class="stitch-card-subtitle">Longitudinal shift in thematic priorities as a
                                     percentage
@@ -1409,6 +1411,28 @@
         </div> <!-- End UI Layer -->
 
 
+
+        <!-- Temporal Chart Modal -->
+        <div id="temporal-modal"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:40px;">
+            <div
+                style="background:var(--l-sidebar-bg); width:90%; height:90%; max-width:1400px; border-radius:12px; padding:32px; display:flex; flex-direction:column; position:relative; box-shadow:0 8px 32px rgba(0,0,0,0.5); border:1px solid var(--l-border);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <div>
+                        <h3 style="margin:0 0 4px 0; color:var(--text-primary); font-size:24px;">Topic Prevalence Over
+                            Time</h3>
+                        <p style="margin:0; color:var(--text-secondary); font-size:14px;">Expanded View</p>
+                    </div>
+                    <div onclick="closeTemporalModal()"
+                        style="color:var(--text-secondary); cursor:pointer; font-size:32px; line-height:1; font-weight:bold; padding:8px;">
+                        &times;</div>
+                </div>
+                <div id="modal-chart-container" style="flex:1; width:100%; min-height:0; position:relative;"></div>
+                <div id="modal-legend-container"
+                    style="display:flex; flex-wrap:wrap; gap:24px; margin-top:24px; justify-content:center; padding-top:16px; border-top:1px solid var(--l-border); max-height:120px; overflow-y:auto;">
+                </div>
+            </div>
+        </div>
 
         <div id="loading">
             <div class="spinner"></div>
@@ -3640,6 +3664,7 @@
                         return;
                     }
 
+                    window.temporalData = data; // Store globally for modal
                     renderTemporalChart(data);
                     fetchAndRenderCorpusGrowth(); // Uses v_corpus_growth_by_year_v1
                     fetchAndRenderEmergence();    // Uses v_topic_trend_10y_share_change_v1
@@ -3901,13 +3926,13 @@
                 container.innerHTML += makeTable('Declining', declining, false);
             }
 
-            function renderTemporalChart(data) {
-                const container = document.getElementById('topic-prevalence-chart');
-                const legendContainer = document.getElementById('topic-prevalence-legend');
-                if (!container) return;
+            function renderTemporalChart(data, containerId = 'topic-prevalence-chart', legendId = 'topic-prevalence-legend', customHeight = null) {
+                const container = document.getElementById(containerId);
+                const legendContainer = legendId ? document.getElementById(legendId) : null;
+                if (!container || !data) return;
 
                 container.innerHTML = '';
-                legendContainer.innerHTML = '';
+                if (legendContainer) legendContainer.innerHTML = '';
 
                 // 1. Process Metadata (Rank, Color, Name) per Series
                 const seriesMeta = {};
@@ -3945,8 +3970,12 @@
 
                 // 3. D3 Setup
                 const width = container.clientWidth;
-                const height = 400;
+                // If customHeight is 'flex', use clientHeight (for modal)
+                const height = customHeight === 'flex' ? container.clientHeight : (customHeight || 400);
                 const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+
+                // Safety check for zero height
+                if (height <= 0) return;
 
                 const svg = d3.select(container).append('svg')
                     .attr('width', width)
@@ -4021,15 +4050,17 @@
                 svg.selectAll('.domain, .tick line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.3);
                 svg.selectAll('.tick text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
 
-                // 4. Legend
-                // Display in reverse order (1, 2... 8, 99)
-                seriesKeys.slice().reverse().forEach(key => {
-                    const meta = seriesMeta[key];
-                    const item = document.createElement('div');
-                    item.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary);';
-                    item.innerHTML = `<div style="width:12px; height:12px; background:${meta.color}; border-radius:2px;"></div><span>${meta.name}</span>`;
-                    legendContainer.appendChild(item);
-                });
+                // 4. Legend (Only if container provided)
+                if (legendContainer) {
+                    // Display in reverse order (1, 2... 8, 99)
+                    seriesKeys.slice().reverse().forEach(key => {
+                        const meta = seriesMeta[key];
+                        const item = document.createElement('div');
+                        item.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary);';
+                        item.innerHTML = `<div style="width:12px; height:12px; background:${meta.color}; border-radius:2px;"></div><span>${meta.name}</span>`;
+                        legendContainer.appendChild(item);
+                    });
+                }
             }
 
             // Global Switch View Function
@@ -4053,6 +4084,43 @@
                     if (tView) tView.style.display = 'none';
                 }
             };
+
+
+            // Modal Functions for Temporal Chart
+            window.openTemporalModal = function () {
+                const modal = document.getElementById('temporal-modal');
+                if (!modal || !window.temporalData) return;
+
+                modal.style.display = 'flex';
+                // Render chart in modal with slight delay to ensure flex layout is calcualted
+                setTimeout(() => {
+                    renderTemporalChart(
+                        window.temporalData,
+                        'modal-chart-container',
+                        'modal-legend-container',
+                        'flex'
+                    );
+                }, 10);
+            };
+
+            window.closeTemporalModal = function () {
+                const modal = document.getElementById('temporal-modal');
+                if (modal) modal.style.display = 'none';
+            };
+
+            // Close on outside click or ESC
+            window.addEventListener('click', function (event) {
+                const modal = document.getElementById('temporal-modal');
+                if (event.target == modal) {
+                    closeTemporalModal();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === "Escape") {
+                    closeTemporalModal();
+                }
+            });
         </script>
 </body>
 
