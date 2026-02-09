@@ -4088,11 +4088,17 @@
                 if (!container) return;
 
                 try {
-                    // UPDATED URL as requested (Added limit=2000 to fetch beyond default 1000 rows)
-                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=2000`;
+                    // Use both limit param and Range header for robustness
+                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=5000`;
                     console.log('Fetching Chart 4 URL:', url);
 
-                    const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                    const response = await fetch(url, {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`,
+                            'Range': '0-4999'  // Explicitly request up to 5000 rows
+                        }
+                    });
                     if (!response.ok) {
                         const errText = await response.text();
                         console.error('Chart 4 Fetch Error:', response.status, response.statusText, 'Output:', errText);
