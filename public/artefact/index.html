@@ -28,6 +28,12 @@
             /* Inputs */
             --input-bg: rgba(255, 255, 255, 0.05);
             --input-border: rgba(255, 255, 255, 0.1);
+
+            /* Chart 3 Panel Theme */
+            --chart-panel-bg: rgba(255, 255, 255, 0.05);
+            --chart-panel-border: rgba(255, 255, 255, 0.12);
+            --chart-row-border: rgba(255, 255, 255, 0.12);
+            --chart-row-hover: rgba(255, 255, 255, 0.1);
         }
 
         /* Light Theme Overrides (Polished High Contrast) */
@@ -55,6 +61,12 @@
             /* Inputs Light */
             --input-bg: #f7f9fa;
             --input-border: #e1e4e8;
+
+            /* Chart 3 Panel Theme Light */
+            --chart-panel-bg: rgba(0, 0, 0, 0.04);
+            --chart-panel-border: rgba(0, 0, 0, 0.12);
+            --chart-row-border: rgba(0, 0, 0, 0.12);
+            --chart-row-hover: rgba(0, 0, 0, 0.06);
         }
 
         body.theme-light #container {
@@ -3817,14 +3829,14 @@
 
                 function makeTable(title, rows, isRising) {
                     // Surface styling for contrast
-                    // Using var(--l-sidebar-bg) gives a solid card look (White in Light, Dark Grey in Dark)
+                    // Using var(--chart-panel-bg) gives a solid card look (Light surface in Light, Darker in Dark)
                     // Adding a border for definition
                     const surfaceStyle = `
                         flex:1; 
                         min-width:320px; 
                         padding: 20px; 
-                        background: var(--l-sidebar-bg); 
-                        border: 1px solid var(--l-border); 
+                        background: var(--chart-panel-bg); 
+                        border: 1px solid var(--chart-panel-border); 
                         border-radius: 12px;
                         box-shadow: 0 2px 8px rgba(0,0,0,0.03);
                     `;
@@ -3833,12 +3845,12 @@
                         <div style="font-size:13px; font-weight:800; margin-bottom:6px; color:var(--text-primary); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
                             ${isRising ? '<span style="color:#4ECDC4">▲</span>' : '<span style="color:#FF6B6B">▼</span>'} ${title}
                         </div>
-                        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:16px; border-bottom:1px solid var(--input-border); padding-bottom:12px; font-weight:500;">
+                        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:16px; border-bottom:1px solid var(--chart-row-border); padding-bottom:12px; font-weight:500;">
                             Top 10 by share change (1980s vs 2020s)
                         </div>
-                        <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <table style="width:100%; border-collapse:collapse; font-size:13px; background: transparent;">
                             <thead>
-                                <tr style="color:var(--text-secondary); text-align:left; border-bottom:1px solid var(--input-border);">
+                                <tr style="color:var(--text-secondary); text-align:left; border-bottom:1px solid var(--chart-row-border);">
                                     <th style="padding:8px 4px; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8;">Topic</th>
                                     <th style="padding:8px 4px; text-align:right; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; width:96px; opacity:0.8;">Change</th>
                                 </tr>
@@ -3859,8 +3871,8 @@
                         // Tooltip
                         const tooltipText = `<strong>${safeDisplayName}</strong><br>1980s share: ${r.first_decade_share.toFixed(1)}%<br>Latest share: ${r.last_decade_share.toFixed(1)}%<br>Change: ${val}pp`;
 
-                        html += `<tr style="border-bottom:1px solid var(--input-border); cursor:default; transition: all 0.2s;" 
-                                     onmouseover="const tt=document.getElementById('temporal-tooltip'); tt.style.opacity=1; tt.innerHTML='${tooltipText}'; tt.style.left=(event.pageX+10)+'px'; tt.style.top=(event.pageY-20)+'px'; this.style.background='var(--input-bg)';" 
+                        html += `<tr style="border-bottom:1px solid var(--chart-row-border); cursor:default; transition: all 0.2s;" 
+                                     onmouseover="const tt=document.getElementById('temporal-tooltip'); tt.style.opacity=1; tt.innerHTML='${tooltipText}'; tt.style.left=(event.pageX+10)+'px'; tt.style.top=(event.pageY-20)+'px'; this.style.background='var(--chart-row-hover)';" 
                                      onmouseout="document.getElementById('temporal-tooltip').style.opacity=0; this.style.background='transparent';">
                             <td style="padding:8px 4px; display:flex; align-items:center; gap:8px;">
                                 <div style="width:6px; height:6px; border-radius:50%; background:${rowColor}; flex-shrink:0;"></div>
