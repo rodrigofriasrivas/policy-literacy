@@ -1,40 +1,36 @@
 import { Link } from "react-router-dom";
 import { HomeLayout } from "@/components/layout/HomeLayout";
 import { useAsciiAnimation } from "@/hooks/useAsciiAnimation";
-
-const metrics = [
-  { value: "5,700+", label: "Academic papers" },
-  { value: "125", label: "Terms" },
-  { value: "25", label: "Topics" },
-  { value: "40+", label: "Years of evolution" },
-];
-
+const metrics = [{
+  value: "5,700+",
+  label: "Academic papers"
+}, {
+  value: "125",
+  label: "Terms"
+}, {
+  value: "25",
+  label: "Topics"
+}, {
+  value: "40+",
+  label: "Years of evolution"
+}];
 export default function HomePage() {
   const asciiWords = useAsciiAnimation();
-
-  return (
-    <HomeLayout>
+  return <HomeLayout>
       <div className="ascii-container">
         {/* Animated ASCII Background with colored words */}
         <pre className="ascii-pre">
-          {asciiWords.map((row, rowIndex) => (
-            <span key={rowIndex}>
-              {row.map((word, wordIndex) => (
-                <span 
-                  key={wordIndex} 
-                  className={`ascii-word ascii-word--${word.colorClass}`}
-                >
+          {asciiWords.map((row, rowIndex) => <span key={rowIndex}>
+              {row.map((word, wordIndex) => <span key={wordIndex} className={`ascii-word ascii-word--${word.colorClass}`}>
                   {word.text}
-                </span>
-              ))}
+                </span>)}
               {"\n"}
-            </span>
-          ))}
+            </span>)}
         </pre>
 
         {/* Hero Overlay with soft vignette */}
         <div className="hero-overlay">
-          <h1 className="hero-title">Enterprise Policy Literacy</h1>
+          <h1 className="hero-title font-serif" style={{ fontSize: 'clamp(2rem, 5.5vw, 6rem)' }}>Enterprise Policy Literacy</h1>
           <p className="hero-subtitle">
             Mapping decades of entrepreneurship and enterprise policy research through advanced network visualization.
           </p>
@@ -50,15 +46,12 @@ export default function HomePage() {
 
           {/* Metric cards */}
           <div className="hero-metrics">
-            {metrics.map((metric) => (
-              <div key={metric.label} className="hero-metric">
+            {metrics.map(metric => <div key={metric.label} className="hero-metric">
                 <div className="hero-metric-value">{metric.value}</div>
                 <div className="hero-metric-label">{metric.label}</div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </div>
-    </HomeLayout>
-  );
+    </HomeLayout>;
 }

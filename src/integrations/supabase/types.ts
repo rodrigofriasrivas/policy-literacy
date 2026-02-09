@@ -62,6 +62,34 @@ export type Database = {
             foreignKeyName: "bigrams_topic_id_fkey"
             columns: ["topic_id"]
             isOneToOne: false
+            referencedRelation: "v_topic_papers_by_year"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "bigrams_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_10yr_v2"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "bigrams_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "bigrams_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_share_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "bigrams_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
             referencedRelation: "v_topics_ranked"
             referencedColumns: ["topic_id"]
           },
@@ -198,6 +226,34 @@ export type Database = {
             foreignKeyName: "topic_paper_links_topic_id_fkey"
             columns: ["topic_id"]
             isOneToOne: false
+            referencedRelation: "v_topic_papers_by_year"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_10yr_v2"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_share_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
             referencedRelation: "v_topics_ranked"
             referencedColumns: ["topic_id"]
           },
@@ -251,6 +307,34 @@ export type Database = {
             foreignKeyName: "topic_weights_topic_id_fkey"
             columns: ["topic_id"]
             isOneToOne: true
+            referencedRelation: "v_topic_papers_by_year"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_weights_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_topic_trends_10yr_v2"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_weights_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_topic_trends_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_weights_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_topic_trends_share_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_weights_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
             referencedRelation: "v_topics_ranked"
             referencedColumns: ["topic_id"]
           },
@@ -274,13 +358,123 @@ export type Database = {
         }
         Relationships: []
       }
+      ui_topic_colors: {
+        Row: {
+          color_family: string | null
+          color_hex: string | null
+          notes: string | null
+          topic_id: number
+          updated_at: string
+        }
+        Insert: {
+          color_family?: string | null
+          color_hex?: string | null
+          notes?: string | null
+          topic_id: number
+          updated_at?: string
+        }
+        Update: {
+          color_family?: string | null
+          color_hex?: string | null
+          notes?: string | null
+          topic_id?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ui_topic_colors_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "topics"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "ui_topic_colors_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_papers_by_topic"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "ui_topic_colors_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_top_bigrams_by_topic"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "ui_topic_colors_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_topic_papers_by_year"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "ui_topic_colors_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_topic_trends_10yr_v2"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "ui_topic_colors_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_topic_trends_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "ui_topic_colors_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_topic_trends_share_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "ui_topic_colors_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: true
+            referencedRelation: "v_topics_ranked"
+            referencedColumns: ["topic_id"]
+          },
+        ]
+      }
     }
     Views: {
+      v_chart1_corpus_growth: {
+        Row: {
+          papers_count: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
       v_papers_by_topic: {
         Row: {
           paper_count: number | null
           topic_id: number | null
           topic_name: string | null
+        }
+        Relationships: []
+      }
+      v_papers_cumulative: {
+        Row: {
+          papers_count: number | null
+          papers_cumulative: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_papers_per_year: {
+        Row: {
+          papers_count: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_papers_per_year_v2: {
+        Row: {
+          papers_count: number | null
+          year: number | null
         }
         Relationships: []
       }
@@ -319,6 +513,180 @@ export type Database = {
           rank: number | null
           topic_id: number | null
           topic_name: string | null
+        }
+        Relationships: []
+      }
+      v_topic_papers_by_year: {
+        Row: {
+          papers_count: number | null
+          topic_id: number | null
+          topic_name: string | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_topic_prevalence_top8_other_by_year: {
+        Row: {
+          papers_count: number | null
+          series_key: string | null
+          series_name: string | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_topic_prevalence_top8_other_by_year_v2: {
+        Row: {
+          papers_count: number | null
+          series_key: string | null
+          series_name: string | null
+          series_rank: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_topic_prevalence_top8_other_by_year_v3: {
+        Row: {
+          papers_count: number | null
+          series_color: string | null
+          series_key: string | null
+          series_name: string | null
+          series_rank: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_topic_prevalence_top8_other_by_year_v4: {
+        Row: {
+          papers_count: number | null
+          series_color: string | null
+          series_key: string | null
+          series_name: string | null
+          series_rank: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_topic_prevalence_top8_other_by_year_v5: {
+        Row: {
+          papers_count: number | null
+          series_color: string | null
+          series_key: string | null
+          series_name: string | null
+          series_rank: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_topic_prevalence_top8_other_by_year_v6: {
+        Row: {
+          papers_count: number | null
+          series_color: string | null
+          series_key: string | null
+          series_name: string | null
+          series_rank: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      v_topic_totals: {
+        Row: {
+          papers_total: number | null
+          topic_id: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_papers_by_topic"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_bigrams_by_topic"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_papers_by_year"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_10yr_v2"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_share_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topics_ranked"
+            referencedColumns: ["topic_id"]
+          },
+        ]
+      }
+      v_topic_trends_10yr_v2: {
+        Row: {
+          direction: string | null
+          end_year: number | null
+          first_decade_share: number | null
+          last_decade_share: number | null
+          share_change_pp: number | null
+          start_year: number | null
+          topic_id: number | null
+          topic_name: string | null
+        }
+        Relationships: []
+      }
+      v_topic_trends_last10_vs_prev10: {
+        Row: {
+          delta_count: number | null
+          last_10y_count: number | null
+          pct_change: number | null
+          prev_10y_count: number | null
+          topic_id: number | null
+          topic_name: string | null
+          trend_direction: string | null
+        }
+        Relationships: []
+      }
+      v_topic_trends_share_last10_vs_prev10: {
+        Row: {
+          last_10y_count: number | null
+          last_10y_share_pct: number | null
+          prev_10y_count: number | null
+          prev_10y_share_pct: number | null
+          share_delta_pp: number | null
+          topic_id: number | null
+          topic_name: string | null
+          trend_direction: string | null
         }
         Relationships: []
       }
