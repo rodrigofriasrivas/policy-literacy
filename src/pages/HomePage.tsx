@@ -30,7 +30,7 @@ export default function HomePage() {
 
         {/* Hero Overlay with soft vignette */}
         <div className="hero-overlay">
-          <h1 className="hero-title text-8xl font-extralight font-serif">Enterprise Policy Literacy</h1>
+          <h1 className="hero-title text-8xl font-serif">Enterprise Policy Literacy</h1>
           <p className="hero-subtitle">
             Mapping decades of entrepreneurship and enterprise policy research through advanced network visualization.
           </p>
