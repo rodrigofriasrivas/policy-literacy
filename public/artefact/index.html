@@ -3764,12 +3764,19 @@
                 container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading trends...</div>';
                 try {
                     // Use V2 with corrected 1980-89 vs 2016-25 timeframe
-                    // Order by absolute delta desc (PostgREST doesn't support ABS() in order, so we fetch more and sort in JS)
-                    const url = `${SUPABASE_URL}/rest/v1/v_topic_trends_10yr_v2?select=direction,topic_id,topic_name,share_change_pp,first_decade_share,last_decade_share,series_color&limit=100`;
+                    // URL: Request ONLY existing columns (direction, topic_id, topic_name, share_change_pp, first_decade_share, last_decade_share)
+                    // Does NOT request 'series_color' as it is not in the view.
+                    const url = `${SUPABASE_URL}/rest/v1/v_topic_trends_10yr_v2?select=direction,topic_id,topic_name,share_change_pp,first_decade_share,last_decade_share&limit=100`;
                     console.log('Fetching Chart 3 URL:', url);
 
                     const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                    if (!response.ok) throw new Error('View not found (v2)');
+
+                    if (!response.ok) {
+                        const errBody = await response.text();
+                        console.error('Emergence Fetch Failed:', response.status, errBody);
+                        throw new Error(`HTTP ${response.status}: ${errBody}`);
+                    }
+
                     const data = await response.json();
 
                     if (data && data.length > 0) {
@@ -3781,7 +3788,10 @@
                     renderEmergenceTables(data);
                 } catch (e) {
                     console.warn('Emergence Error:', e);
-                    container.innerHTML = '<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">Trend data unavailable.<br>Run SQL script v_topic_trends_10yr_v2.</div>';
+                    container.innerHTML = `<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">
+                        Trend data unavailable.<br>
+                        <span style="font-size:10px; opacity:0.7;">${e.message}</span>
+                    </div>`;
                 }
             }
 
