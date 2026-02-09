@@ -4088,15 +4088,15 @@
                 if (!container) return;
 
                 try {
-                    // Use both limit param and Range header for robustness
-                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=5000`;
+                    // Explicit fix: limit=2000, offset=0 to bypass default 1000 row limit (Chart 4 requires ~1150 rows)
+                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=2000&offset=0`;
                     console.log('Fetching Chart 4 URL:', url);
 
                     const response = await fetch(url, {
                         headers: {
                             'apikey': SUPABASE_KEY,
                             'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            'Range': '0-4999'  // Explicitly request up to 5000 rows
+                            // 'Range': '0-1999' // Redundant if limit query param works, but leaving for safety if needed. URL limit is primary.
                         }
                     });
                     if (!response.ok) {
@@ -4110,8 +4110,15 @@
                         container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);">No data returned.</div>';
                         return;
                     }
+
+                    // DEBUG: Validate full dataset load (expect >1000 rows, max year 2025)
+                    console.log('Chart 4 Total Rows:', data.length);
+                    if (data.length > 0) {
+                        const maxYear = Math.max(...data.map(d => Number(d.year)));
+                        console.log('Chart 4 Max Year:', maxYear);
+                    }
                     // Debug sample
-                    console.log('Chart 4 Trend Data Sample:', data[0]);
+                    console.log('Chart 4 First Row:', data[0]);
 
                     // Clear loading
                     container.innerHTML = '';
