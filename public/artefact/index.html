@@ -1409,7 +1409,7 @@
                             <div class="stitch-card">
                                 <div class="stitch-card-title">Topic trends over time (all topics)</div>
                                 <div class="stitch-card-subtitle">1980–2025 (hover to isolate a topic)</div>
-                                <div id="topic-trends-chart" style="height: 350px; width: 100%; position: relative;">
+                                <div id="topic-trends-chart" style="height: 400px; width: 100%; position: relative;">
                                     <div
                                         style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
                                         Loading trends...
@@ -4155,15 +4155,17 @@
                     // Clear loading
                     container.innerHTML = '';
 
-                    // D3 Setup
-                    const width = container.clientWidth || 800;
-                    const height = 350;
+                    // D3 Setup: Responsive Layout
+                    const rect = container.getBoundingClientRect();
+                    const width = rect.width || 800;
+                    const height = rect.height || 400;
                     const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
                     const svg = d3.select(container).append('svg')
-                        .attr('width', width)
-                        .attr('height', height)
+                        .attr('width', '100%')
+                        .attr('height', '100%')
                         .attr('viewBox', `0 0 ${width} ${height}`)
+                        .attr('preserveAspectRatio', 'xMinYMin meet')
                         .style('overflow', 'visible');
 
                     // Process Data: Group by Topic
