@@ -4088,34 +4088,60 @@
                 if (!container) return;
 
                 try {
-                    // FIX: limit=5000 to ensure full 1980-2025 dataset (Chart 4 requires ~1150 rows)
-                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=5000&offset=0`;
-                    console.log('Fetching Chart 4 URL:', url);
+                    // FIX: Pagination loop to fetch all rows beyond PostgREST 1000-row default limit
+                    let allRows = [];
+                    let offset = 0;
+                    const limit = 1000;
+                    let fetchMore = true;
 
-                    const response = await fetch(url, {
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                    console.log('Fetching Chart 4 data via pagination...');
+                    while (fetchMore) {
+                        const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=${limit}&offset=${offset}`;
+
+                        const response = await fetch(url, {
+                            headers: {
+                                'apikey': SUPABASE_KEY,
+                                'Authorization': `Bearer ${SUPABASE_KEY}`
+                            }
+                        });
+
+                        if (!response.ok) {
+                            const errText = await response.text();
+                            console.error('Chart 4 Fetch Error:', response.status, response.statusText, 'Output:', errText);
+                            throw new Error(`HTTP ${response.status}: ${errText}`);
                         }
-                    });
-                    if (!response.ok) {
-                        const errText = await response.text();
-                        console.error('Chart 4 Fetch Error:', response.status, response.statusText, 'Output:', errText);
-                        throw new Error(`HTTP ${response.status}: ${errText}`);
+
+                        const pageData = await response.json();
+
+                        if (!pageData || pageData.length === 0) {
+                            fetchMore = false;
+                        } else {
+                            allRows = allRows.concat(pageData);
+                            if (pageData.length < limit) {
+                                fetchMore = false; // Last page reached
+                            } else {
+                                offset += limit; // Next page
+                            }
+                        }
                     }
 
-                    const rawData = await response.json();
-                    if (!rawData || rawData.length === 0) {
+                    if (allRows.length === 0) {
                         container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);">No data returned.</div>';
                         return;
                     }
 
-                    // Enforce numeric types
+                    const rawData = allRows;
+
                     const data = rawData.map(d => ({
                         ...d,
                         year: Number(d.year),
                         papers_count: Number(d.papers_count)
                     }));
+
+                    const minYear = Math.min(...data.map(d => d.year));
+                    const maxYear = Math.max(...data.map(d => d.year));
+
+                    console.log(`Chart 4 fetched total rows: ${data.length}, minYear: ${minYear}, maxYear: ${maxYear}`);
 
                     // DEBUG: Validate full dataset load (expect >1000 rows, max year 2025)
                     console.log('Chart 4 Total Rows:', data.length);
@@ -4303,29 +4329,7 @@
                         d3.select('#temporal-tooltip').style('opacity', 0);
                     }
 
-                    // ADD VISIBLE DEBUG PANEL (requested)
-                    const DEBUG_CHART4 = true;
-                    if (DEBUG_CHART4) {
-                        const years = data.map(d => d.year);
-                        const minYear = Math.min(...years);
-                        const maxYear = Math.max(...years);
-                        const uniqueYears = new Set(years).size;
 
-                        // Valid sample for display
-                        const sample = [...data].sort((a, b) => b.year - a.year).slice(0, 5);
-
-                        const debugDiv = document.createElement('div');
-                        debugDiv.style.cssText = "background:rgba(0,0,0,0.8); color:#0f0; padding:10px; font-family:monospace; font-size:10px; margin-top:10px; overflow:auto; max-height:200px; border:1px solid #0f0; width:100%; box-sizing:border-box;";
-                        debugDiv.innerHTML = `
-                            <strong>DEBUG CHART 4</strong><br>
-                            Rows: ${data.length} (Expected: ~1150)<br>
-                            MinYear: ${minYear}, MaxYear: ${maxYear}<br>
-                            Unique Years: ${uniqueYears}<br>
-                            Last 5 Rows (sorted by year desc):<br>
-                            ${sample.map(d => `Y${d.year} T${d.topic_id}: count=${d.papers_count}`).join('<br>')}
-                         `;
-                        container.appendChild(debugDiv);
-                    }
 
                 } catch (e) {
                     console.error('Error loading Chart 4:', e);
