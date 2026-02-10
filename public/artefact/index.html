@@ -1413,6 +1413,11 @@
                                     <span>1980–2025 (hover to isolate a topic)</span>
                                     <div id="chart4-topic-selector" style="position:relative; min-width:180px;"></div>
                                 </div>
+
+                                <div id="chart4-topic-tags"
+                                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; margin-top:-16px;">
+                                    <!-- Tags injected here -->
+                                </div>
                                 <div id="topic-trends-chart" style="height: 400px; width: 100%; position: relative;">
                                     <div
                                         style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
@@ -4245,11 +4250,18 @@
                             }
                         });
 
-                        // Populate Options
+                        // Populate Options & Build Lookup Map
+                        const topicLookup = {};
                         // Sort distinct topics by ID for the list
-                        const uniqueTopics = Array.from(new Set(data.map(d => JSON.stringify({ id: d.topic_id, label: d.topic_label }))))
+                        const uniqueTopics = Array.from(new Set(data.map(d => JSON.stringify({
+                            id: d.topic_id,
+                            label: d.topic_label,
+                            color: d.series_color || topicColors[(d.topic_id - 1) % topicColors.length]
+                        }))))
                             .map(s => JSON.parse(s))
                             .sort((a, b) => a.id - b.id);
+
+                        uniqueTopics.forEach(t => topicLookup[t.id] = t);
 
                         uniqueTopics.forEach(t => {
                             const opt = document.createElement('div');
@@ -4302,18 +4314,96 @@
                         };
 
                         function updateSelectionState() {
+                            const tagContainer = document.getElementById('chart4-topic-tags');
+
                             // Update Trigger Label
                             if (selectedTopicIds.size === 0) {
                                 label.textContent = 'Select topics...';
                                 label.style.color = 'var(--text-primary)';
+
+                                if (tagContainer) {
+                                    tagContainer.innerHTML = '<span style="display:inline-flex; align-items:center; height:24px; padding:0 12px; border-radius:12px; font-size:11px; font-weight:500; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-secondary); opacity:0.7;">All topics</span>';
+                                }
                             } else {
                                 label.textContent = `${selectedTopicIds.size} topics selected`;
                                 label.style.color = 'var(--accent-color)';
+
+                                if (tagContainer) {
+                                    tagContainer.innerHTML = '';
+                                    const sortedIds = Array.from(selectedTopicIds).sort((a, b) => a - b);
+
+                                    sortedIds.forEach(tid => {
+                                        const meta = topicLookup[tid] || { label: 'Unknown', color: '#ccc' };
+
+                                        // Standardize label
+                                        let labelStr = meta.label || '';
+                                        if (!labelStr.startsWith(`Topic ${tid}:`)) {
+                                            labelStr = `Topic ${tid}: ${labelStr}`;
+                                        }
+
+                                        const tag = document.createElement('div');
+                                        tag.style.cssText = `
+                                            display: inline-flex;
+                                            align-items: center;
+                                            height: 24px;
+                                            padding: 0 8px 0 10px;
+                                            border-radius: 12px;
+                                            font-size: 11px;
+                                            font-weight: 500;
+                                            background: var(--bg-card);
+                                            border: 1px solid var(--border-color);
+                                            color: var(--text-primary);
+                                            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                                            white-space: nowrap;
+                                        `;
+
+                                        tag.innerHTML = `
+                                            <span style="width:8px; height:8px; border-radius:50%; background:${meta.color}; margin-right:8px;"></span>
+                                            ${labelStr}
+                                            <span class="tag-close" style="
+                                                margin-left: 8px;
+                                                cursor: pointer;
+                                                color: var(--text-secondary);
+                                                font-size: 14px;
+                                                display: flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                width: 16px; 
+                                                height: 16px;
+                                                border-radius: 50%;
+                                            ">×</span>
+                                        `;
+
+                                        // Hover effect for close btn
+                                        const closeBtn = tag.querySelector('.tag-close');
+                                        closeBtn.onmouseover = () => { closeBtn.style.background = 'var(--bg-hover)'; closeBtn.style.color = 'var(--text-primary)'; };
+                                        closeBtn.onmouseout = () => { closeBtn.style.background = 'transparent'; closeBtn.style.color = 'var(--text-secondary)'; };
+
+                                        closeBtn.onclick = (e) => {
+                                            e.stopPropagation();
+                                            selectedTopicIds.delete(tid);
+
+                                            // Untick in dropdown
+                                            const opt = optionsList.querySelector(`div[data-tid="${tid}"]`);
+                                            if (opt) {
+                                                opt.style.color = 'var(--text-secondary)';
+                                                opt.style.fontWeight = 'normal';
+                                                opt.textContent = opt.textContent.replace('✓ ', '');
+                                            }
+                                            updateSelectionState();
+                                        };
+
+                                        tagContainer.appendChild(tag);
+                                    });
+                                }
                             }
 
                             // Update Chart Visuals
                             updateChartVisuals();
                         }
+
+                        // Initial Call
+                        updateSelectionState();
                     }
 
                     function updateChartVisuals() {
