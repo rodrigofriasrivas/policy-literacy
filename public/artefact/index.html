@@ -1408,7 +1408,11 @@
                             <!-- Card 4: Topic Trends (All Topics) -->
                             <div class="stitch-card">
                                 <div class="stitch-card-title">Topic trends over time (all topics)</div>
-                                <div class="stitch-card-subtitle">1980–2025 (hover to isolate a topic)</div>
+                                <div class="stitch-card-subtitle"
+                                    style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span>1980–2025 (hover to isolate a topic)</span>
+                                    <div id="chart4-topic-selector" style="position:relative; min-width:180px;"></div>
+                                </div>
                                 <div id="topic-trends-chart" style="height: 400px; width: 100%; position: relative;">
                                     <div
                                         style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
@@ -4168,6 +4172,175 @@
                         .attr('preserveAspectRatio', 'xMinYMin meet')
                         .style('overflow', 'visible');
 
+
+                    // Multi-Select State
+                    let selectedTopicIds = new Set();
+
+                    // --- Render Multi-Select Dropdown ---
+                    const selectorContainer = document.getElementById('chart4-topic-selector');
+                    if (selectorContainer) {
+                        // Create basic structure if not present
+                        // Note: Using a simple custom dropdown to allow multiple selection without external libraries
+                        selectorContainer.innerHTML = `
+                            <div id="c4-dropdown-trigger" style="
+                                border: 1px solid var(--border-color); 
+                                border-radius: 4px; 
+                                padding: 4px 8px; 
+                                background: var(--bg-card); 
+                                cursor: pointer; 
+                                font-size: 11px;
+                                color: var(--text-primary);
+                                display: flex;
+                                align-items: center;
+                                justify-content: space-between;
+                                min-width: 180px;
+                            ">
+                                <span id="c4-dropdown-label">Select topics...</span>
+                                <span style="font-size:8px; margin-left:6px;">▼</span>
+                            </div>
+                            <div id="c4-dropdown-menu" style="
+                                display: none;
+                                position: absolute;
+                                top: 100%;
+                                right: 0;
+                                width: 240px;
+                                max-height: 200px;
+                                overflow-y: auto;
+                                background: var(--bg-card);
+                                border: 1px solid var(--border-color);
+                                border-radius: 4px;
+                                z-index: 1000;
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                                margin-top: 4px;
+                            ">
+                                <div id="c4-clear-btn" style="
+                                    padding: 6px 12px;
+                                    font-size: 10px;
+                                    color: #ff6b6b;
+                                    cursor: pointer;
+                                    border-bottom: 1px solid var(--border-color);
+                                    font-weight: 600;
+                                    background: rgba(255, 107, 107, 0.05);
+                                ">Clear Selection (×)</div>
+                                <div id="c4-options-list"></div>
+                            </div>
+                        `;
+
+                        const trigger = document.getElementById('c4-dropdown-trigger');
+                        const menu = document.getElementById('c4-dropdown-menu');
+                        const label = document.getElementById('c4-dropdown-label');
+                        const clearBtn = document.getElementById('c4-clear-btn');
+                        const optionsList = document.getElementById('c4-options-list');
+
+                        // Toggle Menu
+                        trigger.onclick = (e) => {
+                            e.stopPropagation();
+                            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+                        };
+
+                        // Close on click outside
+                        document.addEventListener('click', (e) => {
+                            if (!selectorContainer.contains(e.target)) {
+                                menu.style.display = 'none';
+                            }
+                        });
+
+                        // Populate Options
+                        // Sort distinct topics by ID for the list
+                        const uniqueTopics = Array.from(new Set(data.map(d => JSON.stringify({ id: d.topic_id, label: d.topic_label }))))
+                            .map(s => JSON.parse(s))
+                            .sort((a, b) => a.id - b.id);
+
+                        uniqueTopics.forEach(t => {
+                            const opt = document.createElement('div');
+                            opt.className = 'c4-option';
+                            // Nomenclature: "Topic <id>: <name>"
+                            opt.textContent = `Topic ${t.id}: ${t.label}`;
+                            opt.style.cssText = `
+                                padding: 6px 12px;
+                                font-size: 11px;
+                                color: var(--text-secondary);
+                                cursor: pointer;
+                                border-bottom: 1px solid var(--border-color);
+                            `;
+                            opt.dataset.tid = t.id;
+
+                            opt.onmouseover = () => { opt.style.background = 'var(--bg-hover)'; };
+                            opt.onmouseout = () => { opt.style.background = 'transparent'; };
+
+                            opt.onclick = (e) => {
+                                e.stopPropagation();
+                                const tid = Number(t.id);
+                                if (selectedTopicIds.has(tid)) {
+                                    selectedTopicIds.delete(tid);
+                                    opt.style.color = 'var(--text-secondary)';
+                                    opt.style.fontWeight = 'normal';
+                                    opt.textContent = opt.textContent.replace('✓ ', '');
+                                } else {
+                                    selectedTopicIds.add(tid);
+                                    opt.style.color = 'var(--accent-color)';
+                                    opt.style.fontWeight = 'bold';
+                                    opt.textContent = '✓ ' + opt.textContent;
+                                }
+                                updateSelectionState();
+                            };
+                            optionsList.appendChild(opt);
+                        });
+
+                        // Clear Action
+                        clearBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            selectedTopicIds.clear();
+                            // Reset UI
+                            Array.from(optionsList.children).forEach(child => {
+                                child.style.color = 'var(--text-secondary)';
+                                child.style.fontWeight = 'normal';
+                                child.textContent = child.textContent.replace('✓ ', '');
+                            });
+                            updateSelectionState();
+                            menu.style.display = 'none';
+                        };
+
+                        function updateSelectionState() {
+                            // Update Trigger Label
+                            if (selectedTopicIds.size === 0) {
+                                label.textContent = 'Select topics...';
+                                label.style.color = 'var(--text-primary)';
+                            } else {
+                                label.textContent = `${selectedTopicIds.size} topics selected`;
+                                label.style.color = 'var(--accent-color)';
+                            }
+
+                            // Update Chart Visuals
+                            updateChartVisuals();
+                        }
+                    }
+
+                    function updateChartVisuals() {
+                        const hasSelection = selectedTopicIds.size > 0;
+
+                        pathGroup.selectAll('.trend-line')
+                            .each(function (id) {
+                                const el = d3.select(this);
+                                if (!hasSelection) {
+                                    // Default State
+                                    el.attr('opacity', 0.6)
+                                        .attr('stroke-width', 1.5);
+                                } else {
+                                    // Selection Mode
+                                    if (selectedTopicIds.has(id)) {
+                                        el.attr('opacity', 1.0)
+                                            .attr('stroke-width', 3)
+                                            .raise(); // Bring to front
+                                    } else {
+                                        el.attr('opacity', 0.1)
+                                            .attr('stroke-width', 1);
+                                    }
+                                }
+                            });
+                    }
+
+
                     // Process Data: Group by Topic
                     const topicsMap = d3.group(data, d => d.topic_id);
                     const topicIds = Array.from(topicsMap.keys());
@@ -4298,35 +4471,77 @@
                         });
 
                     function highlightTopic(tId, pointData) {
-                        // Fade all
+                        // Priority Check: If multi-selection is active,
+                        // ONLY allow highlighting/focus if the hovered topic is in the selection.
+                        // Or, allow hover to temporarily "peek" but respect the faded items.
+                        // Impl: If selection active, and hovered item is NOT selected, do nothing special (keep filtered).
+                        // If selection active, and hovered item IS selected, maybe thicken it?
+                        // If NO selection, standard behaviour (dim others).
+
+                        const hasSelection = selectedTopicIds.size > 0;
+
+                        if (hasSelection) {
+                            // If we have a selection filter, we generally preserve the "selected" view.
+                            // Hovering on a non-selected item should not abruptly hide the selected ones.
+                            // Design Choice: If selection is active, ignore hover effects on non-selected items.
+                            // Only show tooltip for hovered item.
+
+                            // Visuals: Only update tooltip, don't change opacity unless needed.
+                            if (pointData) {
+                                // Fix duplicated label
+                                let labelStr = pointData.topic_label || '';
+                                if (labelStr.startsWith(`Topic ${tId}:`)) {
+                                    // already prefixed, do nothing
+                                } else {
+                                    // prefix nicely
+                                    labelStr = `Topic ${tId}: ${labelStr}`;
+                                }
+
+                                legend.innerHTML = `<span style="font-weight:700; color:${pointData.series_color || '#fff'}">${labelStr}</span> &bull; ${pointData.year}: ${pointData.papers_count} papers`;
+
+                                const tooltip = d3.select('#temporal-tooltip');
+                                tooltip.style('opacity', 1)
+                                    .style('left', (event.pageX + 15) + 'px')
+                                    .style('top', (event.pageY - 15) + 'px')
+                                    .html(`<strong>${labelStr}</strong><br>Year: ${pointData.year}<br>Papers: ${pointData.papers_count}`);
+                            }
+                            return; // Skip the opacity manipulation below
+                        }
+
+
+                        // Standard Behaviour (No Multi-Select)
                         pathGroup.selectAll('.trend-line')
                             .attr('opacity', 0.1)
                             .attr('stroke-width', 1);
 
-                        // Highlight active
                         const activePath = pathGroup.select('#trend-line-' + tId);
                         activePath
                             .attr('opacity', 1)
                             .attr('stroke-width', 3)
                             .raise();
 
-                        // Legend Update
                         if (pointData) {
-                            legend.innerHTML = `<span style="font-weight:700; color:${pointData.series_color || '#fff'}">Topic ${tId}: ${pointData.topic_label}</span> &bull; ${pointData.year}: ${pointData.papers_count} papers`;
+                            // Fix duplicated label
+                            let labelStr = pointData.topic_label || '';
+                            if (!labelStr.startsWith(`Topic ${tId}:`)) {
+                                labelStr = `Topic ${tId}: ${labelStr}`;
+                            }
 
-                            // Tooltip
+                            legend.innerHTML = `<span style="font-weight:700; color:${pointData.series_color || '#fff'}">${labelStr}</span> &bull; ${pointData.year}: ${pointData.papers_count} papers`;
+
                             const tooltip = d3.select('#temporal-tooltip');
                             tooltip.style('opacity', 1)
                                 .style('left', (event.pageX + 15) + 'px')
                                 .style('top', (event.pageY - 15) + 'px')
-                                .html(`<strong>Topic ${tId}: ${pointData.topic_label}</strong><br>Year: ${pointData.year}<br>Papers: ${pointData.papers_count}`);
+                                .html(`<strong>${labelStr}</strong><br>Year: ${pointData.year}<br>Papers: ${pointData.papers_count}`);
                         }
                     }
 
                     function resetHighlight() {
-                        pathGroup.selectAll('.trend-line')
-                            .attr('opacity', 0.6)
-                            .attr('stroke-width', 1.5);
+                        // If selection exists, revert to selection view
+                        // If no selection, revert to all visible
+                        updateChartVisuals();
+
                         legend.innerHTML = '&nbsp;';
                         d3.select('#temporal-tooltip').style('opacity', 0);
                     }
