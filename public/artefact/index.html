@@ -4178,14 +4178,92 @@
                         .style('overflow', 'visible');
 
 
+
+
+
+                    // Process Data: Group by Topic
+                    const topicsMap = d3.group(data, d => d.topic_id);
+                    const topicIds = Array.from(topicsMap.keys());
+
+                    // Scales
+                    const x = d3.scaleLinear()
+                        .domain([1980, 2025])
+                        .range([margin.left, width - margin.right]);
+
+                    const yMax = d3.max(data, d => Number(d.papers_count)) || 10;
+                    const y = d3.scaleLinear()
+                        .domain([0, yMax])
+                        .range([height - margin.bottom, margin.top]);
+
+                    // Axes
+                    const xAxis = d3.axisBottom(x).tickFormat(d3.format('d')).tickValues(d3.range(1980, 2026, 5));
+                    const yAxis = d3.axisLeft(y).ticks(5);
+
+                    // Style Axes
+                    const gx = svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(xAxis);
+                    const gy = svg.append('g').attr('transform', `translate(${margin.left},0)`).call(yAxis);
+
+                    gx.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
+                    gy.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
+                    gx.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.3);
+                    gy.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.3);
+
+                    // Labels
+                    svg.append('text').attr('x', width / 2).attr('y', height).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Year');
+                    svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers');
+
+                    // Line Generator
+                    const line = d3.line()
+                        .x(d => x(Number(d.year)))
+                        .y(d => y(Number(d.papers_count)))
+                        .curve(d3.curveMonotoneX);
+
+                    // Draw all lines
+                    const pathGroup = svg.append('g');
+
+                    pathGroup.selectAll('path')
+                        .data(topicIds)
+                        .join('path')
+                        .attr('class', 'trend-line')
+                        .attr('id', d => 'trend-line-' + d)
+                        .attr('d', id => line(topicsMap.get(id)))
+                        .attr('fill', 'none')
+                        .attr('stroke', id => {
+                            const tData = topicsMap.get(id)[0];
+                            return tData.series_color || topicColors[(id - 1) % topicColors.length] || '#999';
+                        })
+                        .attr('stroke-width', 1.5)
+                        .attr('opacity', 0.6)
+                        .attr('stroke-linecap', 'round');
+
+                    // ============================================
+                    // UI: Multi-Select Logic (Moved After Render)
+                    // ============================================
                     // Multi-Select State
                     let selectedTopicIds = new Set();
+
+                    function updateChartVisuals() {
+                        const hasSelection = selectedTopicIds.size > 0;
+
+                        pathGroup.selectAll('.trend-line')
+                            .each(function (id) {
+                                const el = d3.select(this);
+                                if (!hasSelection) {
+                                    el.attr('opacity', 0.6).attr('stroke-width', 1.5);
+                                } else {
+                                    if (selectedTopicIds.has(id)) {
+                                        el.attr('opacity', 1.0).attr('stroke-width', 3).raise();
+                                    } else {
+                                        el.attr('opacity', 0.1).attr('stroke-width', 1);
+                                    }
+                                }
+                            });
+                    }
 
                     // --- Render Multi-Select Dropdown ---
                     const selectorContainer = document.getElementById('chart4-topic-selector');
                     if (selectorContainer) {
-                        // Create basic structure if not present
-                        // Note: Using a simple custom dropdown to allow multiple selection without external libraries
+                        // Create basic structure
                         selectorContainer.innerHTML = `
                             <div id="c4-dropdown-trigger" style="
                                 border: 1px solid var(--border-color); 
@@ -4405,87 +4483,6 @@
                         // Initial Call
                         updateSelectionState();
                     }
-
-                    function updateChartVisuals() {
-                        const hasSelection = selectedTopicIds.size > 0;
-
-                        pathGroup.selectAll('.trend-line')
-                            .each(function (id) {
-                                const el = d3.select(this);
-                                if (!hasSelection) {
-                                    // Default State
-                                    el.attr('opacity', 0.6)
-                                        .attr('stroke-width', 1.5);
-                                } else {
-                                    // Selection Mode
-                                    if (selectedTopicIds.has(id)) {
-                                        el.attr('opacity', 1.0)
-                                            .attr('stroke-width', 3)
-                                            .raise(); // Bring to front
-                                    } else {
-                                        el.attr('opacity', 0.1)
-                                            .attr('stroke-width', 1);
-                                    }
-                                }
-                            });
-                    }
-
-
-                    // Process Data: Group by Topic
-                    const topicsMap = d3.group(data, d => d.topic_id);
-                    const topicIds = Array.from(topicsMap.keys());
-
-                    // Scales
-                    const x = d3.scaleLinear()
-                        .domain([1980, 2025])
-                        .range([margin.left, width - margin.right]);
-
-                    const yMax = d3.max(data, d => Number(d.papers_count)) || 10;
-                    const y = d3.scaleLinear()
-                        .domain([0, yMax])
-                        .range([height - margin.bottom, margin.top]);
-
-                    // Axes
-                    const xAxis = d3.axisBottom(x).tickFormat(d3.format('d')).tickValues(d3.range(1980, 2026, 5));
-                    const yAxis = d3.axisLeft(y).ticks(5);
-
-                    // Style Axes
-                    const gx = svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(xAxis);
-                    const gy = svg.append('g').attr('transform', `translate(${margin.left},0)`).call(yAxis);
-
-                    gx.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
-                    gy.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
-                    gx.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.3);
-                    gy.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.3);
-
-                    // Labels
-                    svg.append('text').attr('x', width / 2).attr('y', height).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Year');
-                    svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers');
-
-                    // Line Generator
-                    const line = d3.line()
-                        .x(d => x(Number(d.year)))
-                        .y(d => y(Number(d.papers_count)))
-                        .curve(d3.curveMonotoneX);
-
-                    // Draw all lines
-                    const pathGroup = svg.append('g');
-
-                    pathGroup.selectAll('path')
-                        .data(topicIds)
-                        .join('path')
-                        .attr('class', 'trend-line')
-                        .attr('id', d => 'trend-line-' + d)
-                        .attr('d', id => line(topicsMap.get(id)))
-                        .attr('fill', 'none')
-                        .attr('stroke', id => {
-                            const tData = topicsMap.get(id)[0];
-                            return tData.series_color || topicColors[(id - 1) % topicColors.length] || '#999';
-                        })
-                        .attr('stroke-width', 1.5)
-                        .attr('opacity', 0.6)
-                        .attr('stroke-linejoin', 'round')
-                        .attr('stroke-linecap', 'round');
 
                     // Interaction Layer
                     const overlay = svg.append('rect')
