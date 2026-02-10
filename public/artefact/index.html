@@ -1408,16 +1408,24 @@
                             <!-- Card 4: Topic Trends (All Topics) -->
                             <div class="stitch-card">
                                 <div class="stitch-card-title">Topic trends over time (all topics)</div>
-                                <div class="stitch-card-subtitle"
-                                    style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span>1980–2025 (hover to isolate a topic)</span>
-                                    <div id="chart4-topic-selector" style="position:relative; min-width:180px;"></div>
+
+                                <!-- Header Row: Subtitle + Dropdown -->
+                                <div class="stitch-card-header-row"
+                                    style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px;">
+                                    <div class="stitch-card-subtitle" style="margin-bottom:0; flex:1;">
+                                        1980–2025 (hover to isolate a topic)
+                                    </div>
+                                    <div id="chart4-topic-selector"
+                                        style="position:relative; min-width:200px; flex-shrink:0;"></div>
                                 </div>
 
+                                <!-- Tags Container -->
                                 <div id="chart4-topic-tags"
-                                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; margin-top:-16px;">
+                                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
                                     <!-- Tags injected here -->
                                 </div>
+
+                                <!-- Chart Wrapper -->
                                 <div id="topic-trends-chart" style="height: 400px; width: 100%; position: relative;">
                                     <div
                                         style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
@@ -1426,7 +1434,8 @@
                                 </div>
                                 <div id="topic-trends-legend"
                                     style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
-                                    &nbsp;</div>
+                                    &nbsp;
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -4263,47 +4272,48 @@
                     // --- Render Multi-Select Dropdown ---
                     const selectorContainer = document.getElementById('chart4-topic-selector');
                     if (selectorContainer) {
-                        // Create basic structure
+                        // Create basic structure with Theme Variables
                         selectorContainer.innerHTML = `
                             <div id="c4-dropdown-trigger" style="
-                                border: 1px solid var(--border-color); 
-                                border-radius: 4px; 
-                                padding: 4px 8px; 
-                                background: var(--bg-card); 
+                                border: 1px solid var(--border-color, #ccc); 
+                                border-radius: 6px; 
+                                padding: 6px 12px; 
+                                background: var(--bg-card, #fff); 
                                 cursor: pointer; 
-                                font-size: 11px;
-                                color: var(--text-primary);
+                                font-size: 13px;
+                                color: var(--text-primary, #333);
                                 display: flex;
                                 align-items: center;
                                 justify-content: space-between;
-                                min-width: 180px;
                             ">
-                                <span id="c4-dropdown-label">Select topics...</span>
-                                <span style="font-size:8px; margin-left:6px;">▼</span>
+                                <span id="c4-dropdown-label" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px;">Select topics...</span>
+                                <span style="font-size:10px; color:var(--text-secondary);">▼</span>
                             </div>
+                            <!-- Dropdown Menu -->
                             <div id="c4-dropdown-menu" style="
                                 display: none;
                                 position: absolute;
                                 top: 100%;
                                 right: 0;
-                                width: 240px;
-                                max-height: 200px;
+                                width: 280px; /* Wider for labels */
+                                max-height: 300px;
                                 overflow-y: auto;
-                                background: var(--bg-card);
-                                border: 1px solid var(--border-color);
-                                border-radius: 4px;
+                                background: var(--bg-card, #fff);
+                                border: 1px solid var(--border-color, #ccc);
+                                border-radius: 6px;
                                 z-index: 1000;
-                                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                                box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Subtler shadow */
                                 margin-top: 4px;
                             ">
                                 <div id="c4-clear-btn" style="
-                                    padding: 6px 12px;
-                                    font-size: 10px;
+                                    padding: 8px 12px;
+                                    font-size: 11px;
                                     color: #ff6b6b;
                                     cursor: pointer;
-                                    border-bottom: 1px solid var(--border-color);
+                                    border-bottom: 1px solid var(--border-color, #eee);
                                     font-weight: 600;
                                     background: rgba(255, 107, 107, 0.05);
+                                    text-align: right;
                                 ">Clear Selection (×)</div>
                                 <div id="c4-options-list"></div>
                             </div>
@@ -4328,6 +4338,10 @@
                             }
                         });
 
+                        // Prevent click inside menu from closing it
+                        menu.onclick = (e) => e.stopPropagation();
+
+
                         // Populate Options & Build Lookup Map
                         const topicLookup = {};
                         // Sort distinct topics by ID for the list
@@ -4344,18 +4358,25 @@
                         uniqueTopics.forEach(t => {
                             const opt = document.createElement('div');
                             opt.className = 'c4-option';
-                            // Nomenclature: "Topic <id>: <name>"
-                            opt.textContent = `Topic ${t.id}: ${t.label}`;
+
+                            // CLEAN LABEL LOGIC: Remove existing "Topic X:" prefix if present
+                            // Regex: ^Topic \d+:\s*
+                            const cleanLabel = (t.label || '').replace(/^Topic \d+:\s*/i, '').trim();
+
+                            // Render: "Topic <id>: <Clean Name>"
+                            opt.textContent = `Topic ${t.id}: ${cleanLabel}`;
+
                             opt.style.cssText = `
-                                padding: 6px 12px;
-                                font-size: 11px;
+                                padding: 8px 12px;
+                                font-size: 12px;
                                 color: var(--text-secondary);
                                 cursor: pointer;
-                                border-bottom: 1px solid var(--border-color);
+                                border-bottom: 1px solid var(--border-color, #eee);
+                                transition: background 0.1s;
                             `;
                             opt.dataset.tid = t.id;
 
-                            opt.onmouseover = () => { opt.style.background = 'var(--bg-hover)'; };
+                            opt.onmouseover = () => { opt.style.background = 'var(--bg-hover, #f5f5f5)'; };
                             opt.onmouseout = () => { opt.style.background = 'transparent'; };
 
                             opt.onclick = (e) => {
@@ -4399,13 +4420,15 @@
                                 label.textContent = 'Select topics...';
                                 label.style.color = 'var(--text-primary)';
 
+                                // Render Empty State Placeholder Tag
                                 if (tagContainer) {
-                                    tagContainer.innerHTML = '<span style="display:inline-flex; align-items:center; height:24px; padding:0 12px; border-radius:12px; font-size:11px; font-weight:500; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-secondary); opacity:0.7;">All topics</span>';
+                                    tagContainer.innerHTML = '<span style="display:inline-flex; align-items:center; height:24px; padding:0 12px; border-radius:12px; font-size:11px; font-weight:500; background:var(--bg-card); border:1px solid var(--border-color); color:var(--text-secondary); opacity:0.7;">All topics visible</span>';
                                 }
                             } else {
                                 label.textContent = `${selectedTopicIds.size} topics selected`;
                                 label.style.color = 'var(--accent-color)';
 
+                                // Render Tags
                                 if (tagContainer) {
                                     tagContainer.innerHTML = '';
                                     const sortedIds = Array.from(selectedTopicIds).sort((a, b) => a - b);
@@ -4413,20 +4436,19 @@
                                     sortedIds.forEach(tid => {
                                         const meta = topicLookup[tid] || { label: 'Unknown', color: '#ccc' };
 
-                                        // Standardize label
-                                        let labelStr = meta.label || '';
-                                        if (!labelStr.startsWith(`Topic ${tid}:`)) {
-                                            labelStr = `Topic ${tid}: ${labelStr}`;
-                                        }
+                                        // Standardize label for Tag
+                                        let rawLabel = meta.label || '';
+                                        const cleanLabel = rawLabel.replace(/^Topic \d+:\s*/i, '').trim();
+                                        const displayLabel = `Topic ${tid}: ${cleanLabel}`;
 
                                         const tag = document.createElement('div');
                                         tag.style.cssText = `
                                             display: inline-flex;
                                             align-items: center;
-                                            height: 24px;
-                                            padding: 0 8px 0 10px;
-                                            border-radius: 12px;
-                                            font-size: 11px;
+                                            height: 26px;
+                                            padding: 0 10px 0 12px;
+                                            border-radius: 13px;
+                                            font-size: 12px;
                                             font-weight: 500;
                                             background: var(--bg-card);
                                             border: 1px solid var(--border-color);
@@ -4437,25 +4459,26 @@
 
                                         tag.innerHTML = `
                                             <span style="width:8px; height:8px; border-radius:50%; background:${meta.color}; margin-right:8px;"></span>
-                                            ${labelStr}
+                                            ${displayLabel}
                                             <span class="tag-close" style="
                                                 margin-left: 8px;
                                                 cursor: pointer;
                                                 color: var(--text-secondary);
-                                                font-size: 14px;
+                                                font-size: 16px;
                                                 display: flex;
                                                 align-items: center;
                                                 justify-content: center;
-                                                width: 16px; 
-                                                height: 16px;
+                                                width: 18px; 
+                                                height: 18px;
                                                 border-radius: 50%;
-                                            ">×</span>
+                                                opacity: 0.7;
+                                            " title="Remove">×</span>
                                         `;
 
                                         // Hover effect for close btn
                                         const closeBtn = tag.querySelector('.tag-close');
-                                        closeBtn.onmouseover = () => { closeBtn.style.background = 'var(--bg-hover)'; closeBtn.style.color = 'var(--text-primary)'; };
-                                        closeBtn.onmouseout = () => { closeBtn.style.background = 'transparent'; closeBtn.style.color = 'var(--text-secondary)'; };
+                                        closeBtn.onmouseover = () => { closeBtn.style.background = 'var(--bg-hover, #eee)'; closeBtn.style.opacity = '1'; };
+                                        closeBtn.onmouseout = () => { closeBtn.style.background = 'transparent'; closeBtn.style.opacity = '0.7'; };
 
                                         closeBtn.onclick = (e) => {
                                             e.stopPropagation();
