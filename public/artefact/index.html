@@ -4088,15 +4088,14 @@
                 if (!container) return;
 
                 try {
-                    // Explicit fix: limit=2000, offset=0 to bypass default 1000 row limit (Chart 4 requires ~1150 rows)
-                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=2000&offset=0`;
+                    // FIX: limit=5000 to ensure full 1980-2025 dataset (Chart 4 requires ~1150 rows)
+                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=5000&offset=0`;
                     console.log('Fetching Chart 4 URL:', url);
 
                     const response = await fetch(url, {
                         headers: {
                             'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`,
-                            // 'Range': '0-1999' // Redundant if limit query param works, but leaving for safety if needed. URL limit is primary.
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
                         }
                     });
                     if (!response.ok) {
@@ -4105,11 +4104,18 @@
                         throw new Error(`HTTP ${response.status}: ${errText}`);
                     }
 
-                    const data = await response.json();
-                    if (!data || data.length === 0) {
+                    const rawData = await response.json();
+                    if (!rawData || rawData.length === 0) {
                         container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);">No data returned.</div>';
                         return;
                     }
+
+                    // Enforce numeric types
+                    const data = rawData.map(d => ({
+                        ...d,
+                        year: Number(d.year),
+                        papers_count: Number(d.papers_count)
+                    }));
 
                     // DEBUG: Validate full dataset load (expect >1000 rows, max year 2025)
                     console.log('Chart 4 Total Rows:', data.length);
@@ -4295,6 +4301,30 @@
                             .attr('stroke-width', 1.5);
                         legend.innerHTML = '&nbsp;';
                         d3.select('#temporal-tooltip').style('opacity', 0);
+                    }
+
+                    // ADD VISIBLE DEBUG PANEL (requested)
+                    const DEBUG_CHART4 = true;
+                    if (DEBUG_CHART4) {
+                        const years = data.map(d => d.year);
+                        const minYear = Math.min(...years);
+                        const maxYear = Math.max(...years);
+                        const uniqueYears = new Set(years).size;
+
+                        // Valid sample for display
+                        const sample = [...data].sort((a, b) => b.year - a.year).slice(0, 5);
+
+                        const debugDiv = document.createElement('div');
+                        debugDiv.style.cssText = "background:rgba(0,0,0,0.8); color:#0f0; padding:10px; font-family:monospace; font-size:10px; margin-top:10px; overflow:auto; max-height:200px; border:1px solid #0f0; width:100%; box-sizing:border-box;";
+                        debugDiv.innerHTML = `
+                            <strong>DEBUG CHART 4</strong><br>
+                            Rows: ${data.length} (Expected: ~1150)<br>
+                            MinYear: ${minYear}, MaxYear: ${maxYear}<br>
+                            Unique Years: ${uniqueYears}<br>
+                            Last 5 Rows (sorted by year desc):<br>
+                            ${sample.map(d => `Y${d.year} T${d.topic_id}: count=${d.papers_count}`).join('<br>')}
+                         `;
+                        container.appendChild(debugDiv);
                     }
 
                 } catch (e) {
