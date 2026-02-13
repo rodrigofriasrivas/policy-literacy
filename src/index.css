@@ -511,3 +511,46 @@
     padding: 12px 0;
   }
 }
+
+/* ========================================
+   Topic Page – Dark / Glass Theme
+   ======================================== */
+
+.topic-dark-wrapper {
+  background: #050505;
+  color: #ffffff;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.topic-glass-card {
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.topic-glass-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.topic-glass-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+}
+
+.topic-glass-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}

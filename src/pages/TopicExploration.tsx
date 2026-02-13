@@ -1,15 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useTopic, useTopBigramsByTopic, useTopicsRanked } from "@/hooks/useTopics";
-import { usePapersByTopicId } from "@/hooks/usePapers";
-import { useTopicTemporalData } from "@/hooks/useTopicTemporalData";
 import {
   TopicSidebar,
-  TopicHeader,
-  NetworkVisualizationPlaceholder,
-  TopTermsGrid,
-  TemporalEvolutionSection,
-  ResearchPapersList,
+  NetworkEmbed,
+  TopicInfoCard,
+  BigramCards,
+  BigramTrendsChart,
+  PapersTable,
+  TopicNavigation,
 } from "@/components/topic";
 
 export default function TopicExploration() {
@@ -20,8 +19,6 @@ export default function TopicExploration() {
   const { data: allTopics, isLoading: allTopicsLoading } = useTopicsRanked();
   const { data: topic, isLoading: topicLoading } = useTopic(numericTopicId);
   const { data: bigrams, isLoading: bigramsLoading } = useTopBigramsByTopic(numericTopicId);
-  const { data: papers, isLoading: papersLoading } = usePapersByTopicId(numericTopicId);
-  const { data: temporalData, isLoading: temporalLoading } = useTopicTemporalData(numericTopicId);
 
   // Auto-select first topic when none is selected
   useEffect(() => {
@@ -34,10 +31,8 @@ export default function TopicExploration() {
     }
   }, [topicId, allTopics, navigate]);
 
-  const isContentLoading = topicLoading || bigramsLoading || papersLoading || temporalLoading;
-
   return (
-    <div className="flex gap-6 min-h-[600px]">
+    <div className="topic-dark-wrapper flex min-h-[600px] -mx-6 -my-8">
       {/* Left Sidebar */}
       <TopicSidebar
         topics={allTopics}
@@ -46,36 +41,31 @@ export default function TopicExploration() {
       />
 
       {/* Main Panel */}
-      <main className="flex-1 space-y-8 pb-8">
-        {/* Topic Header */}
-        <TopicHeader
-          topicId={numericTopicId}
-          topicName={topic?.topic_name}
-          definition={topic?.definition}
-          isLoading={topicLoading}
-        />
+      <main className="flex-1 p-6 space-y-6 overflow-y-auto" style={{ background: '#050505' }}>
+        {/* Network + Info Card row */}
+        <div className="flex gap-4">
+          <div className="flex-1 min-w-0">
+            <NetworkEmbed topicId={numericTopicId} />
+          </div>
+          <TopicInfoCard
+            topicId={numericTopicId}
+            topicName={topic?.topic_name}
+            definition={topic?.definition}
+            isLoading={topicLoading}
+          />
+        </div>
 
-        {/* Network Visualization Placeholder */}
-        <NetworkVisualizationPlaceholder />
+        {/* Top 5 Bigram Cards */}
+        <BigramCards bigrams={bigrams} isLoading={bigramsLoading} />
 
-        {/* Top 5 Terms */}
-        <TopTermsGrid
-          bigrams={bigrams}
-          isLoading={bigramsLoading}
-        />
+        {/* Bigram Trends Chart */}
+        <BigramTrendsChart topicId={numericTopicId} topicName={topic?.topic_name} />
 
-        {/* Temporal Evolution */}
-        <TemporalEvolutionSection
-          chartData={temporalData?.chartData}
-          bigrams={temporalData?.bigrams}
-          isLoading={temporalLoading}
-        />
+        {/* Papers Table */}
+        <PapersTable topicId={numericTopicId} />
 
-        {/* Research Papers */}
-        <ResearchPapersList
-          papers={papers}
-          isLoading={papersLoading}
-        />
+        {/* Navigation */}
+        <TopicNavigation topicId={numericTopicId} />
       </main>
     </div>
   );

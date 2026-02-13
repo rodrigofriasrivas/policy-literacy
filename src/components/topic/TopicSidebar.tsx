@@ -21,30 +21,30 @@ export function TopicSidebar({ topics, isLoading, selectedTopicId }: TopicSideba
     : [];
 
   return (
-    <aside className="w-60 shrink-0 border-r border-border">
-      <div className="p-4 border-b border-border">
-        <h3 className="text-sm font-medium text-foreground">Topics</h3>
-        <p className="text-xs text-muted-foreground mt-1">Select a topic to explore</p>
+    <aside className="w-80 shrink-0" style={{ background: 'rgba(10, 10, 10, 0.95)' }}>
+      <div className="p-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <h3 className="text-xs font-bold text-white uppercase tracking-widest">Topics</h3>
+        <p className="text-[10px] text-[#a0a0a0] mt-1">Select a topic to explore</p>
       </div>
       <ScrollArea className="h-[calc(100vh-280px)]">
         <div className="p-2">
           {isLoading ? (
             <div className="space-y-1">
               {[...Array(10)].map((_, i) => (
-                <Skeleton key={i} className="h-8 w-full" />
+                <Skeleton key={i} className="h-8 w-full bg-white/10" />
               ))}
             </div>
           ) : sortedTopics.length > 0 ? (
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {sortedTopics.map((t) => (
                 <Link
                   key={t.topic_id}
                   to={`/evidence/topic/${t.topic_id}`}
                   className={cn(
-                    "block px-3 py-2 text-sm rounded transition-colors",
+                    "block px-3 py-2 text-xs rounded-lg transition-colors",
                     selectedTopicId === t.topic_id
-                      ? "bg-secondary text-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                      ? "bg-white/10 text-white font-medium"
+                      : "text-[#a0a0a0] hover:text-white hover:bg-white/5"
                   )}
                 >
                   Topic {t.topic_id}: {t.topic_name}
@@ -52,7 +52,7 @@ export function TopicSidebar({ topics, isLoading, selectedTopicId }: TopicSideba
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground px-3 py-2">No topics available.</p>
+            <p className="text-xs text-[#a0a0a0] px-3 py-2">No topics available.</p>
           )}
         </div>
       </ScrollArea>
