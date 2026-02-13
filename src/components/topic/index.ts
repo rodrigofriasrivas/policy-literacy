@@ -4,3 +4,9 @@ export { NetworkVisualizationPlaceholder } from "./NetworkVisualizationPlacehold
 export { TopTermsGrid } from "./TopTermsGrid";
 export { TemporalEvolutionSection } from "./TemporalEvolutionSection";
 export { ResearchPapersList } from "./ResearchPapersList";
+export { NetworkEmbed } from "./NetworkEmbed";
+export { TopicInfoCard } from "./TopicInfoCard";
+export { BigramCards } from "./BigramCards";
+export { BigramTrendsChart } from "./BigramTrendsChart";
+export { PapersTable } from "./PapersTable";
+export { TopicNavigation } from "./TopicNavigation";
