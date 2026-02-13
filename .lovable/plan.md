@@ -1,342 +1,162 @@
 
-# Plan: Homepage with Animated ASCII Background
+
+# Topic Page -- Network Visualisation Style
 
 ## Overview
 
-Build a new homepage at "/" with an animated ASCII bigram background, transparent header navigation, and hero overlay. Create placeholder pages for /evidence, /about, /policy, /contact. The existing dashboard functionality moves to /evidence with sub-navigation tabs.
+Create a new Topic Page that replaces the current Topic Exploration view with a layout and aesthetic matching the Network Visualisation artifact (dark glass panels, same header structure, sidebar). The page is driven by the selected topic ID and presents topic metadata, bigrams, temporal chart, and a paginated papers table -- all in the dark/glass design language.
 
-## Architecture Changes
+## Architecture
 
-### Routing Structure
+The page will remain a React component served at the existing `/evidence/topic/:topicId` route. Rather than duplicating the raw HTML artifact, we build React components that replicate the artifact's visual language (CSS variables, glass panels, dark backgrounds) while staying within the React/Tailwind stack.
 
-| Route | Component | Layout |
-|-------|-----------|--------|
-| `/` | HomePage | HomeLayout (transparent header) |
-| `/about` | AboutPage | HomeLayout |
-| `/policy` | PolicyPage | HomeLayout |
-| `/contact` | ContactPage | HomeLayout |
-| `/evidence` | EvidencePage (placeholder with tabs) | AppLayout (existing) |
-| `/evidence/field` | FieldOverview (existing) | AppLayout |
-| `/evidence/papers` | PaperListing (existing) | AppLayout |
-| `/evidence/temporal` | TemporalEvolution (existing) | AppLayout |
-| `/evidence/topic/:topicId?` | TopicExploration (existing) | AppLayout |
-
-## File Changes
-
-### 1. `index.html`
-- Add Google Fonts link for Lato (weights 300, 400, 600, 700)
-- Update title and meta tags
-
-### 2. `src/index.css`
-- Add homepage-specific CSS variables and styles
-- Homepage background color: #F4EFEB
-- Pre element styling for ASCII animation
-- Hero overlay styling
-- Transparent header styles
-
-### 3. `src/hooks/useAsciiAnimation.ts` (new)
-Custom hook for the ASCII animation logic:
-- Responsive rows/cols calculation based on viewport
-- Wave + distance algorithm from user's JS
-- 30fps throttling (every 2nd RAF frame)
-- `prefers-reduced-motion` respect (static frame if true)
-- Returns: `{ asciiText, preRef }`
-
-### 4. `src/components/layout/HomeLayout.tsx` (new)
-Layout for homepage and landing pages:
-- Transparent header with centered nav
-- Full viewport height (minus header/footer)
-- Footer with version line
-- Nav items: Explore the Data, About the project, Policy engagement, Contact
-
-### 5. `src/pages/HomePage.tsx` (new)
-Main homepage component:
-- Uses HomeLayout
-- ASCII container with animated pre element
-- Hero overlay with:
-  - Title: "ENTREPRENEURSHIP POLICY RESEARCH IN WORDS" (WORDS italic)
-  - Subtitle with author attribution
-  - CTA button linking to /evidence
-
-### 6. `src/pages/AboutPage.tsx` (new)
-Placeholder page with HomeLayout
-
-### 7. `src/pages/PolicyPage.tsx` (new)
-Placeholder page with HomeLayout
-
-### 8. `src/pages/ContactPage.tsx` (new)
-Placeholder page with HomeLayout
-
-### 9. `src/pages/EvidencePage.tsx` (new)
-Dashboard placeholder with:
-- Horizontal sub-navigation showing future tabs (non-functional):
-  - Evidence | Field overview | Papers | Temporal evolution | Experimental view
-- Helper text: "Topics ordered by cumulative weight across the corpus..."
-- Eventually will contain the dashboard content
-
-### 10. `src/components/layout/AppLayout.tsx`
-Update navigation items to reflect new structure:
-- Remove "/" from nav (homepage is separate)
-- Nav for dashboard pages under /evidence
-
-### 11. `src/App.tsx`
-Update routing:
-- "/" -> HomePage (no AppLayout wrapper)
-- "/about", "/policy", "/contact" -> respective pages
-- "/evidence/*" routes -> existing dashboard pages with AppLayout
-
-## Technical Implementation Details
-
-### ASCII Animation Hook
-
-```typescript
-// src/hooks/useAsciiAnimation.ts
-const bigrams = [
-  "policy reform", "venture capital", "start up", ...
-];
-
-export function useAsciiAnimation() {
-  const [asciiText, setAsciiText] = useState("");
-  const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
-  
-  // Calculate responsive grid size
-  const calculateGridSize = useCallback(() => {
-    const charWidth = 7; // approximate for monospace at 11px
-    const charHeight = 12;
-    const cols = Math.floor(window.innerWidth / charWidth);
-    const rows = Math.floor((window.innerHeight - 60) / charHeight);
-    return { cols: Math.min(cols, 150), rows: Math.min(rows, 100) };
-  }, []);
-  
-  // Generate ASCII frame
-  const generateAscii = useCallback((frame: number, cols: number, rows: number) => {
-    const centerX = 0.5;
-    const centerY = 0.5;
-    let result = "";
-    
-    for (let y = 0; y < rows; y++) {
-      let row = "";
-      for (let x = 0; x < cols; ) {
-        const dx = x / cols - centerX;
-        const dy = y / rows - centerY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        const wave = Math.sin(x / 3 + y / 5 + frame / 3000 + dist * 10)
-                   + Math.cos(x / 4 - y / 3 - frame / 2000)
-                   + Math.sin(frame / 1000 + (x / cols) * 2 * Math.PI);
-        
-        const bigramIndex = Math.floor(Math.abs((wave + 2) * 10 + dist * 5)) % bigrams.length;
-        const bigram = bigrams[bigramIndex].padEnd(28).slice(0, 28);
-        row += bigram;
-        x += 28;
-      }
-      result += row + "\n";
-    }
-    return result;
-  }, []);
-  
-  useEffect(() => {
-    const { cols, rows } = calculateGridSize();
-    
-    // Static frame for reduced motion
-    if (prefersReducedMotion) {
-      setAsciiText(generateAscii(0, cols, rows));
-      return;
-    }
-    
-    // Animation loop with 30fps throttle
-    let frame = 0;
-    let lastUpdate = 0;
-    let rafId: number;
-    
-    const animate = (timestamp: number) => {
-      if (timestamp - lastUpdate >= 33) { // ~30fps
-        setAsciiText(generateAscii(frame, cols, rows));
-        frame++;
-        lastUpdate = timestamp;
-      }
-      rafId = requestAnimationFrame(animate);
-    };
-    
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-  }, [prefersReducedMotion, calculateGridSize, generateAscii]);
-  
-  return asciiText;
-}
-```
-
-### Homepage Layout Structure
+## Layout Structure
 
 ```text
-┌─────────────────────────────────────────────────────────────────┐
-│  HEADER (transparent, centered nav)                             │
-│  Explore the Data | About the project | Policy engagement | ... │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌───────────────────────────────────────────────────────────┐  │
-│  │ ASCII ANIMATION (pre element, full viewport)              │  │
-│  │                                                           │  │
-│  │        ┌─────────────────────────────────┐                │  │
-│  │        │ HERO OVERLAY                    │                │  │
-│  │        │                                 │                │  │
-│  │        │ ENTREPRENEURSHIP POLICY         │                │  │
-│  │        │ RESEARCH IN WORDS               │                │  │
-│  │        │                                 │                │  │
-│  │        │ By Rodrigo Frías...             │                │  │
-│  │        │                                 │                │  │
-│  │        │ [Explore the Evidence]          │                │  │
-│  │        └─────────────────────────────────┘                │  │
-│  │                                                           │  │
-│  └───────────────────────────────────────────────────────────┘  │
-│                                                                 │
-├─────────────────────────────────────────────────────────────────┤
-│  FOOTER: Research project... [v1.2025]                          │
-└─────────────────────────────────────────────────────────────────┘
++----------------------------------------------------------+
+| Top Nav Bar (SiteHeader - existing, solid variant)       |
++----------------------------------------------------------+
+| Dashboard Sub-Nav (existing AppLayout tabs)              |
++--------+------------------------------------------------+
+| Left   |  Main Content Area (dark bg)                    |
+| Topic  |                                                 |
+| Side-  |  +----------------------------------+  +------+ |
+| bar    |  | Network Graph Embed (iframe)     |  | Info | |
+| (320px)|  | filtered to selected topic       |  | Card | |
+|        |  |                                  |  |(glass)| |
+|        |  +----------------------------------+  +------+ |
+|        |                                                 |
+|        |  [ Bigram 1 ] [ Bigram 2 ] [ Bigram 3 ] ...     |
+|        |                                                 |
+|        |  +------------------------------------------+   |
+|        |  | Bigram Trends Chart (1980-2025)           |   |
+|        |  +------------------------------------------+   |
+|        |                                                 |
+|        |  +------------------------------------------+   |
+|        |  | Papers Table (paginated, 50/page)         |   |
+|        |  | Title | Authors | Year | Journal          |   |
+|        |  | [accordion row -> abstract]               |   |
+|        |  +------------------------------------------+   |
+|        |                                                 |
+|        |  [< Previous Topic]        [Next Topic >]       |
++--------+------------------------------------------------+
 ```
 
-### Evidence Page Tab Preview
+## Detailed Plan
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│  Evidence | Field overview | Papers | Temporal evolution | Exp. │
-│           ─────────────────                                     │
-│  "Topics ordered by cumulative weight across the corpus.        │
-│   Select a topic to explore its structure."                     │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  [Dashboard placeholder - coming soon]                          │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+### 1. Dark Theme Wrapper
 
-## CSS Additions
+Create a CSS class or wrapper component that applies the artifact's dark/glass design tokens to the main content area only (the AppLayout header and sub-nav remain as-is with their existing styling).
 
-```css
-/* Homepage-specific styles */
-.home-page {
-  background: #F4EFEB;
-  font-family: 'Lato', sans-serif;
-  font-size: 11px;
-  line-height: 1.1;
-  overflow: hidden;
-}
+- Dark background (`#050505` or similar)
+- Glass panel styles: `backdrop-filter: blur(20px)`, semi-transparent backgrounds, subtle borders
+- Typography: Inter font, muted secondary text (`#a0a0a0`), white primary text
 
-.ascii-pre {
-  color: rgba(0, 0, 0, 0.25);
-  margin: 0;
-  padding: 20px;
-  user-select: none;
-  white-space: pre;
-  pointer-events: none;
-  font-family: monospace;
-}
+### 2. Enhanced Topic Sidebar (left panel)
 
-.ascii-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: calc(100vh - 60px);
-  width: 100vw;
-  position: relative;
-}
+Update the existing `TopicSidebar` component to match the artifact sidebar style:
+- Darker background (`rgba(10, 10, 10, 0.95)`)
+- 320px width (currently 240px)
+- Same font sizes and hover states as the artifact
+- Scrollable topic list with the same visual treatment
 
-.hero-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  z-index: 2;
-}
+### 3. Network Graph Section (center-left)
 
-.hero-title {
-  font-family: 'Lato', sans-serif;
-  font-weight: 300;
-  font-size: 56px;
-  color: rgba(0, 0, 0, 0.9);
-  letter-spacing: 2px;
-  line-height: 1.3;
-}
+Embed the existing network visualization artifact via an `<iframe>` pointing to `/artefact/index.html` with a query parameter to pre-select the topic (e.g., `?topic=1`). This avoids duplicating the D3 code.
 
-.hero-subtitle {
-  font-size: 25px;
-  font-weight: 400;
-  color: rgba(0, 0, 0, 0.8);
-  margin-top: 18px;
-}
+- The iframe fills the main block area (~60-70% width)
+- Fixed height (e.g., 500px)
+- The artifact already supports topic selection via the sidebar dropdown -- we pass the topic ID as a URL parameter
 
-.cta-button {
-  display: inline-block;
-  padding: 12px 28px;
-  background: #000;
-  color: #fff;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: background 0.3s ease;
-}
+**Note:** This requires a small addition to `public/artefact/index.html` to read a `topic` query parameter on load and auto-select that topic in the dropdown. This is a minor JS addition (~10 lines).
 
-.cta-button:hover {
-  background: #B2BEB5;
-  color: #000;
-}
+### 4. Right-side Info Card (glass panel)
 
-.transparent-header {
-  background: transparent;
-  padding: 8px 0;
-  text-align: center;
-}
+A vertically stacked, semi-transparent card positioned to the right of the network graph (within a flex row):
 
-.home-nav {
-  display: flex;
-  justify-content: center;
-  gap: 28px;
-  font-size: 18px;
-  font-weight: 600;
-}
+- Glass effect: `background: rgba(20, 20, 20, 0.6)`, `backdrop-filter: blur(20px)`, `border: 1px solid rgba(255,255,255,0.08)`, subtle shadow
+- Content:
+  - "Topic X: Name" title (using `formatTopicName`)
+  - Topic definition from Supabase `topics.definition`
+  - Fallback: "Description not available yet." if definition is null
+- Width: ~280px, fixed position relative to the graph area
 
-.home-nav a {
-  color: #222;
-  opacity: 0.8;
-}
+### 5. Top 5 Bigram Cards (below network section)
 
-.home-nav a:hover {
-  opacity: 1;
-}
+Five compact cards in a single responsive row:
 
-.home-footer {
-  text-align: center;
-  font-size: 13px;
-  color: #555;
-  padding: 8px 0;
-  border-top: 1px solid #ddd;
-}
-```
+- Glass card styling matching the artifact
+- Each card shows:
+  - Bigram name (underscores replaced with spaces for display)
+  - Frequency sum and normalized frequency as percentage
+- Data source: existing `useTopBigramsByTopic` hook (already queries `v_top_bigrams_by_topic`)
 
-## Performance Optimizations
+### 6. Bigram Trends Chart (1980-2025)
 
-1. **Responsive grid**: Calculate rows/cols based on viewport size, capped at reasonable maximums
-2. **30fps throttle**: Only update every ~33ms instead of every RAF frame
-3. **Reduced motion**: Single static frame when `prefers-reduced-motion` is enabled
-4. **Pointer events disabled**: ASCII pre element cannot capture clicks
+A line chart showing temporal evolution of the top 5 bigrams:
 
-## Summary of New Files
+- Title: "Bigram trends over time (Topic X)"
+- Data source: `v_chart5_bigram_trends` view (already exists in DB with `year`, `bigram`, `papers_count` columns filtered by `topic_id`)
+- New hook: `useBigramTrends(topicId)` querying `v_chart5_bigram_trends`
+- Reuse Recharts (`LineChart`) with dark-themed styling (white/grey lines on dark background)
+- X-axis: 1980-2025, Y-axis: papers count
+- Legend with bigram names (spaces instead of underscores)
 
-| File | Purpose |
-|------|---------|
-| `src/hooks/useAsciiAnimation.ts` | Animation logic hook |
-| `src/components/layout/HomeLayout.tsx` | Layout for landing pages |
-| `src/pages/HomePage.tsx` | Main homepage with animation |
-| `src/pages/AboutPage.tsx` | Placeholder |
-| `src/pages/PolicyPage.tsx` | Placeholder |
-| `src/pages/ContactPage.tsx` | Placeholder |
-| `src/pages/EvidencePage.tsx` | Dashboard entry with tab preview |
+### 7. Papers Table (paginated, 50 per page)
 
-## Files to Modify
+Replace the current simple list with a proper paginated table:
 
-| File | Changes |
-|------|---------|
-| `index.html` | Add Lato font, update title |
-| `src/index.css` | Add homepage CSS |
-| `src/App.tsx` | Update routing structure |
-| `src/components/layout/AppLayout.tsx` | Update nav for dashboard context |
+- Columns: Title, Author(s), Year, Journal
+- Server-side pagination using Supabase `.range()` -- 50 rows per page
+- New hook: `usePaginatedPapersByTopic(topicId, page)` with `.range(from, to)` and count query
+- Each row has an accordion trigger to expand/collapse the abstract inline
+- Abstract fetched on demand or included in the initial query (the `papers` table has an `abstract` column)
+- Loading and empty states: "Loading papers..." / "No papers found for this topic."
+- Glass-styled table with dark theme
+
+### 8. Previous / Next Topic Navigation
+
+Two buttons at the bottom:
+
+- "Previous Topic" and "Next Topic"
+- Navigate by `topic_id` sequentially (1-25)
+- Disabled state: Topic 1 has no previous, Topic 25 has no next
+- Uses `useNavigate` to go to `/evidence/topic/{id-1}` or `/evidence/topic/{id+1}`
+- Styled as glass buttons matching the artifact `.btn` class
+
+## Files to Create / Modify
+
+| File | Action | Purpose |
+|------|--------|---------|
+| `src/pages/TopicExploration.tsx` | Modify | New layout with dark theme wrapper, all sections |
+| `src/components/topic/TopicSidebar.tsx` | Modify | Dark theme styling, wider (320px) |
+| `src/components/topic/TopicInfoCard.tsx` | Create | Glass info card (right side) |
+| `src/components/topic/BigramCards.tsx` | Create | Row of 5 bigram cards |
+| `src/components/topic/BigramTrendsChart.tsx` | Create | Line chart for bigram trends |
+| `src/components/topic/PapersTable.tsx` | Create | Paginated table with accordion abstracts |
+| `src/components/topic/TopicNavigation.tsx` | Create | Previous/Next topic buttons |
+| `src/components/topic/NetworkEmbed.tsx` | Create | Iframe wrapper for network viz |
+| `src/components/topic/index.ts` | Modify | Export new components |
+| `src/hooks/useBigramTrends.ts` | Create | Hook for `v_chart5_bigram_trends` |
+| `src/hooks/usePaginatedPapers.ts` | Create | Hook with server-side pagination |
+| `public/artefact/index.html` | Modify | Read `?topic=X` param to auto-select topic |
+| `src/index.css` | Modify | Add dark/glass utility classes |
+
+## Data Sources (all existing)
+
+- **Topic metadata**: `topics` table (topic_id, topic_name, definition)
+- **Ranked topics list**: `v_topics_ranked` view
+- **Top 5 bigrams**: `v_top_bigrams_by_topic` view
+- **Bigram trends**: `v_chart5_bigram_trends` view (year, bigram, papers_count by topic)
+- **Papers**: `topic_paper_links` joined with `papers` (paper_id, title, authors, year, journal, abstract)
+
+No new database views or migrations are needed. All required data already exists.
+
+## Technical Notes
+
+- The dark theme is scoped to the topic page content area only -- the AppLayout header and sub-nav keep their existing styling
+- Server-side pagination uses Supabase's `.range(from, to)` with a count header for total pages
+- The iframe network embed communicates via URL parameters only (no postMessage needed for MVP)
+- All components follow the existing pattern of loading skeletons and graceful empty states
+- Dark/light mode: the dark theme is the primary design for this page, matching the artifact. Light mode support can be added later if needed
+
