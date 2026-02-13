@@ -33,8 +33,8 @@ const App = () => (
           {/* Dashboard routes with AppLayout */}
           {/* /evidence redirects to /evidence/topic (Evidence tab) */}
           <Route path="/evidence" element={<Navigate to="/evidence/topic" replace />} />
-          <Route path="/evidence/topic" element={<AppLayout><TopicExploration /></AppLayout>} />
-          <Route path="/evidence/topic/:topicId" element={<AppLayout><TopicExploration /></AppLayout>} />
+          <Route path="/evidence/topic" element={<TopicExploration />} />
+          <Route path="/evidence/topic/:topicId" element={<TopicExploration />} />
           <Route path="/evidence/field" element={<AppLayout><FieldOverview /></AppLayout>} />
           <Route path="/evidence/temporal" element={<AppLayout><TemporalEvolution /></AppLayout>} />
           <Route path="/evidence/papers" element={<AppLayout><PaperListing /></AppLayout>} />

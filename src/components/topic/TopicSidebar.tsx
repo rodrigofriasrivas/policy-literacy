@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { ArrowLeft } from "lucide-react";
 
 interface Topic {
   topic_id: number | null;
@@ -23,10 +24,13 @@ export function TopicSidebar({ topics, isLoading, selectedTopicId }: TopicSideba
   return (
     <aside className="w-80 shrink-0" style={{ background: 'rgba(10, 10, 10, 0.95)' }}>
       <div className="p-5 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        <Link to="/evidence" className="flex items-center gap-1.5 text-[11px] text-[#a0a0a0] hover:text-white transition-colors mb-3">
+          <ArrowLeft size={12} /> Back to dashboard
+        </Link>
         <h3 className="text-xs font-bold text-white uppercase tracking-widest">Topics</h3>
         <p className="text-[10px] text-[#a0a0a0] mt-1">Select a topic to explore</p>
       </div>
-      <ScrollArea className="h-[calc(100vh-280px)]">
+      <ScrollArea className="h-[calc(100vh-110px)]">
         <div className="p-2">
           {isLoading ? (
             <div className="space-y-1">
