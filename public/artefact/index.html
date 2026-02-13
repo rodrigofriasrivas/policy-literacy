@@ -1013,6 +1013,27 @@
             /* Center vertically in the canvas area roughly? Or top of canvas area? */
             top: 140px !important;
         }
+
+        /* ── Embed Mode: hide all chrome, show only canvas ── */
+        body.embed-mode {
+            background: transparent !important;
+            overflow: hidden;
+        }
+        body.embed-mode #container {
+            background: transparent !important;
+        }
+        body.embed-mode #ui-layer {
+            display: none !important;
+        }
+        body.embed-mode #zoomControls {
+            display: none !important;
+        }
+        body.embed-mode #topicTitle {
+            display: none !important;
+        }
+        body.embed-mode #loading {
+            /* keep spinner but transparent bg */
+        }
     </style>
 </head>
 
@@ -1640,12 +1661,18 @@
 
             // URL Configuration Parser
             const urlParams = new URLSearchParams(window.location.search);
+            const isEmbedMode = urlParams.get('embed') === 'true';
             const urlState = {
                 mode: urlParams.get('mode') || 'macro', // 'macro' | 'topic'
                 topicId: parseInt(urlParams.get('topicId')) || null
             };
 
-            console.log('🔗 URL Configuration:', urlState);
+            // Apply embed mode class immediately
+            if (isEmbedMode) {
+                document.body.classList.add('embed-mode');
+            }
+
+            console.log('🔗 URL Configuration:', urlState, 'Embed:', isEmbedMode);
 
             // Data storage
             let allData = {

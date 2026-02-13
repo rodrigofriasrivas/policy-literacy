@@ -4,15 +4,16 @@ interface NetworkEmbedProps {
 
 export function NetworkEmbed({ topicId }: NetworkEmbedProps) {
   const src = topicId
-    ? `/artefact/index.html?topic=${topicId}`
-    : "/artefact/index.html";
+    ? `/artefact/index.html?embed=true&mode=topic&topicId=${topicId}`
+    : "/artefact/index.html?embed=true";
 
   return (
     <iframe
       src={src}
-      className="w-full rounded-2xl border border-[rgba(255,255,255,0.08)]"
-      style={{ height: 500 }}
+      className="w-full rounded-2xl"
+      style={{ height: 500, border: 'none', background: 'transparent' }}
       title="Topic Network Visualization"
+      allowTransparency
     />
   );
 }
