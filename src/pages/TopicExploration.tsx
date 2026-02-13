@@ -37,7 +37,7 @@ export default function TopicExploration() {
   }, [topicId, allTopics, navigate]);
 
   return (
-    <div className="topic-dark-wrapper flex min-h-[600px] -mx-6 -my-8">
+    <div className="topic-dark-wrapper flex h-screen overflow-hidden">
       {/* Left Sidebar */}
       <TopicSidebar
         topics={allTopics}
