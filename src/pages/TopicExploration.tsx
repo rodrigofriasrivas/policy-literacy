@@ -46,9 +46,9 @@ export default function TopicExploration() {
       />
 
       {/* Main Panel */}
-      <main className="flex-1 p-6 space-y-6 overflow-y-auto" style={{ background: '#050505' }}>
-        {/* Network + Info Card row */}
-        <div className="flex gap-4">
+      <main className="flex-1 p-6 space-y-8 overflow-y-auto" style={{ background: '#050505' }}>
+        {/* Network + Info Card row — aligned at top */}
+        <div className="flex items-start gap-5">
           <div className="flex-1 min-w-0">
             <NetworkEmbed topicId={numericTopicId} />
           </div>
