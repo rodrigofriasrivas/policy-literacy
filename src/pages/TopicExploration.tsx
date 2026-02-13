@@ -11,6 +11,11 @@ import {
   TopicNavigation,
 } from "@/components/topic";
 
+/**
+ * Topic UI is React; network is embedded artefact.
+ * This page lives at /evidence/topic/:topicId — do NOT edit /artefact/index.html for UI changes.
+ * The D3 network visualization is loaded via <iframe> in embed mode (see NetworkEmbed component).
+ */
 export default function TopicExploration() {
   const { topicId } = useParams<{ topicId: string }>();
   const navigate = useNavigate();
