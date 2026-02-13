@@ -1,56 +1,67 @@
 
 
-# Remove Visible iframe -- Seamless Network Embed
+# Remove White Shell + Add Navigation & Fix Scrolling
 
-## The Problem
+## Changes
 
-The current implementation uses an `<iframe>` to embed the 5,000-line D3 network visualization artifact. You see a "page within a page" with duplicate headers, sidebars, and controls.
+### 1. `src/App.tsx` -- Unwrap topic routes from AppLayout
 
-## Why Not Remove the iframe Entirely?
+Remove `<AppLayout>` from the two topic routes:
 
-The network visualization (`public/artefact/index.html`) is a standalone 5,000-line file with:
-- D3 force simulation with custom physics
-- Canvas-based rendering with hit detection
-- Complex hover/click interactions, search, zoom
-- Multiple views (macro, micro, bigram network, temporal)
+```
+Before:
+<Route path="/evidence/topic" element={<AppLayout><TopicExploration /></AppLayout>} />
+<Route path="/evidence/topic/:topicId" element={<AppLayout><TopicExploration /></AppLayout>} />
 
-Rewriting this as a React component would be a very large effort (weeks of work) and would risk breaking the carefully tuned physics and interactions. Instead, we make the iframe **seamless** so it feels native.
+After:
+<Route path="/evidence/topic" element={<TopicExploration />} />
+<Route path="/evidence/topic/:topicId" element={<TopicExploration />} />
+```
 
-## Plan
+All other `/evidence/*` routes keep `AppLayout`.
 
-### 1. Add "embed mode" to the artifact
+### 2. `src/pages/TopicExploration.tsx` -- Full-screen dark layout with proper overflow
 
-Modify `public/artefact/index.html` to detect a `?embed=true` query parameter. When present:
-- Hide the artifact's own header bar (title, navigation tabs, breadcrumbs)
-- Hide the artifact's left sidebar/control panel
-- Make the background transparent so it blends with the parent page
-- Auto-select the topic from `?topic=X` parameter
-- The canvas fills the full area with no chrome
+Change the outer wrapper from:
+```
+<div className="topic-dark-wrapper flex min-h-[600px] -mx-6 -my-8">
+```
+to:
+```
+<div className="topic-dark-wrapper flex h-screen overflow-hidden">
+```
 
-This is roughly 20-30 lines of JS/CSS added to the artifact.
+- `h-screen` fills the viewport since there is no outer shell consuming space.
+- `overflow-hidden` on the outer wrapper prevents double scrollbars -- only the individual columns scroll.
+- The main content column keeps `overflow-y-auto` so the iframe, bigrams, and papers table scroll naturally within it.
 
-### 2. Update NetworkEmbed component
+### 3. `src/components/topic/TopicSidebar.tsx` -- Add "Back to dashboard" + fix height
 
-Modify `src/components/topic/NetworkEmbed.tsx` to:
-- Pass `?embed=true&topic=X` to the iframe URL
-- Remove the visible border so the iframe blends seamlessly
-- Set `frameBorder="0"` and transparent background
-- The result looks like a native D3 canvas rendered directly in the page
+Add a "Back to dashboard" link at the top of the sidebar (navigates to `/evidence`), and adjust the ScrollArea height to fill the viewport now that there is no outer header.
 
-### 3. Result
+Changes:
+- Add a back button/link above the "Topics" heading, styled as a small muted link with a left-arrow icon.
+- Update ScrollArea height from `calc(100vh - 280px)` to `calc(100vh - 110px)` to account for just the sidebar header area (back button + Topics heading).
 
-The network graph will appear as if it's rendered directly inside the Topic Page -- no duplicate header, no duplicate sidebar, no visible iframe border. The user sees only the force-directed graph canvas with its hover/click interactions.
+The back link uses:
+```
+<Link to="/evidence" className="...flex items-center gap-1.5 text-[11px] text-[#a0a0a0] hover:text-white...">
+  <ArrowLeft size={12} /> Back to dashboard
+</Link>
+```
 
-## Files to Modify
+## Files Modified
 
 | File | Change |
 |------|--------|
-| `public/artefact/index.html` | Add embed mode: read `?embed=true` param, hide header/sidebar/controls, transparent bg, auto-select topic |
-| `src/components/topic/NetworkEmbed.tsx` | Update iframe URL to include `embed=true`, remove border styling |
+| `src/App.tsx` | Remove `<AppLayout>` wrapper from topic routes |
+| `src/pages/TopicExploration.tsx` | `h-screen overflow-hidden` instead of `min-h-[600px] -mx-6 -my-8` |
+| `src/components/topic/TopicSidebar.tsx` | Add "Back to dashboard" link, fix ScrollArea height |
 
-## Technical Notes
+## Result
 
-- The artifact's own sidebar topic selection is hidden in embed mode -- the React sidebar handles topic switching by changing the iframe URL
-- When the user clicks a different topic in the React sidebar, the iframe `src` updates with the new topic ID, causing the artifact to reload with that topic pre-selected
-- No D3 code needs to be rewritten -- all physics, rendering, and interactions remain intact
+- Topic page fills the full viewport with a dark background, no white shell
+- Users can navigate back via the sidebar's "Back to dashboard" link
+- No double scrollbars: outer wrapper clips, only the main content column scrolls
+- All other `/evidence/*` routes remain unchanged
 
