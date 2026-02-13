@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 
 const navItems = [
-  { path: "/evidence", label: "Explore the Data" },
+  { path: "/artefact/index.html", label: "Network Visualisation", external: true },
   { path: "/about", label: "About the project" },
   { path: "/policy", label: "Policy engagement" },
   { path: "/contact", label: "Contact" },
-  { path: "/artefact/index.html", label: "Network Visualization", external: true },
+  { path: "/evidence", label: "Explore the Data" },
 ];
 
 interface SiteHeaderProps {
