@@ -228,8 +228,8 @@
   text-align: center;
   z-index: 2;
   padding: 40px;
-  max-width: 720px;
-  width: 90%;
+  max-width: 90%;
+  width: auto;
   /* Soft vignette - not a box */
   background: radial-gradient(
     circle at center,
