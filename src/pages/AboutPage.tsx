@@ -71,26 +71,27 @@ export default function AboutPage() {
       <div className="about-progress" style={{ width: `${progress}%` }} />
 
       <div className="about-scrolly-page" ref={pageRef}>
-        {/* Desktop rail */}
-        <nav className="about-rail" aria-label="Chapter navigation">
-          <span className="about-rail-title">About the project</span>
-          <div className="about-rail-list">
-            {PANELS.map((p, i) => (
-              <button
-                key={p.id}
-                className={`about-rail-item${i === activeIndex ? " is-active" : ""}`}
-                onClick={() => scrollToPanel(i)}
-                aria-label={`Go to ${p.label}`}
-              >
-                <span className="about-rail-num">{p.num}</span>
-                <span className="about-rail-label">{p.label}</span>
-              </button>
-            ))}
-          </div>
-        </nav>
+        <div className="about-layout">
+          {/* Desktop rail */}
+          <nav className="about-rail" aria-label="Chapter navigation">
+            <span className="about-rail-title">About the project</span>
+            <div className="about-rail-list">
+              {PANELS.map((p, i) => (
+                <button
+                  key={p.id}
+                  className={`about-rail-item${i === activeIndex ? " is-active" : ""}`}
+                  onClick={() => scrollToPanel(i)}
+                  aria-label={`Go to ${p.label}`}
+                >
+                  <span className="about-rail-num">{p.num}</span>
+                  <span className="about-rail-label">{p.label}</span>
+                </button>
+              ))}
+            </div>
+          </nav>
 
-        {/* Content column */}
-        <div className="about-column">
+          {/* Content column */}
+          <div className="about-main">
           <header className="about-header">
             <h1>About the project</h1>
             <p className="about-subtitle">
@@ -252,10 +253,16 @@ export default function AboutPage() {
             <h2>About the author</h2>
             <div className="about-body">
               <p className="about-lead">
-                Rodrigo Frías is a PhD Researcher at Durham University Business School working at the intersection of entrepreneurship policy, evidence use, and decision-making under bounded rationality.
+                Rodrigo Frías is a PhD Researcher at Durham University Business School focused on entrepreneurship policy, innovation, and evidence-informed policymaking. His research bridges academic insight with real-world policy, entrepreneurship, and innovation challenges, combining rigorous methodologies with practical experience to generate evidence that matters.
               </p>
               <p>
-                He previously served as Chief Executive of Start-Up Chile and as Director of Early Investment at CORFO (Chile's Economic Development Agency), where he led national programmes supporting early-stage ventures and policy innovation initiatives. This project brings together those practical policy experiences with computational methods and design science to improve enterprise policy literacy.
+                He previously served as Chief Executive of Start-Up Chile and as Director of Early Investment at CORFO (Chile's Economic Development Agency), leading national programmes supporting early-stage ventures and policy innovation initiatives.
+              </p>
+              <p>
+                <strong style={{ color: 'rgba(255,255,255,0.80)' }}>PhD Research — Rethinking how entrepreneurship policy is designed</strong>
+              </p>
+              <p>
+                In his PhD, Rodrigo studies how entrepreneurship policy is framed and designed—not just which instruments are used. His work focuses on the early stages of policy formulation, where assumptions are set and future paths are shaped. Using design science, qualitative fieldwork, and computational text analysis, he translates theory and evidence into practical principles and tools for more reflective, context-sensitive policy design.
               </p>
             </div>
           </section>
@@ -270,6 +277,7 @@ export default function AboutPage() {
               </p>
             </div>
           </section>
+          </div>
         </div>
       </div>
     </HomeLayout>
