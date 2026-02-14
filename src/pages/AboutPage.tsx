@@ -13,7 +13,7 @@ export default function AboutPage() {
           </p>
           <p className="text-muted" style={{ marginTop: '1rem' }}>
             The interactive dashboard is a research artefact hosted separately at{" "}
-            <a href="/dashboard/" className="underline">/dashboard/</a>.
+            <a href="/artefact/index.html" className="underline">/artefact/index.html</a>.
           </p>
         </div>
       </div>
