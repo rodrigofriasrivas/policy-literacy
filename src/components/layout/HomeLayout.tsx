@@ -20,7 +20,11 @@ export function HomeLayout({ children, showFooter = true }: HomeLayoutProps) {
       {/* Footer */}
       {showFooter && (
         <footer className="home-footer">
-          Research project developed by Rodrigo Frías, Durham University Business School [v1.2025]
+          <span>Research project developed by Rodrigo Frías, Durham University Business School [v1.2025]</span>
+          <span className="block text-xs mt-1 opacity-70">
+            The dashboard is an interactive research artefact hosted separately at{" "}
+            <a href="/dashboard/" className="underline">/dashboard/</a>.
+          </span>
         </footer>
       )}
     </div>
