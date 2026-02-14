@@ -4,7 +4,7 @@ export default function AboutPage() {
   return (
     <HomeLayout>
       <div className="placeholder-page">
-        <div className="placeholder-content" style={{ maxWidth: '720px' }}>
+        <div className="placeholder-content" style={{ maxWidth: '720px', textAlign: 'left' }}>
           <h1>About the project</h1>
           <p className="text-muted" style={{ fontSize: '15px', fontStyle: 'italic', marginBottom: '2rem' }}>
             A policy-facing map of entrepreneurship and enterprise policy research (1979–2024/25).
