@@ -11,8 +11,8 @@ export function SiteFooter() {
           <img
             src={durhamLogo}
             alt="Durham University"
-            className="w-[130px] h-auto opacity-85"
-          />
+            className="w-[130px] h-auto opacity-85" />
+
         </div>
 
         {/* Col 2: Disclaimer + data sources + version */}
@@ -22,8 +22,8 @@ export function SiteFooter() {
           </p>
           <Link
             to="/about#data-sources"
-            className="text-xs text-white/75 hover:text-[hsl(185_70%_55%)] transition-colors no-underline block"
-          >
+            className="text-xs text-white/75 hover:text-[hsl(185_70%_55%)] transition-colors no-underline block">
+
             Data sources
           </Link>
           <p className="text-[11px] text-white/40 m-0">
@@ -49,18 +49,18 @@ export function SiteFooter() {
       </div>
 
       {/* Row 2: Copyright below the grid */}
-      <p className="text-xs text-white/55 mt-6 pt-4 border-t border-white/[0.06]">
+      <p className="text-white/55 mt-6 pt-4 border-t border-white/[0.06] text-sm text-center">
         Research, design and programming by ©{" "}
         <a
           href="https://rodrigofrias.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-white/75 hover:text-[hsl(185_70%_55%)] transition-colors no-underline"
-        >
+          className="text-white/75 hover:text-[hsl(185_70%_55%)] transition-colors no-underline">
+
           Rodrigo Frías
         </a>
         .
       </p>
-    </footer>
-  );
+    </footer>);
+
 }
