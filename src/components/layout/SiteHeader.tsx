@@ -4,7 +4,7 @@ const navItems = [
   { path: "/about", label: "About the project" },
   { path: "/policy", label: "Policy engagement" },
   { path: "/contact", label: "Contact" },
-  { path: "/dashboard/", label: "Explore the Data" },
+  { path: "/artefact/index.html", label: "Explore the Data" },
 ];
 
 interface SiteHeaderProps {
