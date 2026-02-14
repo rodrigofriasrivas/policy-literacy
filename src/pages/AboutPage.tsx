@@ -11,6 +11,10 @@ export default function AboutPage() {
             Learn more about the research methodology, data sources, and academic context
             behind this entrepreneurship policy research artefact.
           </p>
+          <p className="text-muted" style={{ marginTop: '1rem' }}>
+            The interactive dashboard is a research artefact hosted separately at{" "}
+            <a href="/dashboard/" className="underline">/dashboard/</a>.
+          </p>
         </div>
       </div>
     </HomeLayout>

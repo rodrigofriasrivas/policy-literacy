@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 
 const navItems = [
-  { path: "/artefact/index.html", label: "Network Visualisation", external: true },
   { path: "/about", label: "About the project" },
   { path: "/policy", label: "Policy engagement" },
   { path: "/contact", label: "Contact" },
-  { path: "/evidence", label: "Explore the Data" },
+  { path: "/dashboard/", label: "Explore the Data" },
 ];
 
 interface SiteHeaderProps {
@@ -17,16 +16,10 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
     return (
       <header className="transparent-header">
         <nav className="home-nav">
-          {navItems.map((item) => (
-            item.external ? (
-              <a key={item.path} href={item.path}>
-                {item.label}
-              </a>
-            ) : (
-              <Link key={item.path} to={item.path}>
-                {item.label}
-              </Link>
-            )
+        {navItems.map((item) => (
+            <Link key={item.path} to={item.path}>
+              {item.label}
+            </Link>
           ))}
         </nav>
       </header>
@@ -46,24 +39,14 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
             </p>
           </Link>
           <nav className="flex gap-6">
-            {navItems.map((item) => (
-              item.external ? (
-                <a
-                  key={item.path}
-                  href={item.path}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {item.label}
-                </a>
-              ) : (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {item.label}
-                </Link>
-              )
+          {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {item.label}
+              </Link>
             ))}
           </nav>
         </div>
