@@ -464,9 +464,19 @@
   text-align: center;
   font-size: 11px;
   color: rgba(255, 255, 255, 0.3);
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.site-footer-copyright a {
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.site-footer-copyright a:hover {
+  color: hsl(185 70% 55%);
 }
 
 /* Placeholder pages */
