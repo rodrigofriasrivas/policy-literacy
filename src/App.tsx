@@ -25,21 +25,20 @@ const App = () => (
           <Route path="/policy" element={<PolicyPage />} />
           <Route path="/contact" element={<ContactPage />} />
 
-          {/* Backward-compatible redirects to /dashboard/ */}
-          <Route path="/evidence" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/evidence/topic" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/evidence/topic/:topicId" element={<RedirectToExternal toFn={(p) => `/dashboard/?mode=topic&topicId=${p.topicId}`} />} />
-          <Route path="/evidence/field" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/evidence/temporal" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/evidence/papers" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/evidence/papers/:paperId" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/evidence/experimental" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/temporal" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/topic" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/topic/:topicId" element={<RedirectToExternal toFn={(p) => `/dashboard/?mode=topic&topicId=${p.topicId}`} />} />
-          <Route path="/papers" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/papers/:paperId" element={<RedirectToExternal to="/dashboard/" />} />
-          <Route path="/artefact/*" element={<RedirectToExternal to="/dashboard/" />} />
+          {/* Backward-compatible redirects to /artefact/index.html */}
+          <Route path="/evidence" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/evidence/topic" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/evidence/topic/:topicId" element={<RedirectToExternal toFn={(p) => `/artefact/index.html?mode=topic&topicId=${p.topicId}`} />} />
+          <Route path="/evidence/field" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/evidence/temporal" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/evidence/papers" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/evidence/papers/:paperId" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/evidence/experimental" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/temporal" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/topic" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/topic/:topicId" element={<RedirectToExternal toFn={(p) => `/artefact/index.html?mode=topic&topicId=${p.topicId}`} />} />
+          <Route path="/papers" element={<RedirectToExternal to="/artefact/index.html" />} />
+          <Route path="/papers/:paperId" element={<RedirectToExternal to="/artefact/index.html" />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>

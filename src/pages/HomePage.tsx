@@ -36,7 +36,7 @@ export default function HomePage() {
           </p>
           
           <div className="cta-container">
-            <Link to="/dashboard/" className="cta-button">
+            <Link to="/artefact/index.html" className="cta-button">
               Explore the Data
             </Link>
             <Link to="/about" className="cta-secondary">
