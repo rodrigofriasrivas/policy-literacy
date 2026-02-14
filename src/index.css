@@ -541,15 +541,29 @@
   .about-progress { display: none; }
 }
 
-/* Page wrapper — no overflow:hidden so sticky works */
+/* Page wrapper — overflow visible so sticky works */
 .about-scrolly-page {
   position: relative;
   z-index: 1;
-  display: flex;
   padding: 60px 24px 0;
   max-width: 1100px;
   margin: 0 auto;
-  overflow: visible;
+  overflow: visible !important;
+}
+
+/* Grid layout for rail + content */
+.about-layout {
+  display: block;
+  overflow: visible !important;
+}
+
+@media (min-width: 900px) {
+  .about-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 48px;
+    align-items: start;
+  }
 }
 
 /* Left rail (desktop) */
@@ -562,13 +576,11 @@
     display: flex;
     flex-direction: column;
     position: sticky;
-    top: 110px;
-    align-self: flex-start;
-    width: 260px;
-    flex-shrink: 0;
-    padding-right: 32px;
-    height: fit-content;
-    overflow: visible;
+    top: 120px;
+    height: calc(100vh - 140px);
+    overflow-y: auto;
+    overflow-x: visible;
+    padding-right: 8px;
   }
 }
 
@@ -638,12 +650,12 @@
   color: rgba(255, 255, 255, 0.50);
 }
 
-/* Content column */
-.about-column {
+/* Content column (main) */
+.about-main {
   max-width: 680px;
-  flex: 1;
   text-align: left;
   padding-bottom: 80px;
+  overflow: visible !important;
 }
 
 .about-header {
@@ -689,7 +701,7 @@
 
 /* Scroll snapping (desktop) */
 @media (min-width: 900px) {
-  .about-column {
+  .about-main {
     scroll-snap-type: y proximity;
   }
   .about-panel {
@@ -697,19 +709,25 @@
   }
 }
 
-/* Watermark number */
+/* Watermark number — visible behind text, never clipped */
 .about-watermark {
   position: absolute;
-  top: 48px;
-  right: 0;
+  top: 18px;
+  right: 6px;
   font-family: var(--font-display);
   font-size: 110px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.12);
   line-height: 1;
   pointer-events: none;
   user-select: none;
   z-index: 0;
+}
+
+/* All panel content above watermark */
+.about-panel > *:not(.about-watermark) {
+  position: relative;
+  z-index: 1;
 }
 
 /* Style B: Section Headings */
@@ -800,7 +818,7 @@
   height: 100%;
   opacity: 0.07;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .about-node-map circle {
