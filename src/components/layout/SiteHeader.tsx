@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
+import { NavLink as RouterNavLink, Link } from "react-router-dom";
 
 const navItems = [
-  { path: "/about", label: "About the project" },
-  { path: "/policy", label: "Policy engagement" },
-  { path: "/contact", label: "Contact" },
-  { path: "/artefact/index.html", label: "Explore the Data" },
+  { path: "/artefact/index.html", label: "Network visualisation", external: true },
+  { path: "/about", label: "About the project", external: false },
+  { path: "/policy", label: "Policy engagement", external: false },
+  { path: "/contact", label: "Contact", external: false },
 ];
 
 interface SiteHeaderProps {
@@ -17,14 +17,18 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
       <header className="transparent-header">
         <nav className="home-nav">
         {navItems.map((item) =>
-            item.path.endsWith(".html") ? (
+            item.external ? (
               <a key={item.path} href={item.path}>
                 {item.label}
               </a>
             ) : (
-              <Link key={item.path} to={item.path}>
+              <RouterNavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => isActive ? "active" : ""}
+              >
                 {item.label}
-              </Link>
+              </RouterNavLink>
             )
           )}
         </nav>
@@ -46,7 +50,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
           </Link>
           <nav className="flex gap-6">
           {navItems.map((item) =>
-              item.path.endsWith(".html") ? (
+              item.external ? (
                 <a
                   key={item.path}
                   href={item.path}
@@ -55,13 +59,15 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
                   {item.label}
                 </a>
               ) : (
-                <Link
+                <RouterNavLink
                   key={item.path}
                   to={item.path}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className={({ isActive }) =>
+                    `text-sm transition-colors ${isActive ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`
+                  }
                 >
                   {item.label}
-                </Link>
+                </RouterNavLink>
               )
             )}
           </nav>
