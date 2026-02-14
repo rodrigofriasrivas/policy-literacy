@@ -1,67 +1,46 @@
 
 
-# Remove White Shell + Add Navigation & Fix Scrolling
+# Ship the Split: Marketing Site + Dashboard Redirects
 
-## Changes
+## Summary
 
-### 1. `src/App.tsx` -- Unwrap topic routes from AppLayout
+Strip all dashboard routes from Lovable. Replace with backward-compatible redirects to `/dashboard/`. Update navigation and footer. Dashboard files stay on disk (cleanup deferred).
 
-Remove `<AppLayout>` from the two topic routes:
+## Regarding `/dashboard/` in production
 
-```
-Before:
-<Route path="/evidence/topic" element={<AppLayout><TopicExploration /></AppLayout>} />
-<Route path="/evidence/topic/:topicId" element={<AppLayout><TopicExploration /></AppLayout>} />
+`window.location.replace("/dashboard/")` navigates the browser to that same-domain path. For this to work:
 
-After:
-<Route path="/evidence/topic" element={<TopicExploration />} />
-<Route path="/evidence/topic/:topicId" element={<TopicExploration />} />
-```
+- Your web server / hosting platform must serve the Antigravity HTML app at the `/dashboard/` path
+- The `?mode=topic&topicId=X` query params are passed through as-is in the URL -- the Antigravity app reads them from `window.location.search` on load
+- This is a deployment concern outside of Lovable's React app
 
-All other `/evidence/*` routes keep `AppLayout`.
+## Files to create
 
-### 2. `src/pages/TopicExploration.tsx` -- Full-screen dark layout with proper overflow
+**`src/components/RedirectToExternal.tsx`** -- redirect utility with `useRef` guard against StrictMode double-fires, using `window.location.replace()`
 
-Change the outer wrapper from:
-```
-<div className="topic-dark-wrapper flex min-h-[600px] -mx-6 -my-8">
-```
-to:
-```
-<div className="topic-dark-wrapper flex h-screen overflow-hidden">
-```
+## Files to modify
 
-- `h-screen` fills the viewport since there is no outer shell consuming space.
-- `overflow-hidden` on the outer wrapper prevents double scrollbars -- only the individual columns scroll.
-- The main content column keeps `overflow-y-auto` so the iframe, bigrams, and papers table scroll naturally within it.
+**`src/App.tsx`**
+- Remove imports: `AppLayout`, `Navigate`, `FieldOverview`, `TemporalEvolution`, `TopicExploration`, `PaperListing`, `ExperimentalView`
+- Add import: `RedirectToExternal`
+- Keep marketing routes: `/`, `/about`, `/policy`, `/contact`, `*`
+- Replace all `/evidence/*`, `/topic/*`, `/papers/*`, `/artefact/*` routes with `<RedirectToExternal>` pointing to `/dashboard/`
+- Topic ID routes preserve params: `/dashboard/?mode=topic&topicId=:id`
 
-### 3. `src/components/topic/TopicSidebar.tsx` -- Add "Back to dashboard" + fix height
+**`src/components/layout/SiteHeader.tsx`**
+- Replace navItems: remove "Network Visualisation", add "Explore the Data" pointing to `/dashboard/`
+- Remove `external` flag and conditional `<a>` rendering -- all items use `<Link>`
 
-Add a "Back to dashboard" link at the top of the sidebar (navigates to `/evidence`), and adjust the ScrollArea height to fill the viewport now that there is no outer header.
+**`src/pages/HomePage.tsx`**
+- Change hero CTA from `<a href="/artefact/index.html">` to `<Link to="/dashboard/">Explore the Data</Link>`
 
-Changes:
-- Add a back button/link above the "Topics" heading, styled as a small muted link with a left-arrow icon.
-- Update ScrollArea height from `calc(100vh - 280px)` to `calc(100vh - 110px)` to account for just the sidebar header area (back button + Topics heading).
+**`src/components/layout/HomeLayout.tsx`**
+- Append to footer: "The dashboard is an interactive research artefact hosted separately at /dashboard/."
 
-The back link uses:
-```
-<Link to="/evidence" className="...flex items-center gap-1.5 text-[11px] text-[#a0a0a0] hover:text-white...">
-  <ArrowLeft size={12} /> Back to dashboard
-</Link>
-```
+**`src/pages/AboutPage.tsx`**
+- Add paragraph with dashboard note and link
 
-## Files Modified
+## Not changed (deferred cleanup)
 
-| File | Change |
-|------|--------|
-| `src/App.tsx` | Remove `<AppLayout>` wrapper from topic routes |
-| `src/pages/TopicExploration.tsx` | `h-screen overflow-hidden` instead of `min-h-[600px] -mx-6 -my-8` |
-| `src/components/topic/TopicSidebar.tsx` | Add "Back to dashboard" link, fix ScrollArea height |
-
-## Result
-
-- Topic page fills the full viewport with a dark background, no white shell
-- Users can navigate back via the sidebar's "Back to dashboard" link
-- No double scrollbars: outer wrapper clips, only the main content column scrolls
-- All other `/evidence/*` routes remain unchanged
+All dashboard components, hooks, and pages remain on disk.
 
