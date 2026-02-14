@@ -2,14 +2,15 @@ import { HomeLayout } from "@/components/layout/HomeLayout";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 const PANELS = [
-  { id: "panel-1", num: "01", label: "Why it became a concern" },
-  { id: "panel-2", num: "02", label: "Enterprise culture" },
+  { id: "panel-1", num: "01", label: "Why it became a policy concern" },
+  { id: "panel-2", num: "02", label: "Enterprise culture to policy" },
   { id: "panel-3", num: "03", label: "Expansion & fragmentation" },
-  { id: "panel-4", num: "04", label: "One space, larger gap" },
-  { id: "panel-5", num: "05", label: "Same words, same thing?" },
+  { id: "panel-4", num: "04", label: "One space, a larger gap" },
+  { id: "panel-5", num: "05", label: "Same words, same meaning?" },
   { id: "panel-6", num: "06", label: "Orientation is hard" },
-  { id: "panel-7", num: "07", label: "Topic modelling" },
+  { id: "panel-7", num: "07", label: "Topic modelling at scale" },
   { id: "panel-8", num: "08", label: "The artefact" },
+  { id: "panel-9", num: "09", label: "About the author" },
 ];
 
 export default function AboutPage() {
@@ -40,7 +41,7 @@ export default function AboutPage() {
             setActiveIndex(Math.min(...visibleSet));
           }
         },
-        { threshold: 0.25 }
+        { threshold: 0.2 }
       );
       obs.observe(el);
       observers.push(obs);
@@ -81,7 +82,7 @@ export default function AboutPage() {
                 onClick={() => scrollToPanel(i)}
                 aria-label={`Go to ${p.label}`}
               >
-                <span className="about-rail-dot" />
+                <span className="about-rail-num">{p.num}</span>
                 <span className="about-rail-label">{p.label}</span>
               </button>
             ))}
@@ -147,14 +148,11 @@ export default function AboutPage() {
               <p className="about-lead">
                 "Enterprise policy" is written with just one space between two words. But the distance it is expected to bridge is much larger than we often assume.
               </p>
-
-              {/* Gap visual */}
               <div className="about-gap-visual">
-                <span className="about-gap-line about-gap-line--left" />
+                <span className="about-gap-line" />
                 <span className="about-gap-space" />
-                <span className="about-gap-line about-gap-line--right" />
+                <span className="about-gap-line" />
               </div>
-
               <p>
                 In practice, that small linguistic gap hides a bigger operational gap: between what research has produced over decades and what policy teams can realistically locate, interpret, and use under real-world constraints of time, attention, and mandate.
               </p>
@@ -209,7 +207,6 @@ export default function AboutPage() {
           {/* Panel 8 — Hero moment */}
           <section id="panel-8" className="about-panel about-panel--hero about-panel-8-bg" ref={setPanelRef(7)}>
             <span className="about-watermark">08</span>
-            {/* Node-map background motif */}
             <svg className="about-node-map" viewBox="0 0 680 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
               <circle cx="80" cy="60" r="3" /><circle cx="200" cy="120" r="2.5" />
               <circle cx="340" cy="80" r="3.5" /><circle cx="480" cy="140" r="2" />
@@ -247,6 +244,20 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="about-closing-beat" />
+          </section>
+
+          {/* Panel 9 — About the author */}
+          <section id="panel-9" className="about-panel" ref={setPanelRef(8)}>
+            <span className="about-watermark">09</span>
+            <h2>About the author</h2>
+            <div className="about-body">
+              <p className="about-lead">
+                Rodrigo Frías is a PhD Researcher at Durham University Business School working at the intersection of entrepreneurship policy, evidence use, and decision-making under bounded rationality.
+              </p>
+              <p>
+                He previously served as Chief Executive of Start-Up Chile and as Director of Early Investment at CORFO (Chile's Economic Development Agency), where he led national programmes supporting early-stage ventures and policy innovation initiatives. This project brings together those practical policy experiences with computational methods and design science to improve enterprise policy literacy.
+              </p>
+            </div>
           </section>
 
           {/* Data sources (preserved anchor) */}
