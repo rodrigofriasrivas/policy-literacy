@@ -4,6 +4,11 @@ import durhamLogo from "@/assets/durham_logo_white_720_300_rodrigo_frias.png";
 export function SiteFooter() {
   return (
     <footer className="site-footer">
+      {/* Top: copyright line */}
+      <div className="site-footer-copyright">
+        Research, design and programming by © <a href="https://rodrigofrias.com" target="_blank" rel="noopener noreferrer">Rodrigo Frías</a>.
+      </div>
+
       <div className="site-footer-inner">
         {/* Left: Logo */}
         <div className="site-footer-brand">
@@ -34,11 +39,6 @@ export function SiteFooter() {
           <Link to="/policy">Policy engagement</Link>
           <Link to="/contact">Contact</Link>
         </nav>
-      </div>
-
-      {/* Bottom copyright */}
-      <div className="site-footer-copyright">
-        Research, design and programming by © Rodrigo Frías.
       </div>
     </footer>
   );
