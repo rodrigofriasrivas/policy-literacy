@@ -523,80 +523,310 @@
    ======================================== */
 
 /* ========================================
-   Scrollytelling – Long-form narrative pages
+   About Page – Scrollytelling
    ======================================== */
 
-.scrolly-page {
+/* Mobile progress bar */
+.about-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: hsl(185 70% 45%);
+  z-index: 50;
+  transition: width 80ms linear;
+}
+
+@media (min-width: 900px) {
+  .about-progress { display: none; }
+}
+
+/* Page wrapper */
+.about-scrolly-page {
   position: relative;
   z-index: 1;
-  padding: 60px 24px 80px;
-}
-
-.scrolly-column {
-  max-width: 680px;
+  display: flex;
+  padding: 60px 24px 0;
+  max-width: 1100px;
   margin: 0 auto;
-  text-align: left;
 }
 
-.scrolly-panel {
-  padding: 64px 0 40px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+/* Left rail (desktop) */
+.about-rail {
+  display: none;
 }
 
-.scrolly-panel:first-of-type {
-  border-top: none;
+@media (min-width: 900px) {
+  .about-rail {
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 100px;
+    align-self: flex-start;
+    width: 200px;
+    flex-shrink: 0;
+    padding-right: 40px;
+    height: fit-content;
+  }
 }
 
-.scrolly-panel h2 {
+.about-rail-title {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 24px;
+  letter-spacing: 0.02em;
+}
+
+.about-rail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.about-rail-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+  text-align: left;
+  transition: opacity 0.2s;
+}
+
+.about-rail-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.about-rail-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 0.3s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.about-rail-item.is-active .about-rail-dot {
+  background: hsl(185 70% 45%);
+  box-shadow: 0 0 8px hsl(185 70% 45% / 0.4);
+}
+
+.about-rail-item.is-active .about-rail-label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.about-rail-item:hover .about-rail-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Content column */
+.about-column {
+  max-width: 680px;
+  flex: 1;
+  text-align: left;
+  padding-bottom: 80px;
+}
+
+.about-header {
+  padding-bottom: 40px;
+}
+
+.about-header h1 {
+  font-family: var(--font-display);
+  font-size: 36px;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.92);
-  margin-bottom: 24px;
-  line-height: 1.3;
+  margin: 0;
 }
 
-@media (min-width: 769px) {
-  .scrolly-panel h2 {
+.about-subtitle {
+  font-size: 15px;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 10px;
+}
+
+/* Panels */
+.about-panel {
+  position: relative;
+  padding: 110px 0 90px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+
+  /* Reveal animation — starts hidden */
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 550ms ease, transform 550ms ease;
+}
+
+.about-panel.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Scroll snapping (desktop) */
+@media (min-width: 900px) {
+  .about-column {
+    scroll-snap-type: y proximity;
+  }
+  .about-panel {
+    scroll-snap-align: start;
+  }
+}
+
+/* Watermark number */
+.about-watermark {
+  position: absolute;
+  top: 70px;
+  right: 0;
+  font-family: var(--font-display);
+  font-size: 140px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.03);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Headings */
+.about-panel h2 {
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 28px;
+  line-height: 1.3;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 900px) {
+  .about-panel h2 {
     position: sticky;
     top: 80px;
     background: var(--home-bg);
-    padding-bottom: 16px;
+    padding: 8px 0 16px;
     z-index: 2;
   }
-  .scrolly-panel {
-    padding: 80px 0 48px;
-  }
 }
 
-.scrolly-lead {
+/* Body text */
+.about-body {
+  position: relative;
+  z-index: 1;
+}
+
+.about-lead {
   font-size: 16px;
   color: rgba(255, 255, 255, 0.70);
-  line-height: 1.75;
-  margin-bottom: 16px;
-}
-
-.scrolly-body p {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.55);
   line-height: 1.8;
+  margin-bottom: 18px;
+}
+
+.about-body p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.60);
+  line-height: 1.85;
   margin-bottom: 16px;
 }
 
-.scrolly-body .scrolly-lead {
+.about-body .about-lead {
   font-size: 16px;
   color: rgba(255, 255, 255, 0.70);
 }
 
-.scrolly-callout {
+/* Callout */
+.about-callout {
   border-left: 3px solid hsl(185 70% 45%);
-  padding: 16px 20px;
-  margin: 24px 0;
+  padding: 18px 24px;
+  margin: 28px 0;
   font-style: italic;
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.80);
   line-height: 1.7;
   background: rgba(255, 255, 255, 0.02);
+}
+
+/* ---- Panel 4: Gap visual ---- */
+.about-gap-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 0;
+  gap: 0;
+}
+
+.about-gap-line {
+  height: 2px;
+  flex: 1;
+  max-width: 200px;
+  background: hsl(185 70% 45% / 0.5);
+  border-radius: 1px;
+}
+
+.about-gap-space {
+  width: 12px;
+  transition: width 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.about-panel.is-visible .about-gap-space {
+  width: 48px;
+}
+
+/* ---- Panel 8: Node-map background ---- */
+.about-panel-8-bg {
+  position: relative;
+}
+
+.about-node-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about-node-map circle {
+  fill: hsl(185 70% 55%);
+}
+
+.about-node-map line {
+  stroke: hsl(185 70% 55%);
+  stroke-width: 0.8;
+}
+
+.about-closing-beat {
+  height: 60px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 899px) {
+  .about-scrolly-page {
+    padding: 32px 20px 0;
+  }
+  .about-panel {
+    padding: 64px 0 48px;
+  }
+  .about-watermark {
+    font-size: 90px;
+    top: 40px;
+  }
+  .about-header h1 {
+    font-size: 28px;
+  }
+  .about-panel h2 {
+    font-size: 22px;
+  }
 }
 
 /* ========================================
