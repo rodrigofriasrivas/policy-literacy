@@ -4,21 +4,7 @@ import durhamLogo from "@/assets/durham_logo_white_720_300_rodrigo_frias.png";
 export function SiteFooter() {
   return (
     <footer className="site-footer px-8 py-8">
-      {/* Row 1: Copyright */}
-      <p className="text-[11px] text-white/30 mb-6 pb-4 border-b border-white/[0.06]">
-        Research, design and programming by ©{" "}
-        <a
-          href="https://rodrigofrias.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white/45 hover:text-[hsl(185_70%_55%)] transition-colors no-underline"
-        >
-          Rodrigo Frías
-        </a>
-        .
-      </p>
-
-      {/* Row 2: Three-column grid */}
+      {/* Row 1: Three-column grid */}
       <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto] items-start gap-10 max-w-[1100px] mx-auto">
         {/* Col 1: Logo */}
         <div>
@@ -61,6 +47,20 @@ export function SiteFooter() {
           </Link>
         </nav>
       </div>
+
+      {/* Row 2: Copyright below the grid */}
+      <p className="text-xs text-white/55 mt-6 pt-4 border-t border-white/[0.06]">
+        Research, design and programming by ©{" "}
+        <a
+          href="https://rodrigofrias.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-white/75 hover:text-[hsl(185_70%_55%)] transition-colors no-underline"
+        >
+          Rodrigo Frías
+        </a>
+        .
+      </p>
     </footer>
   );
 }
