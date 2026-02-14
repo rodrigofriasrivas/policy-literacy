@@ -3,41 +3,62 @@ import durhamLogo from "@/assets/durham_logo_white_720_300_rodrigo_frias.png";
 
 export function SiteFooter() {
   return (
-    <footer className="site-footer">
-      {/* Top: copyright line */}
-      <div className="site-footer-copyright">
-        Research, design and programming by © <a href="https://rodrigofrias.com" target="_blank" rel="noopener noreferrer">Rodrigo Frías</a>.
-      </div>
+    <footer className="site-footer px-8 py-8">
+      {/* Row 1: Copyright */}
+      <p className="text-[11px] text-white/30 mb-6 pb-4 border-b border-white/[0.06]">
+        Research, design and programming by ©{" "}
+        <a
+          href="https://rodrigofrias.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-white/45 hover:text-[hsl(185_70%_55%)] transition-colors no-underline"
+        >
+          Rodrigo Frías
+        </a>
+        .
+      </p>
 
-      <div className="site-footer-inner">
-        {/* Left: Logo */}
-        <div className="site-footer-brand">
+      {/* Row 2: Three-column grid */}
+      <div className="grid grid-cols-1 md:grid-cols-[140px_1fr_auto] items-start gap-10 max-w-[1100px] mx-auto">
+        {/* Col 1: Logo */}
+        <div>
           <img
             src={durhamLogo}
             alt="Durham University"
-            className="site-footer-logo"
+            className="w-[130px] h-auto opacity-85"
           />
         </div>
 
-        {/* Middle: Disclaimer + metadata */}
-        <div className="site-footer-info">
-          <p className="site-footer-disclaimer">
+        {/* Col 2: Disclaimer + data sources + version */}
+        <div className="space-y-2">
+          <p className="text-xs text-white/55 leading-relaxed m-0">
             This artefact maps the research landscape; it does not evaluate, rank, or recommend evidence.
           </p>
-          <Link to="/about#data-sources" className="site-footer-link">
+          <Link
+            to="/about#data-sources"
+            className="text-xs text-white/75 hover:text-[hsl(185_70%_55%)] transition-colors no-underline block"
+          >
             Data sources
           </Link>
-          <p className="site-footer-meta">
+          <p className="text-[11px] text-white/40 m-0">
             Version: v1.2025 · Last updated: Feb 2026
           </p>
         </div>
 
-        {/* Right: Mini nav */}
-        <nav className="site-footer-nav">
-          <a href="/artefact/index.html">Network visualisation</a>
-          <Link to="/about">About the project</Link>
-          <Link to="/policy">Policy engagement</Link>
-          <Link to="/contact">Contact</Link>
+        {/* Col 3: Mini nav */}
+        <nav className="space-y-2 md:text-right">
+          <a href="/artefact/index.html" className="block text-xs text-white/60 hover:text-[hsl(185_70%_55%)] transition-colors no-underline">
+            Network visualisation
+          </a>
+          <Link to="/about" className="block text-xs text-white/60 hover:text-[hsl(185_70%_55%)] transition-colors no-underline">
+            About the project
+          </Link>
+          <Link to="/policy" className="block text-xs text-white/60 hover:text-[hsl(185_70%_55%)] transition-colors no-underline">
+            Policy engagement
+          </Link>
+          <Link to="/contact" className="block text-xs text-white/60 hover:text-[hsl(185_70%_55%)] transition-colors no-underline">
+            Contact
+          </Link>
         </nav>
       </div>
     </footer>
