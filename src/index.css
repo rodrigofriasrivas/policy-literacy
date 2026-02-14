@@ -742,15 +742,7 @@
   z-index: 2;
 }
 
-@media (min-width: 900px) {
-  .about-panel h2 {
-    position: sticky;
-    top: 80px;
-    background: var(--home-bg);
-    padding: 8px 0 14px;
-    z-index: 2;
-  }
-}
+/* H2 is NOT sticky — sticky caused overlap with body text */
 
 /* Style C: Body text — one size for all paragraphs */
 .about-body {
