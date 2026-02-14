@@ -1,75 +1,25 @@
 
 
-# Site-Wide Dark Glass Footer
+# Fix: About Page Text Invisible on Dark Background
 
-## Overview
-Create a shared footer component used across all four React pages (Home, About, Policy, Contact). The footer uses a dark glass aesthetic consistent with the artefact's visual language. It replaces the current simple footer in `HomeLayout`.
+## Problem
+The About page content IS in the code (all seven paragraphs, subtitle, and Data sources section), but the text is invisible because the CSS uses **black text colours** (`rgba(0, 0, 0, ...)`) on a **dark background**. The text is literally there but cannot be seen.
 
-## Assets
-- Copy the two uploaded Durham University logos into `src/assets/`:
-  - `durham_logo_white_720_300_rodrigo_frias.png` (for the dark footer background)
-  - `durham_logo_black_720_300_rodrigo_frias.png` (kept as fallback, though the footer is always dark)
+## Root Cause
+The `.placeholder-page`, `.placeholder-content`, and `.text-muted` styles in `src/index.css` (lines 395-426) use black-based colours:
+- `h1`: `rgba(0, 0, 0, 0.9)` -- black on dark = invisible
+- `p`: `rgba(0, 0, 0, 0.7)` -- black on dark = invisible
+- `.text-muted`: `rgba(0, 0, 0, 0.5)` -- black on dark = invisible
 
-Since the footer background is always dark (`rgba(10,10,10,0.7)`), the white logo will be used by default. The black variant is stored for future use if a light theme is ever added.
+## Fix
+Update the placeholder page CSS colours to use **white-based values** that are visible on the dark background, consistent with the rest of the site:
 
-## New Component: `src/components/layout/SiteFooter.tsx`
+### `src/index.css` (lines 409-426)
+- `h1` colour: change to `rgba(255, 255, 255, 0.92)`
+- `p` colour: change to `rgba(255, 255, 255, 0.7)`
+- `.text-muted` colour: change to `rgba(255, 255, 255, 0.55)`
 
-Three-column layout on desktop, stacked on mobile.
+### `src/pages/AboutPage.tsx`
+- Also change `text-align: center` on `.placeholder-content` to `text-align: left` so the long-form prose reads naturally (left-aligned). This can be done with an inline style override on the About page, or by updating the CSS class.
 
-**Left block** -- Durham University logo (white version), sized to roughly 120-140px wide.
-
-**Middle block**:
-- Disclaimer: "This artefact maps the research landscape; it does not evaluate, rank, or recommend evidence." (small, muted text)
-- "Data sources" link pointing to `/about#data-sources` (React Router `Link`)
-- Metadata: "Version: v1.2025 -- Last updated: Feb 2026"
-
-**Right block** -- Mini navigation (smaller than header):
-- "Network visualisation" as `<a href="/artefact/index.html">`
-- "About the project" as `<Link to="/about">`
-- "Policy engagement" as `<Link to="/policy">`
-- "Contact" as `<Link to="/contact">`
-
-**Bottom row** (full width, centered):
-- "Research, design and programming by (c) Rodrigo Frias." (smallest text)
-
-**Styling** (CSS in `src/index.css`):
-- `background: rgba(10, 10, 10, 0.7)`
-- `border-top: 1px solid rgba(255, 255, 255, 0.08)`
-- `backdrop-filter: blur(18px)`
-- Body text ~12-13px, muted at `rgba(255, 255, 255, 0.55-0.7)`
-- Links slightly brighter, with hover effect matching the cyan accent
-
-## Changes to Existing Files
-
-### 1. `src/components/layout/HomeLayout.tsx`
-- Remove the existing inline `<footer>` block
-- Import and render `<SiteFooter />` instead
-
-### 2. `src/pages/AboutPage.tsx`
-- Add `id="data-sources"` to the paragraph that mentions data sources, so `/about#data-sources` scrolls to it
-- Wrap the data-sources content in a `<section id="data-sources">` element
-
-### 3. `src/pages/PolicyPage.tsx` and `src/pages/ContactPage.tsx`
-- No changes needed -- they already use `HomeLayout` which will get the new footer automatically
-
-### 4. `src/index.css`
-- Replace the `.home-footer` styles with new `.site-footer` styles
-- Add responsive rules: on mobile (<768px), stack the three columns vertically, center-align content
-
-## Technical Details
-
-```text
-+-------------------------------------------------------+
-| [Durham Logo]  |  Disclaimer text       |  Mini Nav   |
-|   (white)      |  Data sources link     |  4 links    |
-|                |  Version metadata      |  (vertical) |
-+-------------------------------------------------------+
-|   Research, design and programming by (c) Rodrigo...  |
-+-------------------------------------------------------+
-```
-
-- Logo imported via ES module: `import logo from "@/assets/durham_logo_white_720_300_rodrigo_frias.png"`
-- Footer is part of `HomeLayout`, so it appears on all four marketing pages automatically
-- The `AppLayout` (used for evidence routes) is not affected -- those routes redirect to the artefact anyway
-- No changes to the Antigravity artefact UI
-
+No new files, no new routes -- just a colour fix in the existing CSS.
