@@ -3111,6 +3111,12 @@
                             <div class="tooltip-sub">Occurrences: ${freq}</div>
                         `;
                 } else if (hoveredNode.type === 'paper') {
+                    // Safe author formatting
+                    const authors = hoveredNode.authors || [];
+                    const authorsShort = authors.length > 2 ?
+                        (authors[0].last_name || authors[0].name || 'Unknown') + ' et al.' :
+                        authors.map(a => a.last_name || a.name || 'Unknown').join(' & ');
+
                     tooltip.innerHTML = `
                         <div style="margin-bottom: 4px;">
                              <span class="tooltip-tag" style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">${hoveredNode.year || 'N/A'}</span>
@@ -5446,6 +5452,17 @@
             } else if (view === 'topic') {
                 if (topicView) topicView.style.display = 'block';
                 // Canvas is handled by initIndividualTopicDashboard
+            } else if (view === 'network') {
+                // Ensure canvas is back in main container
+                const container = document.getElementById('container');
+                if (container && canvas && canvas.parentElement !== container) {
+                    container.appendChild(canvas);
+                    // canvas.style.position = 'absolute'; // Should be default
+                    // Restore dimensions if needed? 
+                    // Usually window resize or initMacroView will handle it, but we can force width match
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
             }
         };
 
