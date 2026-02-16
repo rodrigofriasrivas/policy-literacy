@@ -1371,8 +1371,12 @@
                             <a href="#" class="stitch-sub-link">Paper Library</a>
                         </div>
                         <div class="stitch-breadcrumbs">
-                            NETWORK VISUALISATION <span style="margin: 0 6px;">→</span> <span
-                                class="stitch-bc-current">NETWORK VIEW</span>
+                            <span style="opacity: 0.6; margin-right: 5px; font-weight: 400;">You are here:</span>
+                            <a href="#" onclick="goHome(); return false;"
+                                style="color: inherit; text-decoration: none; font-weight: 600;">NETWORK
+                                VISUALISATION</a>
+                            <span style="margin: 0 6px; opacity: 0.6;">/</span>
+                            <span class="stitch-bc-current">NETWORK VIEW</span>
                         </div>
                     </div>
 
@@ -2243,7 +2247,7 @@
                             // 2. Breadcrumbs
                             const breadcrumbs = document.querySelector('.stitch-breadcrumbs');
                             if (breadcrumbs) {
-                                breadcrumbs.innerHTML = `NETWORK VISUALISATION <span style="margin: 0 6px;">→</span> <span class="stitch-bc-current">TOPIC ${t.id}: ${cleanName}</span>`;
+                                breadcrumbs.innerHTML = `<span style="opacity: 0.6; margin-right: 5px; font-weight: 400;">You are here:</span> <a href="#" onclick="goHome(); return false;" style="color: inherit; text-decoration: none; font-weight: 600;">NETWORK VISUALISATION</a> <span style="margin: 0 6px; opacity: 0.6;">/</span> <span class="stitch-bc-current">TOPIC ${t.id}: ${cleanName}</span>`;
                             }
                         }
                     }
@@ -5451,6 +5455,17 @@
                 container.innerHTML = 'Error loading trends.';
             }
         }
+
+        // Global Navigation Helper
+        window.goHome = function () {
+            // Check if we are in Topic Mode (via URL)
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('mode') === 'topic') {
+                window.location.href = 'index.html';
+            } else {
+                switchView('network');
+            }
+        };
 
         // Global Switch View Function
         window.switchView = function (view) {
