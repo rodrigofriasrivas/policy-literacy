@@ -3942,39 +3942,44 @@
             try {
                 // Fetch basic paper data (year, journal) to allow client-side filtering
                 // This replaces v_chart1_corpus_growth usage to respect journal filters
-                const url = `${SUPABASE_URL}/rest/v1/papers?select=year,journal&order=year.asc`;
+                const url = `${SUPABASE_URL}/rest/v1/papers?select=id,year,journal&order=year.asc`;
 
                 const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                 if (!response.ok) throw new Error(`Status ${response.status}`);
 
                 const data = await response.json();
 
-                // Client-side Filter & Aggregate
+                // Client-side Filter & Aggregate (Distinct Papers)
                 const yearCounts = {};
-                // Initialize range with 0
-                const yStart = (typeof minYear !== 'undefined') ? minYear : 1980;
-                const yEnd = (typeof maxYear !== 'undefined') ? maxYear : 2024;
+                const seenPaperIds = new Set();
 
-                for (let y = yStart; y <= yEnd; y++) {
+                // Initialize range (1980-2025)
+                const yStart = (typeof minYear !== 'undefined') ? minYear : 1980;
+                const yEnd = (typeof maxYear !== 'undefined') ? maxYear : 2025;
+
+                for (let y = 1980; y <= 2025; y++) {
                     yearCounts[y] = 0;
                 }
 
                 data.forEach(p => {
-                    const y = p.year;
-                    if (y >= yStart && y <= yEnd) {
-                        // Check Journal Filter
-                        if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0) {
-                            if (selectedJournals.has(p.journal)) {
+                    const y = parseInt(p.year);
+                    // Validate year and uniqueness
+                    if (!isNaN(y) && y >= 1980 && y <= 2025) {
+                        // Deduplicate by ID
+                        if (p.id && seenPaperIds.has(p.id)) return;
+                        if (p.id) seenPaperIds.add(p.id);
+
+                        // Check Timeframe Filter (Current Scope)
+                        if (y >= yStart && y <= yEnd) {
+                            // Check Journal Filter
+                            let include = true;
+                            if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0) {
+                                include = selectedJournals.has(p.journal);
+                            }
+
+                            if (include) {
                                 yearCounts[y] = (yearCounts[y] || 0) + 1;
                             }
-                        } else {
-                            // No filter active or empty set (assume all? or handle empty as none?)
-                            // Usually initialized to all. If empty, maybe assume all for safety or check app logic.
-                            // For this task, we assume empty means 'all' if not initialized, 
-                            // but if initialized and empty, it means none. 
-                            // However, safer to default to include if logic is ambiguous, 
-                            // but correct UX is: if filter is applied, respect it.
-                            yearCounts[y] = (yearCounts[y] || 0) + 1;
                         }
                     }
                 });
