@@ -5160,35 +5160,7 @@
             }
         }
 
-        async function loadTemporalView() {
-            try {
-                // Update header
-                document.getElementById('view-title').textContent = 'Temporal Evolution';
-                document.getElementById('view-subtitle').textContent = 'Analyzing trends over time (1980-2025)';
 
-                // Hide unwanted containers
-                document.getElementById('global-controls').style.display = 'none'; // Hide macro global controls
-                document.getElementById('macro-view').style.display = 'none';
-                document.getElementById('micro-view').style.display = 'none';
-
-                // Show temporal container
-                const temporalView = document.getElementById('temporal-view');
-                temporalView.style.display = 'block';
-
-                // Fetch Data (Parallel)
-                await Promise.all([
-                    fetchAndRenderCorpusGrowth(),    // Chart 1
-                    fetchAndRenderEmergence(),       // Chart 3
-                    fetchAndRenderTopicTrends(),     // Chart 4
-                    fetchAndRenderBigramTrends()     // Chart 5 (New)
-                ]);
-
-            } catch (e) {
-                const chartDiv = document.getElementById('temporal-view');
-                console.error('Temporal Load Error:', e);
-                chartDiv.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading data: ${e.message}</div>`;
-            }
-        }
 
         // -------------------------------------------------------------------------
         // INDIVIDUAL TOPIC DASHBOARD LOGIC
