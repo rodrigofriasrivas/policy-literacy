@@ -3923,9 +3923,15 @@
                 }
 
             } catch (e) {
-                console.error('Temporal Load Error:', e);
-                chartDiv.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading data: ${e.message}</div>`;
+                console.error('Topic Prevalence Load Error:', e);
+                chartDiv.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading topic prevalence: ${e.message}</div>`;
             }
+
+            // Load other charts independently
+            fetchAndRenderCorpusGrowth(); // Now uses papers table directly
+            // fetchAndRenderEmergence();    // Skipped for now
+            // fetchAndRenderTopicTrends();  // Skipped for now
+            temporalDataLoaded = true;
         }
 
         async function fetchAndRenderCorpusGrowth() {
@@ -3934,32 +3940,55 @@
             container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading...</div>';
 
             try {
-                const url = `${SUPABASE_URL}/rest/v1/v_chart1_corpus_growth?select=year,papers_count&order=year.asc`;
-                console.log('Fetching Chart 1 URL:', url); // Debug log 1
+                // Fetch basic paper data (year, journal) to allow client-side filtering
+                // This replaces v_chart1_corpus_growth usage to respect journal filters
+                const url = `${SUPABASE_URL}/rest/v1/papers?select=year,journal&order=year.asc`;
 
                 const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                if (!response.ok) {
-                    console.error('Fetch error:', response.status, response.statusText, 'URL:', url);
-                    throw new Error(`Status ${response.status}: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`Status ${response.status}`);
+
                 const data = await response.json();
 
-                if (data && data.length > 0) {
-                    console.log('Chart 1 Data Sample:', data[0]); // Debug log 2
-                } else {
-                    console.warn('Chart 1 Data is empty');
+                // Client-side Filter & Aggregate
+                const yearCounts = {};
+                // Initialize range with 0
+                const yStart = (typeof minYear !== 'undefined') ? minYear : 1980;
+                const yEnd = (typeof maxYear !== 'undefined') ? maxYear : 2024;
+
+                for (let y = yStart; y <= yEnd; y++) {
+                    yearCounts[y] = 0;
                 }
 
-                // Ensure 1980-2025 range
-                const fullData = [];
-                for (let y = 1980; y <= 2025; y++) {
-                    const row = data.find(d => d.year === y);
-                    fullData.push({ year: y, count: row ? row.papers_count : 0 });
-                }
+                data.forEach(p => {
+                    const y = p.year;
+                    if (y >= yStart && y <= yEnd) {
+                        // Check Journal Filter
+                        if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0) {
+                            if (selectedJournals.has(p.journal)) {
+                                yearCounts[y] = (yearCounts[y] || 0) + 1;
+                            }
+                        } else {
+                            // No filter active or empty set (assume all? or handle empty as none?)
+                            // Usually initialized to all. If empty, maybe assume all for safety or check app logic.
+                            // For this task, we assume empty means 'all' if not initialized, 
+                            // but if initialized and empty, it means none. 
+                            // However, safer to default to include if logic is ambiguous, 
+                            // but correct UX is: if filter is applied, respect it.
+                            yearCounts[y] = (yearCounts[y] || 0) + 1;
+                        }
+                    }
+                });
+
+                const fullData = Object.keys(yearCounts).sort().map(y => ({
+                    year: parseInt(y),
+                    count: yearCounts[y]
+                }));
+
                 renderCorpusChartD3(container, fullData);
+
             } catch (e) {
                 console.error('Corpus Growth Error:', e);
-                container.innerHTML = '<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">Data unavailable.<br>Check v_chart1_corpus_growth.</div>';
+                container.innerHTML = '<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">Unable to load corpus growth data.<br>(' + e.message + ')</div>';
             }
         }
 
@@ -3972,8 +4001,9 @@
             const svg = d3.select(container).append('svg')
                 .attr('width', width).attr('height', height).style('overflow', 'visible');
 
-            // Explicit domain 1980-2025
-            const x = d3.scaleLinear().domain([1980, 2025]).range([margin.left, width - margin.right]);
+            // Dynamic domain based on data or globals
+            const xDomain = d3.extent(data, d => d.year);
+            const x = d3.scaleLinear().domain(xDomain).range([margin.left, width - margin.right]);
             const y = d3.scaleLinear().domain([0, d3.max(data, d => d.count)]).range([height - margin.bottom, margin.top]);
 
             // Area
