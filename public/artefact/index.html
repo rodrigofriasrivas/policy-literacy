@@ -1019,18 +1019,23 @@
             background: transparent !important;
             overflow: hidden;
         }
+
         body.embed-mode #container {
             background: transparent !important;
         }
+
         body.embed-mode #ui-layer {
             display: none !important;
         }
+
         body.embed-mode #zoomControls {
             display: none !important;
         }
+
         body.embed-mode #topicTitle {
             display: none !important;
         }
+
         body.embed-mode #loading {
             /* keep spinner but transparent bg */
         }
@@ -1488,6 +1493,100 @@
                                     style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
                                     &nbsp;
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Individual Topic Dashboard -->
+                    <div id="view-topic" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                        <div style="max-width: 1400px; margin: 0 auto; padding-bottom: 40px;">
+
+                            <!-- Header Region: Two-Column (Topic Brief + Network Graph) -->
+                            <div
+                                style="display: grid; grid-template-columns: 350px 1fr; gap: 24px; margin-bottom: 24px;">
+                                <!-- Left: Topic Brief -->
+                                <div class="stitch-card"
+                                    style="margin-bottom: 0; display: flex; flex-direction: column;">
+                                    <div class="stitch-card-title" id="topic-brief-title">Loading...</div>
+                                    <div class="stitch-card-subtitle" id="topic-brief-subtitle"
+                                        style="margin-bottom: 16px;">Topic definition</div>
+                                    <div id="topic-brief-definition"
+                                        style="color: var(--text-primary); font-size: 14px; line-height: 1.6; flex: 1;">
+                                        Loading definition...
+                                    </div>
+                                </div>
+
+                                <!-- Right: Network Graph Card -->
+                                <div class="stitch-card"
+                                    style="margin-bottom: 0; padding: 0; height: 500px; position: relative; overflow: hidden; background: var(--bg-color);">
+                                    <!-- Canvas Container -->
+                                    <div id="topic-network-container"
+                                        style="width: 100%; height: 100%; position: absolute; top: 0; left: 0;">
+                                        <!-- D3 Canvas will be moved here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Top Terms -->
+                            <div class="stitch-card">
+                                <div class="stitch-card-title">Top terms shaping this topic</div>
+                                <div id="topic-top-terms"
+                                    style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+                                    <!-- Chips injected here -->
+                                </div>
+                            </div>
+
+                            <!-- Bigram Trends -->
+                            <div class="stitch-card">
+                                <div class="stitch-card-title" id="topic-trends-title">Bigram trends over time</div>
+                                <div class="stitch-card-subtitle">Tracks how the topic’s five defining terms rise and
+                                    fall
+                                    across the corpus timeline.</div>
+                                <div id="topic-trends-chart-container" style="height: 300px; width: 100%;"></div>
+                            </div>
+
+                            <!-- Papers Table -->
+                            <div class="stitch-card">
+                                <div class="stitch-card-title" id="topic-papers-title">Papers informing this topic</div>
+                                <div style="overflow-x: auto;">
+                                    <table id="topic-papers-table"
+                                        style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+                                        <thead>
+                                            <tr style="border-bottom: 1px solid var(--chart-panel-border);">
+                                                <th
+                                                    style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                                    Year</th>
+                                                <th
+                                                    style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%;">
+                                                    Title</th>
+                                                <th
+                                                    style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                                    Author(s)</th>
+                                                <th
+                                                    style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                                    Journal</th>
+                                                <th style="width: 40px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topic-papers-tbody"></tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <div id="topic-papers-pagination"
+                                    style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 24px;">
+                                    <button id="papers-prev-btn" class="btn" style="width: auto;">Previous</button>
+                                    <div id="papers-page-info" style="color: var(--text-secondary); font-size: 13px;">
+                                        Page 1
+                                    </div>
+                                    <button id="papers-next-btn" class="btn" style="width: auto;">Next</button>
+                                </div>
+                            </div>
+
+                            <!-- Topic Navigation -->
+                            <div style="display: flex; justify-content: space-between; margin-top: 32px;">
+                                <button id="prev-topic-btn" class="btn" style="width: auto;">← Previous Topic</button>
+                                <button id="next-topic-btn" class="btn" style="width: auto;">Next Topic →</button>
                             </div>
                         </div>
                     </div>
@@ -2095,6 +2194,8 @@
                         if (!topicExists) {
                             console.error(`❌ Topic ${tId} found in URL but not in data. Fallback to Macro.`);
                         } else {
+                            // Save all topics for navigation before filtering
+                            window.globalAllTopics = [...allData.topics];
                             allData.topics = allData.topics.filter(t => t.id === tId);
 
                             // 2. Filter Bigrams (Keep only belonging to topic)
@@ -2141,8 +2242,14 @@
                     computeBigramLinks(); // Generate bigram network
 
 
-                    initMacroView();
-                    animate();
+                    if (urlState.mode === 'topic') {
+                        await initIndividualTopicDashboard();
+                        initMacroView();
+                        animate();
+                    } else {
+                        initMacroView();
+                        animate();
+                    }
 
                 } catch (error) {
                     console.error('💥 Error:', error);
@@ -3087,6 +3194,20 @@
             });
 
             window.addEventListener('resize', () => {
+                if (urlState.mode === 'topic') {
+                    // Constrain to topic container
+                    const container = document.getElementById('topic-network-container');
+                    if (container) {
+                        const rect = container.getBoundingClientRect();
+                        width = rect.width;
+                        height = rect.height;
+                        canvas.width = width;
+                        canvas.height = height;
+                        initMacroView(); // Restart sim
+                        return;
+                    }
+                }
+
                 width = window.innerWidth;
                 height = window.innerHeight;
                 canvas.width = width;
@@ -5012,6 +5133,246 @@
                 }
             }
 
+            // -------------------------------------------------------------------------
+            // INDIVIDUAL TOPIC DASHBOARD LOGIC
+            // -------------------------------------------------------------------------
+            let topicPapers = [];
+            let topicPapersPage = 1;
+
+            async function initIndividualTopicDashboard() {
+                const topicId = urlState.topicId;
+                if (!topicId) return;
+
+                console.log(`📊 Initializing Individual Topic Dashboard for Topic ${topicId}`);
+
+                // 1. Move Canvas Logic
+                const canvasContainer = document.getElementById('topic-network-container');
+                if (canvasContainer) {
+                    // Force display block to get dimensions
+                    document.getElementById('view-topic').style.display = 'block';
+
+                    const rect = canvasContainer.getBoundingClientRect();
+                    if (rect.width > 0) {
+                        width = rect.width;
+                        height = rect.height;
+                        canvas.width = width;
+                        canvas.height = height;
+                        canvasContainer.appendChild(canvas);
+                        canvas.style.position = 'absolute';
+                    }
+                }
+
+                // Switch View (visually)
+                switchView('topic');
+
+                // 2. Populate Data
+                const topic = allData.topics[0] || { id: topicId, topic_name: 'Unknown Topic' };
+
+                // Header
+                const titleEl = document.getElementById('topic-brief-title');
+                const subEl = document.getElementById('topic-brief-subtitle');
+                const defEl = document.getElementById('topic-brief-definition');
+
+                if (titleEl) titleEl.textContent = topic.topic_name || topic.name;
+                if (subEl) subEl.textContent = `Topic ${topic.id}`;
+                if (defEl) defEl.innerHTML = topic.definition || "No definition available.";
+
+                // Top Terms
+                const sortedBigrams = [...allData.bigrams]
+                    .sort((a, b) => (b.normalized_frequency || 0) - (a.normalized_frequency || 0))
+                    .slice(0, 5);
+
+                const termsContainer = document.getElementById('topic-top-terms');
+                if (termsContainer) {
+                    if (sortedBigrams.length === 0) termsContainer.innerHTML = '<span style="color:var(--text-secondary);font-size:12px">No terms available</span>';
+                    else {
+                        termsContainer.innerHTML = sortedBigrams.map(b =>
+                            `<span style="background:rgba(255,255,255,0.05);border:1px solid var(--chart-panel-border);padding:6px 12px;border-radius:20px;font-size:13px;color:var(--text-primary);white-space:nowrap;">${b.bigram}</span>`
+                        ).join('');
+                    }
+                }
+
+                // Trends Chart
+                renderTopicTrendsChart(topicId, sortedBigrams);
+
+                // Papers Table
+                topicPapers = allData.papers.sort((a, b) => (b.year || 0) - (a.year || 0));
+                topicPapersPage = 1;
+                renderTopicPapersTable();
+
+                // Navigation
+                setupTopicNavigation(topicId);
+            }
+
+            function setupTopicNavigation(currentTopicId) {
+                const prevBtn = document.getElementById('prev-topic-btn');
+                const nextBtn = document.getElementById('next-topic-btn');
+
+                if (!window.globalAllTopics) {
+                    // Try to use allData.topics if global missing (fallback)
+                    window.globalAllTopics = [...allData.topics];
+                }
+
+                const allTopics = window.globalAllTopics;
+                if (!allTopics || allTopics.length === 0) return;
+
+                const sorted = [...allTopics].sort((a, b) => a.id - b.id);
+                const idx = sorted.findIndex(t => t.id === currentTopicId);
+
+                if (prevBtn) {
+                    prevBtn.onclick = () => {
+                        const t = sorted[(idx - 1 + sorted.length) % sorted.length];
+                        window.location.search = `?mode=topic&embed=${isEmbedMode}&topicId=${t.id}`;
+                    };
+                }
+                if (nextBtn) {
+                    nextBtn.onclick = () => {
+                        const t = sorted[(idx + 1) % sorted.length];
+                        window.location.search = `?mode=topic&embed=${isEmbedMode}&topicId=${t.id}`;
+                    };
+                }
+            }
+
+            function renderTopicPapersTable() {
+                const tbody = document.getElementById('topic-papers-tbody');
+                const info = document.getElementById('papers-page-info');
+                const prev = document.getElementById('papers-prev-btn');
+                const next = document.getElementById('papers-next-btn');
+
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                const size = 50;
+                const total = Math.ceil(topicPapers.length / size) || 1;
+                if (topicPapersPage < 1) topicPapersPage = 1;
+                if (topicPapersPage > total) topicPapersPage = total;
+
+                const chunk = topicPapers.slice((topicPapersPage - 1) * size, topicPapersPage * size);
+
+                chunk.forEach(p => {
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid var(--chart-row-border)';
+
+                    const title = p.title || 'Untitled';
+
+                    row.innerHTML = `
+                        <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.year || ''}</td>
+                        <td style="padding:12px;color:var(--text-primary);font-size:13px;font-weight:500;word-break:break-word;vertical-align:top;line-height:1.5;">${title}</td>
+                        <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.authors || 'Unknown'}</td>
+                        <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;font-style:italic;">${p.journal || ''}</td>
+                        <td style="padding:12px;vertical-align:top;text-align:right;">
+                            <button class="btn expand-btn" style="width:24px;height:24px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;">▼</button>
+                        </td>
+                    `;
+
+                    const absRow = document.createElement('tr');
+                    absRow.style.display = 'none';
+                    absRow.innerHTML = `
+                        <td colspan="5" style="padding:0 12px 24px 12px;border-bottom:1px solid var(--chart-row-border);">
+                            <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:8px;color:var(--text-secondary);font-size:13px;line-height:1.6;">
+                                <strong style="color:var(--text-primary);display:block;margin-bottom:8px;">Abstract</strong>
+                                ${p.abstract || 'No abstract available.'}
+                            </div>
+                        </td>
+                    `;
+
+                    row.querySelector('.expand-btn').onclick = function () {
+                        const isHidden = absRow.style.display === 'none';
+                        absRow.style.display = isHidden ? 'table-row' : 'none';
+                        this.textContent = isHidden ? '▲' : '▼';
+                    };
+
+                    tbody.appendChild(row);
+                    tbody.appendChild(absRow);
+                });
+
+                if (info) info.textContent = `Page ${topicPapersPage} / ${total}`;
+
+                if (prev) {
+                    prev.disabled = topicPapersPage <= 1;
+                    prev.onclick = () => {
+                        if (topicPapersPage > 1) { topicPapersPage--; renderTopicPapersTable(); }
+                    };
+                }
+                if (next) {
+                    next.disabled = topicPapersPage >= total;
+                    next.onclick = () => {
+                        if (topicPapersPage < total) { topicPapersPage++; renderTopicPapersTable(); }
+                    };
+                }
+            }
+
+            async function renderTopicTrendsChart(topicId, topBigrams) {
+                const container = document.getElementById('topic-trends-chart-container');
+                if (!container || !topBigrams.length) return;
+
+                container.innerHTML = 'Loading trends...';
+
+                try {
+                    const idsIdx = `(${topBigrams.map(b => b.id).join(',')})`;
+                    // Re-use logic: fetch bigram trends for these IDs
+                    // Manually constructing fetching logic since helper is rigid
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/v_chart5_bigram_trends?select=*&bigram_id=in.${idsIdx}&limit=2000`, {
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    });
+
+                    const data = await response.json();
+                    container.innerHTML = '';
+
+                    if (!data || !data.length) {
+                        container.textContent = 'No trend data.';
+                        return;
+                    }
+
+                    // Render with D3
+                    const w = container.offsetWidth;
+                    const h = container.offsetHeight;
+                    const margin = { top: 20, right: 100, bottom: 30, left: 40 };
+                    const svg = d3.select(container).append('svg').attr('width', w).attr('height', h);
+
+                    const x = d3.scaleLinear().domain([1980, 2025]).range([margin.left, w - margin.right]);
+                    const y = d3.scaleLinear().domain([0, d3.max(data, d => d.normalized_frequency)]).nice().range([h - margin.bottom, margin.top]);
+
+                    // Axis
+                    svg.append("g").attr("transform", `translate(0,${h - margin.bottom})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("d"))).attr("color", "#666");
+                    svg.append("g").attr("transform", `translate(${margin.left},0)`).call(d3.axisLeft(y).ticks(5)).attr("color", "#666");
+
+                    // Lines
+                    const grouped = d3.group(data, d => d.bigram_id);
+                    const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
+
+                    grouped.forEach((vals, bid) => {
+                        vals.sort((a, b) => a.year - b.year);
+                        const bName = topBigrams.find(b => b.id == bid)?.bigram || 'Unknown';
+                        const color = colorScale(bid);
+
+                        svg.append("path")
+                            .datum(vals)
+                            .attr("fill", "none")
+                            .attr("stroke", color)
+                            .attr("stroke-width", 2)
+                            .attr("d", d3.line().x(d => x(d.year)).y(d => y(d.normalized_frequency)));
+
+                        // Label
+                        if (vals.length) {
+                            const last = vals[vals.length - 1];
+                            svg.append("text")
+                                .attr("x", x(last.year) + 5).attr("y", y(last.normalized_frequency))
+                                .attr("fill", color)
+                                .style("font-size", "10px")
+                                .text(bName);
+                        }
+                    });
+
+                } catch (e) {
+                    console.error(e);
+                    container.innerHTML = 'Error loading trends.';
+                }
+            }
+
             // Global Switch View Function
             window.switchView = function (view) {
                 // Update Nav Active State
@@ -5026,11 +5387,19 @@
 
                 // Toggle Views
                 const tView = document.getElementById('view-temporal');
+                const topicView = document.getElementById('view-topic');
+
+                if (tView) tView.style.display = 'none';
+                if (topicView) topicView.style.display = 'none';
+
                 if (view === 'temporal') {
-                    if (tView) tView.style.display = 'block';
-                    loadTemporalView();
-                } else {
-                    if (tView) tView.style.display = 'none';
+                    if (tView) {
+                        tView.style.display = 'block';
+                        loadTemporalView();
+                    }
+                } else if (view === 'topic') {
+                    if (topicView) topicView.style.display = 'block';
+                    // Canvas is handled by initIndividualTopicDashboard
                 }
             };
 
