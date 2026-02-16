@@ -3810,9 +3810,9 @@
 
 
             // Start!
-            loadData().then(() => {
-                populateAdvancedFilters();
-            });
+            // Start!
+            // Moved to end of file to ensure all functions are defined
+            // loadData().then(() => { populateAdvancedFilters(); });
 
             // Override loadDemo to ensure filters populate
             window.loadDemo = () => {
@@ -5441,6 +5441,19 @@
             document.addEventListener('keydown', function (event) {
                 if (event.key === "Escape") {
                     closeTemporalModal();
+                }
+            });
+
+            // Start the application after all definitions are ready
+            loadData().then(() => {
+                if (typeof populateAdvancedFilters === 'function') {
+                    populateAdvancedFilters();
+                }
+            }).catch(e => {
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.display = 'flex';
+                    loading.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading data: ${e.message}</div>`;
                 }
             });
         </script>
