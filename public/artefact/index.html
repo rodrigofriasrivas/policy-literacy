@@ -3940,9 +3940,16 @@
             container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading...</div>';
 
             try {
-                // Fetch basic paper data including title for deduplication (ID caused 400 error)
-                // Added limit=20000 to ensure full corpus (default 1000)
-                const url = `${SUPABASE_URL}/rest/v1/papers?select=title,year,journal&order=year.asc&limit=20000`;
+                // 1. Identify ID column (avoiding guesswork)
+                let idColumn = 'id';
+                try {
+                    const probe = await fetch(`${SUPABASE_URL}/rest/v1/papers?select=id&limit=1`,
+                        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
+                    if (!probe.ok) idColumn = 'paper_id';
+                } catch (e) { idColumn = 'paper_id'; }
+
+                // 2. Fetch full corpus using determined ID
+                const url = `${SUPABASE_URL}/rest/v1/papers?select=${idColumn},year,journal&order=year.asc&limit=20000`;
 
                 const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                 if (!response.ok) throw new Error(`Status ${response.status}`);
@@ -3951,9 +3958,10 @@
 
 
 
-                // Client-side Filter & Aggregate (Distinct Papers by Title)
+                // 3. Aggregate (Distinct IDs)
                 const yearCounts = {};
-                const seenTitles = new Set();
+                const seenIds = new Set();
+                let missingYearCount = 0;
 
                 // Initialize range (1980-2025)
                 const yStart = (typeof minYear !== 'undefined') ? minYear : 1980;
@@ -3965,24 +3973,29 @@
 
                 data.forEach(p => {
                     const y = parseInt(p.year);
-                    // Validate year and uniqueness
-                    if (!isNaN(y) && y >= 1980 && y <= 2025) {
-                        const titleKey = (p.title || '').trim().toLowerCase();
+                    const pid = p[idColumn];
 
-                        // Deduplicate by Title
-                        if (titleKey && seenTitles.has(titleKey)) return;
-                        if (titleKey) seenTitles.add(titleKey);
+                    if (isNaN(y)) {
+                        missingYearCount++;
+                        return;
+                    }
 
-                        // Check Timeframe Filter (Current Scope)
-                        if (y >= yStart && y <= yEnd) {
-                            // Check Journal Filter
-                            let include = true;
-                            if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0) {
-                                include = selectedJournals.has(p.journal);
-                            }
+                    // Strict Deduplication by ID
+                    if (pid && !seenIds.has(pid)) {
+                        seenIds.add(pid);
 
-                            if (include) {
-                                yearCounts[y] = (yearCounts[y] || 0) + 1;
+                        // Apply Filters (Timeframe & Journal)
+                        if (y >= 1980 && y <= 2025) {
+                            if (y >= yStart && y <= yEnd) {
+                                // Check Journal Filter
+                                let include = true;
+                                if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0) {
+                                    include = selectedJournals.has(p.journal);
+                                }
+
+                                if (include) {
+                                    yearCounts[y] = (yearCounts[y] || 0) + 1;
+                                }
                             }
                         }
                     }
@@ -3992,6 +4005,39 @@
                     year: parseInt(y),
                     count: yearCounts[y]
                 }));
+
+                // 4. Audit Logs (Fixed + Verification)
+                const totalPlotted = fullData.reduce((sum, d) => sum + d.count, 0);
+                const distinctPaperCount = seenIds.size;
+                const maxYearCount = Math.max(0, ...fullData.map(d => d.count));
+
+                console.group('Corpus Growth Audit (Fixed)');
+                console.log(`1. ID Column Used: ${idColumn}`);
+                console.log(`2. Total Raw Rows: ${data.length}`);
+                console.log(`3. Total Distinct Papers (by ${idColumn}): ${distinctPaperCount}`);
+                console.log(`4. Sum of Plotted Counts: ${totalPlotted}`);
+                console.log(`5. Rows with Missing Year: ${missingYearCount}`);
+
+                // New: Yearly Counts Preview
+                console.log('6. Yearly Counts Preview (First 10):', fullData.slice(0, 10));
+                console.log('7. Yearly Counts Preview (Last 10):', fullData.slice(-10));
+
+                // New: Validation Checks
+                // Check if filters are active (approximation for warning logic)
+                const isJournalFilterActive = (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0);
+                // We assume full timeframe if range is roughly 1980-2024+
+                const isFullTimeframe = (yStart <= 1981 && yEnd >= 2023);
+
+                if (!isJournalFilterActive && isFullTimeframe) {
+                    if (distinctPaperCount < 1000) {
+                        console.error('%cWARNING: Corpus Growth is not reading the full corpus. Check Supabase query filters and ID field.', 'color: red; font-weight: bold; font-size: 14px;');
+                    }
+                    if (maxYearCount < 20) {
+                        console.error('%cWARNING: Yearly counts are implausibly low for a ~5800-paper corpus.', 'color: red; font-weight: bold; font-size: 14px;');
+                    }
+                }
+                console.groupEnd();
+                // ----------------------------------
 
                 renderCorpusChartD3(container, fullData);
 
