@@ -3940,18 +3940,17 @@
             container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading...</div>';
 
             try {
-                // Fetch basic paper data (year, journal) to allow client-side filtering
-                // This replaces v_chart1_corpus_growth usage to respect journal filters
-                const url = `${SUPABASE_URL}/rest/v1/papers?select=id,year,journal&order=year.asc`;
+                // Fetch basic paper data including title for deduplication (ID caused 400 error)
+                const url = `${SUPABASE_URL}/rest/v1/papers?select=title,year,journal&order=year.asc`;
 
                 const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                 if (!response.ok) throw new Error(`Status ${response.status}`);
 
                 const data = await response.json();
 
-                // Client-side Filter & Aggregate (Distinct Papers)
+                // Client-side Filter & Aggregate (Distinct Papers by Title)
                 const yearCounts = {};
-                const seenPaperIds = new Set();
+                const seenTitles = new Set();
 
                 // Initialize range (1980-2025)
                 const yStart = (typeof minYear !== 'undefined') ? minYear : 1980;
@@ -3965,9 +3964,11 @@
                     const y = parseInt(p.year);
                     // Validate year and uniqueness
                     if (!isNaN(y) && y >= 1980 && y <= 2025) {
-                        // Deduplicate by ID
-                        if (p.id && seenPaperIds.has(p.id)) return;
-                        if (p.id) seenPaperIds.add(p.id);
+                        const titleKey = (p.title || '').trim().toLowerCase();
+
+                        // Deduplicate by Title
+                        if (titleKey && seenTitles.has(titleKey)) return;
+                        if (titleKey) seenTitles.add(titleKey);
 
                         // Check Timeframe Filter (Current Scope)
                         if (y >= yStart && y <= yEnd) {
