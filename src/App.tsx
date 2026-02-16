@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import PolicyPage from "./pages/PolicyPage";
 import ContactPage from "./pages/ContactPage";
+import TopicExploration from "./pages/TopicExploration";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,8 +28,8 @@ const App = () => (
 
           {/* Backward-compatible redirects to /artefact/index.html */}
           <Route path="/evidence" element={<RedirectToExternal to="/artefact/index.html" />} />
-          <Route path="/evidence/topic" element={<RedirectToExternal to="/artefact/index.html" />} />
-          <Route path="/evidence/topic/:topicId" element={<RedirectToExternal toFn={(p) => `/artefact/index.html?mode=topic&topicId=${p.topicId}`} />} />
+          <Route path="/evidence/topic" element={<TopicExploration />} />
+          <Route path="/evidence/topic/:topicId" element={<TopicExploration />} />
           <Route path="/evidence/field" element={<RedirectToExternal to="/artefact/index.html" />} />
           <Route path="/evidence/temporal" element={<RedirectToExternal to="/artefact/index.html" />} />
           <Route path="/evidence/papers" element={<RedirectToExternal to="/artefact/index.html" />} />
