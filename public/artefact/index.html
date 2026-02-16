@@ -3111,11 +3111,19 @@
                             <div class="tooltip-sub">Occurrences: ${freq}</div>
                         `;
                 } else if (hoveredNode.type === 'paper') {
-                    // Safe author formatting
-                    const authors = hoveredNode.authors || [];
-                    const authorsShort = authors.length > 2 ?
-                        (authors[0].last_name || authors[0].name || 'Unknown') + ' et al.' :
-                        authors.map(a => a.last_name || a.name || 'Unknown').join(' & ');
+                    // Safe author formatting - supports both String (new) and Array (legacy) formats
+                    let authorsShort = hoveredNode.authors;
+                    if (!authorsShort) {
+                        authorsShort = '(missing)';
+                    } else if (Array.isArray(authorsShort)) {
+                        // Handle legacy array format if present
+                        if (authorsShort.length > 2) {
+                            authorsShort = (authorsShort[0].last_name || authorsShort[0].name || 'Unknown') + ' et al.';
+                        } else {
+                            authorsShort = authorsShort.map(a => a.last_name || a.name || 'Unknown').join(' & ');
+                        }
+                    }
+                    // If string, use directly (dataset default)
 
                     tooltip.innerHTML = `
                         <div style="margin-bottom: 4px;">
