@@ -1046,7 +1046,7 @@
     <div id="container">
         <canvas id="canvas"></canvas>
         <div id="topicTitle"></div>
-        <div id="tooltip"></div> <!-- Ensure Z-Index is high enough in CSS -->
+
 
         <!-- UI OVERLAY LAYER -->
         <div id="ui-layer">
@@ -5501,6 +5501,7 @@
             }
         });
     </script>
+    <div id="tooltip" style="z-index: 20000000; pointer-events: none;"></div>
 </body>
 
 </html>
