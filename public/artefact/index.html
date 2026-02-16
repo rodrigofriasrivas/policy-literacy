@@ -2234,6 +2234,17 @@
                             const cleanName = rawName.replace(/^Topic \d+:\s*/, '').replace(/^Topic undefined:\s*/, '');
                             titleEl.textContent = `Topic ${t.id}: ${cleanName}`;
                             titleEl.style.display = 'block';
+
+                            // --- SYNC UI STATES ---
+                            // 1. Dropdown
+                            const topicSelect = document.getElementById('topicSelect');
+                            if (topicSelect) topicSelect.value = t.id;
+
+                            // 2. Breadcrumbs
+                            const breadcrumbs = document.querySelector('.stitch-breadcrumbs');
+                            if (breadcrumbs) {
+                                breadcrumbs.innerHTML = `NETWORK VISUALISATION <span style="margin: 0 6px;">→</span> <span class="stitch-bc-current">TOPIC ${t.id}: ${cleanName}</span>`;
+                            }
                         }
                     }
                 } else {
@@ -2910,15 +2921,15 @@
                 console.log(`Selected Topic ID: ${tId}`);
 
                 if (!Number.isNaN(tId) && tId > 0) {
-                    // Auto-open in new tab immediately
-                    console.log(`🚀 Auto-opening topic ${tId}...`);
-                    window.open(`index.html?mode=topic&topicId=${tId}`, '_blank');
-
-                    // Reset dropdown to 'all' to avoid confusion in this tab?
-                    // Or keep it selected? Requirement: "Macro view remains unchanged".
-                    // Leaving it selected might imply state change here.
-                    // Let's reset it to 'all' visually so user knows this tab is still Macro.
-                    topicSelect.value = 'all';
+                    if (urlState.mode === 'topic') {
+                        // Switch Topic (Same Tab)
+                        window.location.href = `index.html?mode=topic&topicId=${tId}`;
+                    } else {
+                        // Open Topic (New Tab) - Keep Macro View intact
+                        window.open(`index.html?mode=topic&topicId=${tId}`, '_blank');
+                        // Reset dropdown to 'all' only in Macro view (to keep context clear)
+                        topicSelect.value = 'all';
+                    }
                 } else {
                     console.error('Invalid Topic ID selected:', value);
                 }
