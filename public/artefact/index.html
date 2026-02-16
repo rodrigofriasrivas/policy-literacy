@@ -3103,7 +3103,7 @@
                         `;
                 } else if (hoveredNode.type === 'bigram') {
                     // Check for extra metadata if available, otherwise just Name/Freq
-                    const freq = hoveredNode.weight || hoveredNode.normalized_frequency || 'N/A';
+                    const freq = hoveredNode.frequency_sum || hoveredNode.weight || 'N/A';
                     tooltip.innerHTML = `
                             <div class="tooltip-header" style="color:var(--accent-color)">${hoveredNode.bigram}</div>
                             <div class="tooltip-sub">Occurrences: ${freq}</div>
@@ -5147,6 +5147,16 @@
                 // Force display block to get dimensions
                 document.getElementById('view-topic').style.display = 'block';
 
+                // RESET GLOBAL INTERACTION STATE to prevent tooltip conflicts
+                activeSpotlights.clear();
+                selectedNode = null;
+                searchTerm = '';
+                // Reset transform to default to ensure coordinates are aligned
+                if (zoom && canvas) {
+                    d3.select(canvas).call(zoom.transform, d3.zoomIdentity);
+                    transform = d3.zoomIdentity;
+                }
+
                 const rect = canvasContainer.getBoundingClientRect();
                 if (rect.width > 0) {
                     width = rect.width;
@@ -5185,9 +5195,12 @@
             if (termsContainer) {
                 if (sortedBigrams.length === 0) termsContainer.innerHTML = '<span style="color:var(--text-secondary);font-size:12px">No terms available</span>';
                 else {
+                    const allBigramsTotal = allData.bigrams.reduce((sum, b) => sum + (b.frequency_sum || b.weight || 0), 0);
+
                     termsContainer.innerHTML = sortedBigrams.map(b => {
-                        const occurrences = Math.round(b.normalized_frequency || 0);
-                        const share = totalTopicFreq > 0 ? ((b.normalized_frequency / totalTopicFreq) * 100).toFixed(1) : '0.0';
+                        // Use frequency_sum for count, fallback to weight if missing
+                        const occurrences = b.frequency_sum || b.weight || Math.round(b.normalized_frequency || 0);
+                        const share = allBigramsTotal > 0 ? ((occurrences / allBigramsTotal) * 100).toFixed(1) : '0.0';
 
                         // Using a chip-like container but with secondary metadata line
                         return `
