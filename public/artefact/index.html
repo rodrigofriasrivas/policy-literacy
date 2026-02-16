@@ -5210,6 +5210,14 @@
             if (subEl) subEl.textContent = `Topic ${topic.id}`;
             if (defEl) defEl.innerHTML = topic.definition || "No definition available.";
 
+            // --- BREADCRUMB UPDATE (Override switchView) ---
+            const bc = document.querySelector('.stitch-bc-current');
+            if (bc) {
+                const rawName = topic.topic_name || topic.name || 'Unknown';
+                const cleanName = rawName.replace(/^Topic \d+:\s*/, '').replace(/^Topic undefined:\s*/, '');
+                bc.textContent = `TOPIC ${topic.id}: ${cleanName}`;
+            }
+
             // Top Terms - Metadata Added
             const sortedBigrams = [...allData.bigrams]
                 .sort((a, b) => (b.normalized_frequency || 0) - (a.normalized_frequency || 0))
