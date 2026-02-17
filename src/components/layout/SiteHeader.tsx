@@ -16,7 +16,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
     return (
       <header className="transparent-header">
         <Link to="/" className="home-brand">
-          Enterprise Policy Literacy
+          Enterprise Policy Literacy Tool
         </Link>
         <nav className="home-nav">
         {navItems.map((item) =>
