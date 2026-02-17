@@ -5653,14 +5653,17 @@
             // Update Breadcrumb
             const bc = document.querySelector('.stitch-bc-current');
             if (bc) bc.textContent = view === 'network' ? 'NETWORK VIEW' :
-                view === 'temporal' ? 'TEMPORAL EVOLUTION' : view.toUpperCase();
+                view === 'temporal' ? 'TEMPORAL EVOLUTION' :
+                    view === 'library' ? 'PAPER LIBRARY' : view.toUpperCase();
 
             // Toggle Views
             const tView = document.getElementById('view-temporal');
             const topicView = document.getElementById('view-topic');
+            const libView = document.getElementById('view-library');
 
             if (tView) tView.style.display = 'none';
             if (topicView) topicView.style.display = 'none';
+            if (libView) libView.style.display = 'none';
 
             if (view === 'temporal') {
                 if (tView) {
@@ -5670,6 +5673,11 @@
             } else if (view === 'topic') {
                 if (topicView) topicView.style.display = 'block';
                 // Canvas is handled by initIndividualTopicDashboard
+            } else if (view === 'library') {
+                if (libView) {
+                    libView.style.display = 'block';
+                    if (typeof LibraryManager !== 'undefined') LibraryManager.init();
+                }
             } else if (view === 'network') {
                 // Ensure canvas is back in main container
                 const container = document.getElementById('container');
@@ -5900,17 +5908,7 @@
             }
         };
 
-        // Hook into switchView to init library on first view if needed
-        const originalSwitchView = window.switchView;
-        window.switchView = function (viewId) {
-            originalSwitchView(viewId); // Call original
-            if (viewId === 'library') {
-                // Only init if table is empty/loading check? 
-                // Or just let init function handle idempotent checks?
-                // Simple logic: call init every time, let it check data readiness quickly.
-                LibraryManager.init();
-            }
-        };
+
 
         // Start the application after all definitions are ready
         loadData().then(() => {
