@@ -1499,6 +1499,73 @@
                             </div>
                         </div>
                     </div>
+                </div> <!-- End #view-temporal -->
+
+                <!-- Paper Library View -->
+                <div id="view-library" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                    <div style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px;">
+                        <!-- DEBUG MARKER as requested -->
+                        <div
+                            style="font-size: 28px; padding: 16px; background: rgba(255,0,0,0.15); border: 1px solid rgba(255,0,0,0.5); color: white; text-align: center; margin-bottom: 20px;">
+                            LIBRARY VIEW ACTIVE — build ${Date.now()}
+                        </div>
+
+                        <div class="stitch-card">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                                <div class="stitch-card-title">Paper Library</div>
+                                <div id="library-total-count"
+                                    style="font-size:12px; color:var(--text-secondary); font-weight:500;">
+                                    Loading...
+                                </div>
+                            </div>
+
+                            <!-- Controls: Search -->
+                            <div style="margin-bottom: 24px;">
+                                <input type="text" id="library-search" class="stitch-input"
+                                    placeholder="Search title, author, or journal..."
+                                    style="width: 100%; max-width: 400px;">
+                            </div>
+
+                            <!-- Table -->
+                            <div style="overflow-x: auto;">
+                                <table id="paper-library-table"
+                                    style="width:100%; border-collapse:collapse; font-size:13px;">
+                                    <thead>
+                                        <tr
+                                            style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); text-align: left;">
+                                            <th style="padding: 12px; cursor: pointer; user-select: none;"
+                                                onclick="LibraryManager.sort('year')">Year <span
+                                                    id="sort-icon-year">▼</span></th>
+                                            <th style="padding: 12px; cursor: pointer; user-select: none;"
+                                                onclick="LibraryManager.sort('title')">Title <span
+                                                    id="sort-icon-title"></span></th>
+                                            <th style="padding: 12px; cursor: pointer; user-select: none;"
+                                                onclick="LibraryManager.sort('authors')">Author(s) <span
+                                                    id="sort-icon-authors"></span></th>
+                                            <th style="padding: 12px; cursor: pointer; user-select: none;"
+                                                onclick="LibraryManager.sort('journal')">Journal <span
+                                                    id="sort-icon-journal"></span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="paper-library-tbody">
+                                        <!-- Rows populated via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div
+                                style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+                                <button id="lib-prev-btn" class="btn"
+                                    style="width:auto; padding: 6px 16px;">Previous</button>
+                                <span id="lib-page-info" style="font-size:13px; color:var(--text-secondary);">Page 1 of
+                                    1</span>
+                                <button id="lib-next-btn" class="btn"
+                                    style="width:auto; padding: 6px 16px;">Next</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Individual Topic Dashboard -->
@@ -5660,6 +5727,7 @@
             const tView = document.getElementById('view-temporal');
             const topicView = document.getElementById('view-topic');
             const libView = document.getElementById('view-library');
+            const canvasEl = document.getElementById('network-canvas') || document.querySelector('canvas');
 
             if (tView) tView.style.display = 'none';
             if (topicView) topicView.style.display = 'none';
@@ -5670,14 +5738,24 @@
                     tView.style.display = 'block';
                     loadTemporalView();
                 }
+                if (canvasEl) canvasEl.style.display = 'none';
             } else if (view === 'topic') {
                 if (topicView) topicView.style.display = 'block';
                 // Canvas is handled by initIndividualTopicDashboard
+                if (canvasEl) canvasEl.style.display = 'block'; // Topic view needs canvas
             } else if (view === 'library') {
+                console.group('VIEW SWITCH: LIBRARY');
+                console.log('Active view:', view);
+                console.log('#view-library exists:', !!libView);
+                console.log('#view-library display:', libView ? getComputedStyle(libView).display : 'N/A');
+                console.log('#network canvas visible:', canvasEl ? getComputedStyle(canvasEl).display : 'N/A');
+                console.groupEnd();
+
                 if (libView) {
                     libView.style.display = 'block';
                     if (typeof LibraryManager !== 'undefined') LibraryManager.init();
                 }
+                if (canvasEl) canvasEl.style.display = 'none';
             } else if (view === 'network') {
                 // Ensure canvas is back in main container
                 const container = document.getElementById('container');
@@ -5689,6 +5767,7 @@
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
                 }
+                if (canvasEl) canvasEl.style.display = 'block';
             }
         };
 
