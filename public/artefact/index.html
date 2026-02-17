@@ -4034,10 +4034,35 @@
                     }
                 });
 
-                const fullData = Object.keys(yearCounts).sort().map(y => ({
+                let fullData = Object.keys(yearCounts).sort().map(y => ({
                     year: parseInt(y),
                     count: yearCounts[y]
                 }));
+
+                // FIX: Trim trailing years that have no data to prevent chart "drop-off" to zero
+                // Find the last year with data
+                let maxYearInSeries = 0;
+                let minYearInSeries = 2025;
+
+                fullData.forEach(d => {
+                    if (d.count > 0) {
+                        if (d.year > maxYearInSeries) maxYearInSeries = d.year;
+                        if (d.year < minYearInSeries) minYearInSeries = d.year;
+                    }
+                });
+
+                // Filter out years beyond the max year found in data
+                // This ensures we don't plot 2025 as 0 if data ends in 2024
+                if (maxYearInSeries > 0) {
+                    fullData = fullData.filter(d => d.year <= maxYearInSeries);
+                }
+
+                // Verification Logs
+                console.group('Corpus Growth Fix Verification');
+                console.log('minYearInSeries:', minYearInSeries);
+                console.log('maxYearInSeries:', maxYearInSeries);
+                console.log('lastPoint:', fullData[fullData.length - 1]);
+                console.groupEnd();
 
                 // --- Corpus Growth Integrity Check ---
                 console.group('Corpus Growth Integrity Check');
