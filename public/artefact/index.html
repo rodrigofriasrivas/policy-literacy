@@ -4039,6 +4039,33 @@
                     count: yearCounts[y]
                 }));
 
+                // --- Corpus Growth Integrity Check ---
+                console.group('Corpus Growth Integrity Check');
+                const distinctSourceIds = new Set();
+                const invalidYearIds = [];
+                papers.forEach(p => {
+                    const pid = p.id || p.paper_id;
+                    if (pid) distinctSourceIds.add(pid);
+                    if (isNaN(parseInt(p.year))) invalidYearIds.push(pid);
+                });
+                const X = distinctSourceIds.size;
+                const Y = fullData.reduce((sum, d) => sum + d.count, 0);
+                const Z = X - Y;
+
+                console.log(`Total papers in source (distinct by paper_id if available): ${X}`);
+                console.log(`Sum of yearly counts: ${Y}`);
+                console.log(`Difference (X - Y): ${Z}`);
+
+                if (Z !== 0) {
+                    console.warn('Discrepancy detected:');
+                    console.log(`number of papers with missing/invalid year: ${invalidYearIds.length}`);
+                    if (invalidYearIds.length > 0) {
+                        console.log(`sample of up to 10 paper_id (or id) values with missing year:`, invalidYearIds.slice(0, 10));
+                    }
+                }
+                console.groupEnd();
+                // -------------------------------------
+
                 // 4. Audit Logs (Updated for Cached Data)
                 const totalPlotted = fullData.reduce((sum, d) => sum + d.count, 0);
                 const distinctPaperCount = seenIds.size;
