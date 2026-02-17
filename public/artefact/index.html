@@ -1053,7 +1053,8 @@
 
             <!-- 1. Top Navigation Bar (Full Width) -->
             <div class="stitch-top-bar">
-                <a href="/" class="stitch-brand" style="text-decoration:none;color:inherit;">Enterprise Policy Literacy
+                <a href="index.html" class="stitch-brand" style="text-decoration:none;color:inherit;">Enterprise Policy
+                    Literacy
                     Tool</a>
                 <nav class="stitch-menu">
                     <a href="/artefact/index.html" class="stitch-menu-link active">Network visualisation</a>
@@ -3940,18 +3941,27 @@
             container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading...</div>';
 
             try {
-                // Use cached data from Network View
-                // This ensures consistency across views and avoids duplicate fetches
-                // We use 'allData.papers' which is already populated with the full corpus (~5800 papers)
+                // Wait for global data load (allData.papers) to ensure chart is not flat (zero)
+                // Retry every 200ms up to 10s (50 attempts)
+                let attempts = 0;
+                const maxAttempts = 50;
 
-                // Fallback check
-                if (!window.allData || !window.allData.papers) {
-                    // If called too early, we might need to wait or just return empty for now.
-                    // But in the typical flow, loadData() runs before loadTemporalView()
-                    console.warn('Corpus Growth: allData.papers is empty or undefined.');
+                while ((!window.allData || !Array.isArray(window.allData.papers) || window.allData.papers.length === 0) && attempts < maxAttempts) {
+                    if (attempts === 0) {
+                        // Only show waiting message if not immediately available
+                        container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Waiting for data...</div>';
+                    }
+                    await new Promise(r => setTimeout(r, 200));
+                    attempts++;
                 }
 
-                const papers = (window.allData && window.allData.papers) ? window.allData.papers : [];
+                if (!window.allData || !Array.isArray(window.allData.papers) || window.allData.papers.length === 0) {
+                    console.warn('Corpus Growth: Data failed to load in time.');
+                    container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Data not available.</div>';
+                    return;
+                }
+
+                const papers = window.allData.papers;
 
                 // 3. Aggregate (Distinct IDs)
                 const yearCounts = {};
