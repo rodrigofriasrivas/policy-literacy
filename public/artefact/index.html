@@ -5709,205 +5709,221 @@
                 modal.style.display = 'none';
                 document.body.style.overflow = ''; // Restore scroll
             }
-            // --- PAPER LIBRARY MANAGER ---
-            const LibraryManager = {
-                currentPage: 1,
-                pageSize: 50,
-                sortKey: 'year',
-                sortAsc: false,
-                searchQuery: '',
-                filteredPapers: [],
+        };
 
-                init: async function () {
-                    // Wait for allData.papers to be ready
-                    const tableBody = document.getElementById('paper-library-tbody');
-                    const totalLabel = document.getElementById('library-total-count');
+        // Close on outside click or ESC
+        window.addEventListener('click', function (event) {
+            const modal = document.getElementById('temporal-modal');
+            if (event.target == modal) {
+                closeTemporalModal();
+            }
+        });
 
-                    if (!tableBody) return;
+        document.addEventListener('keydown', function (event) {
+            if (event.key === "Escape") {
+                closeTemporalModal();
+            }
+        });
 
-                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-secondary);">Loading papers library...</td></tr>';
+        // --- PAPER LIBRARY MANAGER ---
+        const LibraryManager = {
+            currentPage: 1,
+            pageSize: 50,
+            sortKey: 'year',
+            sortAsc: false,
+            searchQuery: '',
+            filteredPapers: [],
 
-                    // Poll for data readiness
-                    let attempts = 0;
-                    while ((!window.allData || !Array.isArray(window.allData.papers) || window.allData.papers.length === 0) && attempts < 20) {
-                        await new Promise(r => setTimeout(r, 150));
-                        attempts++;
-                    }
+            init: async function () {
+                // Wait for allData.papers to be ready
+                const tableBody = document.getElementById('paper-library-tbody');
+                const totalLabel = document.getElementById('library-total-count');
 
-                    const rawPapers = (window.allData && window.allData.papers) ? window.allData.papers : [];
+                if (!tableBody) return;
 
-                    if (rawPapers.length === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-secondary);">No papers available or data failed to load.</td></tr>';
-                        if (totalLabel) totalLabel.textContent = '0 papers';
-                        return;
-                    }
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-secondary);">Loading papers library...</td></tr>';
 
-                    // Initial Filter (Empty Search)
-                    this.applyFilters();
+                // Poll for data readiness
+                let attempts = 0;
+                while ((!window.allData || !Array.isArray(window.allData.papers) || window.allData.papers.length === 0) && attempts < 20) {
+                    await new Promise(r => setTimeout(r, 150));
+                    attempts++;
+                }
 
-                    // Bind Search Input
-                    const searchInput = document.getElementById('library-search');
-                    if (searchInput) {
-                        searchInput.addEventListener('input', (e) => {
-                            this.searchQuery = e.target.value.toLowerCase();
-                            this.currentPage = 1;
-                            this.applyFilters();
-                        });
-                    }
+                const rawPapers = (window.allData && window.allData.papers) ? window.allData.papers : [];
 
-                    // Bind Pagination
-                    document.getElementById('lib-prev-btn').onclick = () => this.changePage(-1);
-                    document.getElementById('lib-next-btn').onclick = () => this.changePage(1);
-                },
+                if (rawPapers.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-secondary);">No papers available or data failed to load.</td></tr>';
+                    if (totalLabel) totalLabel.textContent = '0 papers';
+                    return;
+                }
 
-                applyFilters: function () {
-                    const rawPapers = window.allData.papers;
+                // Initial Filter (Empty Search)
+                this.applyFilters();
 
-                    // 1. Filter
-                    if (!this.searchQuery) {
-                        this.filteredPapers = [...rawPapers];
+                // Bind Search Input
+                const searchInput = document.getElementById('library-search');
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        this.searchQuery = e.target.value.toLowerCase();
+                        this.currentPage = 1;
+                        this.applyFilters();
+                    });
+                }
+
+                // Bind Pagination
+                document.getElementById('lib-prev-btn').onclick = () => this.changePage(-1);
+                document.getElementById('lib-next-btn').onclick = () => this.changePage(1);
+            },
+
+            applyFilters: function () {
+                const rawPapers = window.allData.papers;
+
+                // 1. Filter
+                if (!this.searchQuery) {
+                    this.filteredPapers = [...rawPapers];
+                } else {
+                    const q = this.searchQuery;
+                    this.filteredPapers = rawPapers.filter(p => {
+                        return (p.title && p.title.toLowerCase().includes(q)) ||
+                            (p.authors && p.authors.toLowerCase().includes(q)) ||
+                            (p.journal && p.journal.toLowerCase().includes(q));
+                    });
+                }
+
+                // 2. Sort
+                this.filteredPapers.sort((a, b) => {
+                    let valA = a[this.sortKey];
+                    let valB = b[this.sortKey];
+
+                    // Handle numeric year
+                    if (this.sortKey === 'year') {
+                        valA = Number(valA) || 0;
+                        valB = Number(valB) || 0;
                     } else {
-                        const q = this.searchQuery;
-                        this.filteredPapers = rawPapers.filter(p => {
-                            return (p.title && p.title.toLowerCase().includes(q)) ||
-                                (p.authors && p.authors.toLowerCase().includes(q)) ||
-                                (p.journal && p.journal.toLowerCase().includes(q));
-                        });
+                        // String safe comparison
+                        valA = (valA || '').toString().toLowerCase();
+                        valB = (valB || '').toString().toLowerCase();
                     }
 
-                    // 2. Sort
-                    this.filteredPapers.sort((a, b) => {
-                        let valA = a[this.sortKey];
-                        let valB = b[this.sortKey];
+                    if (valA < valB) return this.sortAsc ? -1 : 1;
+                    if (valA > valB) return this.sortAsc ? 1 : -1;
+                    return 0;
+                });
 
-                        // Handle numeric year
-                        if (this.sortKey === 'year') {
-                            valA = Number(valA) || 0;
-                            valB = Number(valB) || 0;
+                // Log Audit
+                console.groupCollapsed('Paper Library Audit');
+                console.log(`Total Cached Papers: ${rawPapers.length}`);
+                console.log(`Total After Filter: ${this.filteredPapers.length}`);
+                console.log(`Sort: ${this.sortKey} (${this.sortAsc ? 'ASC' : 'DESC'})`);
+                console.log(`Page: ${this.currentPage} / ${Math.ceil(this.filteredPapers.length / this.pageSize)}`);
+                console.groupEnd();
+
+                this.render();
+            },
+
+            sort: function (key) {
+                if (this.sortKey === key) {
+                    this.sortAsc = !this.sortAsc;
+                } else {
+                    this.sortKey = key;
+                    this.sortAsc = true; // Default asc for new column? Or desc for year? Let's stick to true.
+                    // Exception: Year usually better desc by default, but let's keep simple logic.
+                    if (key === 'year') this.sortAsc = false; // Year default DESC
+                }
+
+                // Update Icons
+                ['year', 'title', 'authors', 'journal'].forEach(k => {
+                    const icon = document.getElementById(`sort-icon-${k}`);
+                    if (icon) {
+                        if (k === this.sortKey) {
+                            icon.textContent = this.sortAsc ? '▲' : '▼';
+                            icon.parentElement.style.color = 'var(--text-primary)';
                         } else {
-                            // String safe comparison
-                            valA = (valA || '').toString().toLowerCase();
-                            valB = (valB || '').toString().toLowerCase();
+                            icon.textContent = '';
+                            icon.parentElement.style.color = 'var(--text-secondary)';
                         }
+                    }
+                });
 
-                        if (valA < valB) return this.sortAsc ? -1 : 1;
-                        if (valA > valB) return this.sortAsc ? 1 : -1;
-                        return 0;
-                    });
+                this.applyFilters();
+            },
 
-                    // Log Audit
-                    console.groupCollapsed('Paper Library Audit');
-                    console.log(`Total Cached Papers: ${rawPapers.length}`);
-                    console.log(`Total After Filter: ${this.filteredPapers.length}`);
-                    console.log(`Sort: ${this.sortKey} (${this.sortAsc ? 'ASC' : 'DESC'})`);
-                    console.log(`Page: ${this.currentPage} / ${Math.ceil(this.filteredPapers.length / this.pageSize)}`);
-                    console.groupEnd();
+            changePage: function (delta) {
+                const totalPages = Math.ceil(this.filteredPapers.length / this.pageSize) || 1;
+                const newPage = this.currentPage + delta;
 
+                if (newPage >= 1 && newPage <= totalPages) {
+                    this.currentPage = newPage;
                     this.render();
-                },
+                }
+            },
 
-                sort: function (key) {
-                    if (this.sortKey === key) {
-                        this.sortAsc = !this.sortAsc;
-                    } else {
-                        this.sortKey = key;
-                        this.sortAsc = true; // Default asc for new column? Or desc for year? Let's stick to true.
-                        // Exception: Year usually better desc by default, but let's keep simple logic.
-                        if (key === 'year') this.sortAsc = false; // Year default DESC
-                    }
+            render: function () {
+                const start = (this.currentPage - 1) * this.pageSize;
+                const end = start + this.pageSize;
+                const pageData = this.filteredPapers.slice(start, end);
 
-                    // Update Icons
-                    ['year', 'title', 'authors', 'journal'].forEach(k => {
-                        const icon = document.getElementById(`sort-icon-${k}`);
-                        if (icon) {
-                            if (k === this.sortKey) {
-                                icon.textContent = this.sortAsc ? '▲' : '▼';
-                                icon.parentElement.style.color = 'var(--text-primary)';
-                            } else {
-                                icon.textContent = '';
-                                icon.parentElement.style.color = 'var(--text-secondary)';
-                            }
-                        }
-                    });
+                const tbody = document.getElementById('paper-library-tbody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
 
-                    this.applyFilters();
-                },
+                pageData.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid var(--chart-row-border)';
+                    tr.style.transition = 'background 0.1s';
+                    tr.onmouseover = () => tr.style.background = 'var(--chart-row-hover)';
+                    tr.onmouseout = () => tr.style.background = 'transparent';
 
-                changePage: function (delta) {
-                    const totalPages = Math.ceil(this.filteredPapers.length / this.pageSize) || 1;
-                    const newPage = this.currentPage + delta;
-
-                    if (newPage >= 1 && newPage <= totalPages) {
-                        this.currentPage = newPage;
-                        this.render();
-                    }
-                },
-
-                render: function () {
-                    const start = (this.currentPage - 1) * this.pageSize;
-                    const end = start + this.pageSize;
-                    const pageData = this.filteredPapers.slice(start, end);
-
-                    const tbody = document.getElementById('paper-library-tbody');
-                    if (!tbody) return;
-                    tbody.innerHTML = '';
-
-                    pageData.forEach(p => {
-                        const tr = document.createElement('tr');
-                        tr.style.borderBottom = '1px solid var(--chart-row-border)';
-                        tr.style.transition = 'background 0.1s';
-                        tr.onmouseover = () => tr.style.background = 'var(--chart-row-hover)';
-                        tr.onmouseout = () => tr.style.background = 'transparent';
-
-                        tr.innerHTML = `
+                    tr.innerHTML = `
                         <td style="padding:12px; color:var(--text-secondary); font-family:monospace;">${p.year || ''}</td>
                         <td style="padding:12px; color:var(--text-primary); font-weight:500;">${p.title || 'Untitled'}</td>
                         <td style="padding:12px; color:var(--text-secondary); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.authors || ''}">${p.authors || ''}</td>
                         <td style="padding:12px; color:var(--text-secondary); font-style:italic;">${p.journal || ''}</td>
                     `;
-                        tbody.appendChild(tr);
-                    });
+                    tbody.appendChild(tr);
+                });
 
-                    // Update Controls
-                    const totalCount = this.filteredPapers.length;
-                    const totalPages = Math.ceil(totalCount / this.pageSize) || 1;
+                // Update Controls
+                const totalCount = this.filteredPapers.length;
+                const totalPages = Math.ceil(totalCount / this.pageSize) || 1;
 
-                    const info = document.getElementById('lib-page-info');
-                    const prev = document.getElementById('lib-prev-btn');
-                    const next = document.getElementById('lib-next-btn');
-                    const totalLabel = document.getElementById('library-total-count');
+                const info = document.getElementById('lib-page-info');
+                const prev = document.getElementById('lib-prev-btn');
+                const next = document.getElementById('lib-next-btn');
+                const totalLabel = document.getElementById('library-total-count');
 
-                    if (info) info.textContent = `Page ${this.currentPage} of ${totalPages}`;
-                    if (prev) prev.disabled = (this.currentPage <= 1);
-                    if (next) next.disabled = (this.currentPage >= totalPages);
-                    if (totalLabel) totalLabel.textContent = `${totalCount} papers`;
-                }
-            };
+                if (info) info.textContent = `Page ${this.currentPage} of ${totalPages}`;
+                if (prev) prev.disabled = (this.currentPage <= 1);
+                if (next) next.disabled = (this.currentPage >= totalPages);
+                if (totalLabel) totalLabel.textContent = `${totalCount} papers`;
+            }
+        };
 
-            // Hook into switchView to init library on first view if needed
-            const originalSwitchView = window.switchView;
-            window.switchView = function (viewId) {
-                originalSwitchView(viewId); // Call original
-                if (viewId === 'library') {
-                    // Only init if table is empty/loading check? 
-                    // Or just let init function handle idempotent checks?
-                    // Simple logic: call init every time, let it check data readiness quickly.
-                    LibraryManager.init();
-                }
-            };
+        // Hook into switchView to init library on first view if needed
+        const originalSwitchView = window.switchView;
+        window.switchView = function (viewId) {
+            originalSwitchView(viewId); // Call original
+            if (viewId === 'library') {
+                // Only init if table is empty/loading check? 
+                // Or just let init function handle idempotent checks?
+                // Simple logic: call init every time, let it check data readiness quickly.
+                LibraryManager.init();
+            }
+        };
 
-            // Start the application after all definitions are ready
-            loadData().then(() => {
-                if (typeof populateAdvancedFilters === 'function') {
-                    populateAdvancedFilters();
-                }
-            }).catch(e => {
-                const loading = document.getElementById('loading');
-                if (loading) {
-                    loading.style.display = 'flex';
-                    loading.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading data: ${e.message}</div>`;
-                }
-            });
+        // Start the application after all definitions are ready
+        loadData().then(() => {
+            if (typeof populateAdvancedFilters === 'function') {
+                populateAdvancedFilters();
+            }
+        }).catch(e => {
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'flex';
+                loading.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading data: ${e.message}</div>`;
+            }
+        });
     </script>
 
 </body>
