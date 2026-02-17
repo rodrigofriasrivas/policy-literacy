@@ -1,17 +1,19 @@
 
-# Fix Navigation Menu: Right-Align + Consistent 14px
 
-## Changes
+# Add "Enterprise Policy Literacy Tool" Branding to Transparent Header
 
-### 1. `src/index.css`
-- `.transparent-header`: remove `text-align: center`, add `padding: 16px 24px`
-- `.home-nav`: change `justify-content: center` to `justify-content: flex-end`, keep font-size at 14px
-- Mobile breakpoints: keep existing responsive adjustments
+## Problem
+The transparent header (used on About, Policy, Contact pages) only shows the right-aligned navigation links. It's missing the "Enterprise Policy Literacy Tool" title on the left side, which is present in the artefact header (first screenshot).
 
-### 2. `src/components/layout/SiteHeader.tsx`
-- **Transparent variant**: wrap nav in a full-width container so `justify-end` pushes links right
-- **Solid variant**: already right-aligned, keep `text-sm` (14px) -- no change needed
+## Change
+
+### `src/components/layout/SiteHeader.tsx` -- Transparent variant
+Update the transparent header to include a left-aligned "Enterprise Policy Literacy Tool" link to `/`, with the nav links on the right. Use `justify-between` layout matching the solid header's structure.
+
+### `src/index.css` -- `.transparent-header` / `.home-nav`
+Update styles so `.transparent-header` uses a flex layout with `justify-content: space-between` (brand left, nav right). The `.home-nav` no longer needs `justify-content: flex-end` since the parent handles positioning.
 
 ### Result
-- Menu right-aligned on all pages at 14px
-- No changes to artefact, other pages, or dependencies
+- "Enterprise Policy Literacy Tool" appears on the left of all internal pages, linked to `/`
+- Navigation links remain right-aligned at 14px
+- Consistent with the artefact header layout shown in the first screenshot
