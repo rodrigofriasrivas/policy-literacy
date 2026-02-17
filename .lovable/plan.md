@@ -1,19 +1,35 @@
 
-
-# Add "Enterprise Policy Literacy Tool" Branding to Transparent Header
+# Match Branding Font to Artefact/Dashboard
 
 ## Problem
-The transparent header (used on About, Policy, Contact pages) only shows the right-aligned navigation links. It's missing the "Enterprise Policy Literacy Tool" title on the left side, which is present in the artefact header (first screenshot).
+The "Enterprise Policy Literacy" branding on internal pages (About, Policy, Contact) uses Inter sans-serif at 14px, while the artefact/dashboard uses Times New Roman serif at 22px. They need to match.
 
 ## Change
 
-### `src/components/layout/SiteHeader.tsx` -- Transparent variant
-Update the transparent header to include a left-aligned "Enterprise Policy Literacy Tool" link to `/`, with the nav links on the right. Use `justify-between` layout matching the solid header's structure.
+### `src/index.css` -- `.home-brand`
+Update the font styling to match the artefact's `.stitch-brand`:
+- `font-family: 'Times New Roman', serif` (instead of Inter/sans-serif)
+- `font-size: 22px` (instead of 14px)
+- `letter-spacing: -0.01em`
+- `line-height: 1`
+- Keep existing color and hover transitions
 
-### `src/index.css` -- `.transparent-header` / `.home-nav`
-Update styles so `.transparent-header` uses a flex layout with `justify-content: space-between` (brand left, nav right). The `.home-nav` no longer needs `justify-content: flex-end` since the parent handles positioning.
+```css
+.home-brand {
+  font-family: 'Times New Roman', serif;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  transition: color 0.2s ease;
+  white-space: nowrap;
+}
+```
+
+### Also update the text in `SiteHeader.tsx`
+Change "Enterprise Policy Literacy" to "Enterprise Policy Literacy Tool" to match the artefact exactly.
 
 ### Result
-- "Enterprise Policy Literacy Tool" appears on the left of all internal pages, linked to `/`
-- Navigation links remain right-aligned at 14px
-- Consistent with the artefact header layout shown in the first screenshot
+- Branding on all pages matches the artefact's serif style at 22px
+- Title text matches: "Enterprise Policy Literacy Tool"
