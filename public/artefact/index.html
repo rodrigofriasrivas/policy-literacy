@@ -5744,18 +5744,23 @@
                 // Canvas is handled by initIndividualTopicDashboard
                 if (canvasEl) canvasEl.style.display = 'block'; // Topic view needs canvas
             } else if (view === 'library') {
+                if (libView) {
+                    libView.style.display = 'block';
+                    libView.style.visibility = 'visible';
+                    libView.style.pointerEvents = 'auto'; // Ensure clickable
+                }
+
+                // Hide Network
+                if (canvasEl) canvasEl.style.display = 'none';
+
                 console.group('VIEW SWITCH: LIBRARY');
                 console.log('Active view:', view);
                 console.log('#view-library exists:', !!libView);
-                console.log('#view-library display:', libView ? getComputedStyle(libView).display : 'N/A');
+                console.log('AFTER toggle, #view-library display:', libView ? getComputedStyle(libView).display : 'N/A');
                 console.log('#network canvas visible:', canvasEl ? getComputedStyle(canvasEl).display : 'N/A');
                 console.groupEnd();
 
-                if (libView) {
-                    libView.style.display = 'block';
-                    if (typeof LibraryManager !== 'undefined') LibraryManager.init();
-                }
-                if (canvasEl) canvasEl.style.display = 'none';
+                if (typeof LibraryManager !== 'undefined') LibraryManager.init();
             } else if (view === 'network') {
                 // Ensure canvas is back in main container
                 const container = document.getElementById('container');
@@ -5839,8 +5844,15 @@
 
                 const rawPapers = (window.allData && window.allData.papers) ? window.allData.papers : [];
 
+                // C) Add Audit Group
+                console.group('LIBRARY DATA AUDIT');
+                console.log('papers source:', 'window.allData.papers');
+                console.log('papers length:', rawPapers.length);
+                if (rawPapers.length > 0) console.log('sample paper:', rawPapers[0]);
+                console.groupEnd();
+
                 if (rawPapers.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-secondary);">No papers available or data failed to load.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-secondary);">No papers available or data failed to load. (allData.papers empty)</td></tr>';
                     if (totalLabel) totalLabel.textContent = '0 papers';
                     return;
                 }
