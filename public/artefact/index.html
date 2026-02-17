@@ -3940,23 +3940,18 @@
             container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading...</div>';
 
             try {
-                // 1. Identify ID column (avoiding guesswork)
-                let idColumn = 'id';
-                try {
-                    const probe = await fetch(`${SUPABASE_URL}/rest/v1/papers?select=id&limit=1`,
-                        { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                    if (!probe.ok) idColumn = 'paper_id';
-                } catch (e) { idColumn = 'paper_id'; }
+                // Use cached data from Network View
+                // This ensures consistency across views and avoids duplicate fetches
+                // We use 'allData.papers' which is already populated with the full corpus (~5800 papers)
 
-                // 2. Fetch full corpus using determined ID
-                const url = `${SUPABASE_URL}/rest/v1/papers?select=${idColumn},year,journal&order=year.asc&limit=20000`;
+                // Fallback check
+                if (!window.allData || !window.allData.papers) {
+                    // If called too early, we might need to wait or just return empty for now.
+                    // But in the typical flow, loadData() runs before loadTemporalView()
+                    console.warn('Corpus Growth: allData.papers is empty or undefined.');
+                }
 
-                const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                if (!response.ok) throw new Error(`Status ${response.status}`);
-
-                const data = await response.json();
-
-
+                const papers = (window.allData && window.allData.papers) ? window.allData.papers : [];
 
                 // 3. Aggregate (Distinct IDs)
                 const yearCounts = {};
@@ -3971,9 +3966,10 @@
                     yearCounts[y] = 0;
                 }
 
-                data.forEach(p => {
+                papers.forEach(p => {
                     const y = parseInt(p.year);
-                    const pid = p[idColumn];
+                    // Use id or paper_id depending on what's available in the cached object
+                    const pid = p.id || p.paper_id;
 
                     if (isNaN(y)) {
                         missingYearCount++;
@@ -4006,15 +4002,15 @@
                     count: yearCounts[y]
                 }));
 
-                // 4. Audit Logs (Fixed + Verification)
+                // 4. Audit Logs (Updated for Cached Data)
                 const totalPlotted = fullData.reduce((sum, d) => sum + d.count, 0);
                 const distinctPaperCount = seenIds.size;
                 const maxYearCount = Math.max(0, ...fullData.map(d => d.count));
 
                 console.group('Corpus Growth Audit (Fixed)');
-                console.log(`1. ID Column Used: ${idColumn}`);
-                console.log(`2. Total Raw Rows: ${data.length}`);
-                console.log(`3. Total Distinct Papers (by ${idColumn}): ${distinctPaperCount}`);
+                console.log(`1. Source: allData.papers (Cached)`);
+                console.log(`2. Total Cached Rows: ${papers.length}`);
+                console.log(`3. Total Distinct Papers (by ID): ${distinctPaperCount}`);
                 console.log(`4. Sum of Plotted Counts: ${totalPlotted}`);
                 console.log(`5. Rows with Missing Year: ${missingYearCount}`);
 
@@ -4023,17 +4019,12 @@
                 console.log('7. Yearly Counts Preview (Last 10):', fullData.slice(-10));
 
                 // New: Validation Checks
-                // Check if filters are active (approximation for warning logic)
                 const isJournalFilterActive = (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0);
-                // We assume full timeframe if range is roughly 1980-2024+
                 const isFullTimeframe = (yStart <= 1981 && yEnd >= 2023);
 
                 if (!isJournalFilterActive && isFullTimeframe) {
                     if (distinctPaperCount < 1000) {
-                        console.error('%cWARNING: Corpus Growth is not reading the full corpus. Check Supabase query filters and ID field.', 'color: red; font-weight: bold; font-size: 14px;');
-                    }
-                    if (maxYearCount < 20) {
-                        console.error('%cWARNING: Yearly counts are implausibly low for a ~5800-paper corpus.', 'color: red; font-weight: bold; font-size: 14px;');
+                        console.error('%cWARNING: Corpus Growth is not reading the full corpus. Check if allData.papers is fully populated.', 'color: red; font-weight: bold; font-size: 14px;');
                     }
                 }
                 console.groupEnd();
