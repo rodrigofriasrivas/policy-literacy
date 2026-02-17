@@ -3941,27 +3941,54 @@
             container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading...</div>';
 
             try {
-                // Wait for global data load (allData.papers) to ensure chart is not flat (zero)
-                // Retry every 200ms up to 10s (50 attempts)
+                // Wait for global data load (allData.papers)
                 let attempts = 0;
-                const maxAttempts = 50;
+                const maxAttempts = 100; // Allow up to 20s
 
-                while ((!window.allData || !Array.isArray(window.allData.papers) || window.allData.papers.length === 0) && attempts < maxAttempts) {
+                // Helper to check state
+                const checkReady = () => {
+                    const dataObj = (typeof allData !== 'undefined') ? allData : window.allData;
+                    const hasData = !!dataObj;
+                    const hasArray = hasData && Array.isArray(dataObj.papers);
+                    const length = hasArray ? dataObj.papers.length : 0;
+                    return { ready: hasData && hasArray && length > 0, hasData, hasArray, length, dataObj };
+                };
+
+                while (attempts < maxAttempts) {
+                    const status = checkReady();
+
                     if (attempts === 0) {
-                        // Only show waiting message if not immediately available
-                        container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Waiting for data...</div>';
+                        console.log('Corpus Growth wait: starting', {
+                            hasAllData: status.hasData,
+                            hasPapersArray: status.hasArray,
+                            papersLength: status.length
+                        });
+
+                        if (!status.ready) {
+                            container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Waiting for data...</div>';
+                        }
                     }
+
+                    if (status.ready) break;
+
                     await new Promise(r => setTimeout(r, 200));
                     attempts++;
                 }
 
-                if (!window.allData || !Array.isArray(window.allData.papers) || window.allData.papers.length === 0) {
-                    console.warn('Corpus Growth: Data failed to load in time.');
+                const finalStatus = checkReady();
+
+                if (!finalStatus.ready) {
+                    console.warn('Corpus Growth wait: timeout', {
+                        hasAllData: finalStatus.hasData,
+                        hasPapersArray: finalStatus.hasArray,
+                        papersLength: finalStatus.length
+                    });
                     container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Data not available.</div>';
                     return;
                 }
 
-                const papers = window.allData.papers;
+                console.log(`Corpus Growth wait: ready (${finalStatus.length} papers)`);
+                const papers = finalStatus.dataObj.papers;
 
                 // 3. Aggregate (Distinct IDs)
                 const yearCounts = {};
