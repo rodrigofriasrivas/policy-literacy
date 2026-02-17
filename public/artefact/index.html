@@ -4400,6 +4400,24 @@
                 return row;
             });
 
+            // FIX: Add End-Cap Year to prevent visual "drop to zero"
+            // We duplicate the last real year's data into a new year (lastYear + 1)
+            const endcapYear = lastYearWithData + 1;
+            const lastRow = dataset[dataset.length - 1];
+
+            if (lastRow) {
+                const endcapRow = { ...lastRow, year: endcapYear };
+                dataset.push(endcapRow);
+                years.push(endcapYear); // Update years array for scale domain
+            }
+
+            console.group('Chart2 Endcap Audit');
+            console.log(`minYearInData: ${minYearInData}`);
+            console.log(`lastYearWithData: ${lastYearWithData}`);
+            console.log(`endcapYear: ${endcapYear}`);
+            console.log(`Endcap Applied?`, dataset[dataset.length - 1].year === endcapYear);
+            console.groupEnd();
+
             // 3. D3 Setup
             const width = container.clientWidth;
             // If customHeight is 'flex', use clientHeight (for modal)
