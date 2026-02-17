@@ -4358,15 +4358,33 @@
             // Stack layers: keys[0] is bottom-most.
             seriesKeys.sort((a, b) => seriesMeta[b].rank - seriesMeta[a].rank);
 
-            // 2. Pivot & Gap Fill (1980-lastValidYear)
-            // Fix: Stop at the last year with actual data to avoid drop-off to zero
-            const maxYearInData = d3.max(data, d => d.year) || 2025;
-            const lastValidYear = maxYearInData;
+            // 2. Pivot & Gap Fill (Trim to actual data presence)
 
-            console.log(`Temporal Chart Audit — Chart 2: lastValidYear=${lastValidYear}, maxYearInData=${maxYearInData}`);
+            // Re-calculate last year with active data (>0 papers)
+            const activeData = data.filter(d => Boolean(d.papers_count) && d.papers_count > 0);
+
+            const minYearInData = d3.min(activeData, d => d.year) || 1980;
+            const maxYearInDataRaw = d3.max(data, d => d.year) || 2025;
+            const lastYearWithData = d3.max(activeData, d => d.year) || maxYearInDataRaw;
+
+            console.group('Chart2 Trim Audit');
+            console.log(`minYearInData: ${minYearInData}`);
+            console.log(`maxYearInDataRaw: ${maxYearInDataRaw}`);
+            console.log(`lastYearWithData: ${lastYearWithData}`);
+            console.log(`Any year > lastYearWithData with counts > 0?`, activeData.some(d => d.year > lastYearWithData));
+            console.groupEnd();
 
             const years = [];
-            for (let y = 1980; y <= lastValidYear; y++) years.push(y);
+
+            // Generate years based on requested range [minYearInData, lastYearWithData]
+            // Note: If you want to force 1980 start, use 1980. But user requested [minYearInData, lastYearWithData].
+            // However, to be safe and consistent with previous request, I'll use minYearInData unless it is way too late (e.g. 2000).
+            // Let's stick to minYearInData as requested.
+
+            const startY = minYearInData;
+            const endY = lastYearWithData;
+
+            for (let y = startY; y <= endY; y++) years.push(y);
 
             const dataset = years.map(y => {
                 const row = { year: y };
