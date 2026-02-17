@@ -15,6 +15,9 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
   if (variant === "transparent") {
     return (
       <header className="transparent-header">
+        <Link to="/" className="home-brand">
+          Enterprise Policy Literacy
+        </Link>
         <nav className="home-nav">
         {navItems.map((item) =>
             item.external ? (
