@@ -4358,13 +4358,20 @@
             // Stack layers: keys[0] is bottom-most.
             seriesKeys.sort((a, b) => seriesMeta[b].rank - seriesMeta[a].rank);
 
-            // 2. Pivot & Gap Fill (1980-2025)
+            // 2. Pivot & Gap Fill (1980-lastValidYear)
+            // Fix: Stop at the last year with actual data to avoid drop-off to zero
+            const maxYearInData = d3.max(data, d => d.year) || 2025;
+            const lastValidYear = maxYearInData;
+
+            console.log(`Temporal Chart Audit — Chart 2: lastValidYear=${lastValidYear}, maxYearInData=${maxYearInData}`);
+
             const years = [];
-            for (let y = 1980; y <= 2025; y++) years.push(y);
+            for (let y = 1980; y <= lastValidYear; y++) years.push(y);
 
             const dataset = years.map(y => {
                 const row = { year: y };
-                seriesKeys.forEach(k => row[k] = 0);
+                seriesKeys.forEach(k => { row[k] = 0; }); // Initialize with 0
+
                 // Fill from data
                 data.filter(d => d.year === y).forEach(d => {
                     row[d.series_key] = d.papers_count;
