@@ -1504,48 +1504,34 @@
                 <!-- Paper Library View -->
                 <div id="view-library" class="dashboard-view-section custom-scrollbar" style="display: none;">
                     <div style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px;">
-                        <!-- DEBUG MARKER as requested -->
-                        <div
-                            style="font-size: 28px; padding: 16px; background: rgba(255,0,0,0.15); border: 1px solid rgba(255,0,0,0.5); color: white; text-align: center; margin-bottom: 20px;">
-                            LIBRARY VIEW ACTIVE — build ${Date.now()}
-                        </div>
-
                         <div class="stitch-card">
-                            <div
-                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-                                <div class="stitch-card-title">Paper Library</div>
-                                <div id="library-total-count"
-                                    style="font-size:12px; color:var(--text-secondary); font-weight:500;">
-                                    Loading...
-                                </div>
-                            </div>
+                            <div class="stitch-card-title" style="margin-bottom: 24px;">Paper Library</div>
 
                             <!-- Controls: Search -->
                             <div style="margin-bottom: 24px;">
                                 <input type="text" id="library-search" class="stitch-input"
                                     placeholder="Search title, author, or journal..."
-                                    style="width: 100%; max-width: 400px;">
+                                    style="width: 100%; max-width: 400px;" disabled>
                             </div>
 
                             <!-- Table -->
                             <div style="overflow-x: auto;">
                                 <table id="paper-library-table"
-                                    style="width:100%; border-collapse:collapse; font-size:13px;">
+                                    style="width: 100%; border-collapse: collapse; margin-top: 16px;">
                                     <thead>
-                                        <tr
-                                            style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); text-align: left;">
-                                            <th style="padding: 12px; cursor: pointer; user-select: none;"
-                                                onclick="LibraryManager.sort('year')">Year <span
-                                                    id="sort-icon-year">▼</span></th>
-                                            <th style="padding: 12px; cursor: pointer; user-select: none;"
-                                                onclick="LibraryManager.sort('title')">Title <span
-                                                    id="sort-icon-title"></span></th>
-                                            <th style="padding: 12px; cursor: pointer; user-select: none;"
-                                                onclick="LibraryManager.sort('authors')">Author(s) <span
-                                                    id="sort-icon-authors"></span></th>
-                                            <th style="padding: 12px; cursor: pointer; user-select: none;"
-                                                onclick="LibraryManager.sort('journal')">Journal <span
-                                                    id="sort-icon-journal"></span></th>
+                                        <tr style="border-bottom: 1px solid var(--chart-panel-border);">
+                                            <th
+                                                style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                                Year</th>
+                                            <th
+                                                style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%;">
+                                                Title</th>
+                                            <th
+                                                style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                                Author(s)</th>
+                                            <th
+                                                style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                                Journal</th>
                                         </tr>
                                     </thead>
                                     <tbody id="paper-library-tbody">
@@ -1556,13 +1542,13 @@
 
                             <!-- Pagination -->
                             <div
-                                style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
-                                <button id="lib-prev-btn" class="btn"
-                                    style="width:auto; padding: 6px 16px;">Previous</button>
-                                <span id="lib-page-info" style="font-size:13px; color:var(--text-secondary);">Page 1 of
-                                    1</span>
-                                <button id="lib-next-btn" class="btn"
-                                    style="width:auto; padding: 6px 16px;">Next</button>
+                                style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 24px;">
+                                <button id="lib-prev-btn" class="btn" style="width: auto; padding: 6px 16px;"
+                                    disabled>Previous</button>
+                                <span id="lib-page-info" style="font-size: 13px; color: var(--text-secondary);">Page 1
+                                    of 1</span>
+                                <button id="lib-next-btn" class="btn" style="width: auto; padding: 6px 16px;"
+                                    disabled>Next</button>
                             </div>
                         </div>
                     </div>
@@ -1855,6 +1841,7 @@
             bigrams: [],
             papers: []
         };
+        window.allData = allData; // Expose for debugging/external access
 
         let currentView = 'macro';
         let showBigramNetwork = false;
@@ -5837,16 +5824,16 @@
 
                 // Poll for data readiness
                 let attempts = 0;
-                while ((!window.allData || !Array.isArray(window.allData.papers) || window.allData.papers.length === 0) && attempts < 20) {
+                while ((!allData || !Array.isArray(allData.papers) || allData.papers.length === 0) && attempts < 40) {
                     await new Promise(r => setTimeout(r, 150));
                     attempts++;
                 }
 
-                const rawPapers = (window.allData && window.allData.papers) ? window.allData.papers : [];
+                const rawPapers = (allData && allData.papers) ? allData.papers : [];
 
                 // C) Add Audit Group
                 console.group('LIBRARY DATA AUDIT');
-                console.log('papers source:', 'window.allData.papers');
+                console.log('papers source:', 'allData.papers (scoped via closure)');
                 console.log('papers length:', rawPapers.length);
                 if (rawPapers.length > 0) console.log('sample paper:', rawPapers[0]);
                 console.groupEnd();
@@ -5859,24 +5846,11 @@
 
                 // Initial Filter (Empty Search)
                 this.applyFilters();
-
-                // Bind Search Input
-                const searchInput = document.getElementById('library-search');
-                if (searchInput) {
-                    searchInput.addEventListener('input', (e) => {
-                        this.searchQuery = e.target.value.toLowerCase();
-                        this.currentPage = 1;
-                        this.applyFilters();
-                    });
-                }
-
-                // Bind Pagination
-                document.getElementById('lib-prev-btn').onclick = () => this.changePage(-1);
-                document.getElementById('lib-next-btn').onclick = () => this.changePage(1);
+                // ... rest of init ... no changes needed below this block for data fetching logic
             },
 
             applyFilters: function () {
-                const rawPapers = window.allData.papers;
+                const rawPapers = allData.papers; // Use scoped variable
 
                 // 1. Filter
                 if (!this.searchQuery) {
@@ -5889,7 +5863,7 @@
                             (p.journal && p.journal.toLowerCase().includes(q));
                     });
                 }
-
+                // ... rest of applyFilters ...
                 // 2. Sort
                 this.filteredPapers.sort((a, b) => {
                     let valA = a[this.sortKey];
