@@ -875,6 +875,25 @@
             /* Header strip handles spacing now */
         }
 
+        /* Layout overrides for single-column views (like Paper Library) */
+        .dashboard-content-col.layout-single {
+            display: flex !important;
+            flex-direction: column !important;
+            /* If there was a grid, force single column */
+            grid-template-columns: 1fr !important;
+        }
+
+        .dashboard-content-col.layout-single .dashboard-view-section {
+            padding-left: 0 !important;
+            /* Glue to sidebar */
+        }
+
+        .dashboard-content-col.layout-single #view-library {
+            max-width: none !important;
+            width: 100% !important;
+            margin: 0 !important;
+        }
+
         /* Dashboard Header Strip - Integrated Glass Bar */
         .dashboard-header-row {
             pointer-events: auto;
@@ -5800,6 +5819,7 @@
             const containerEl = document.getElementById('container');
             const canvasEl = document.getElementById('canvas');
             const networkCol = document.querySelector('.dashboard-sidebar-col');
+            const contentCol = document.querySelector('.dashboard-content-col');
             const tView = document.getElementById('view-temporal');
             const libView = document.getElementById('view-library');
             const topicView = document.getElementById('view-topic');
@@ -5811,6 +5831,15 @@
                     networkCol.classList.add('is-disabled');
                 } else {
                     networkCol.classList.remove('is-disabled');
+                }
+            }
+
+            // Handle single-column override logic (e.g., Paper Library)
+            if (contentCol) {
+                if (view === 'library') {
+                    contentCol.classList.add('layout-single');
+                } else {
+                    contentCol.classList.remove('layout-single');
                 }
             }
 
@@ -5846,6 +5875,7 @@
             console.group('VIEW LAYOUT AUDIT');
             console.log('viewName:', view);
             console.log('sidebar display + disabled state:', networkCol ? `${getComputedStyle(networkCol).display} (${networkCol.classList.contains('is-disabled') ? 'disabled' : 'active'})` : 'N/A');
+            console.log('main container class state:', contentCol ? `layout-single: ${contentCol.classList.contains('layout-single')}` : 'N/A');
             console.log('network viewport wrapper display:', containerEl ? getComputedStyle(containerEl).display : 'N/A');
             console.log('#view-library display:', libView ? getComputedStyle(libView).display : 'N/A');
             console.groupEnd();
