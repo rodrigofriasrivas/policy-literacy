@@ -6101,6 +6101,19 @@
                 if (!tbody) return;
                 tbody.innerHTML = '';
 
+                // Helper to detect missing data reliably
+                const isMissing = (value, token) => {
+                    if (value === null || value === undefined) return true;
+                    if (Array.isArray(value) && value.length === 0) return true;
+                    if (typeof value === 'string') {
+                        if (value.trim() === '') return true;
+                        if (token && value.toLowerCase().includes(token.toLowerCase())) return true;
+                    }
+                    return false;
+                };
+
+                const badgeStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:500; background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1);";
+
                 pageData.forEach(p => {
                     const tr = document.createElement('tr');
                     tr.style.borderBottom = '1px solid var(--chart-row-border)';
@@ -6108,23 +6121,30 @@
                     tr.onmouseover = () => tr.style.background = 'var(--chart-row-hover)';
                     tr.onmouseout = () => tr.style.background = 'transparent';
 
-                    let isMissingAuthor = !p.authors || p.authors.trim() === '' || p.authors.trim() === 'MISSING_AUTHOR';
-                    let isMissingJournal = !p.journal || p.journal.trim() === '';
+                    let isMissingAuthor = isMissing(p.authors, 'missing_author');
+                    let isMissingJournal = isMissing(p.journal);
+
+                    let displayAuthors = Array.isArray(p.authors) ? p.authors.join(', ') : p.authors;
 
                     let authorsHTML = isMissingAuthor
-                        ? '<span style="display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); opacity:0.6;"><span style="display:inline-block; width:6px; height:6px; background:var(--text-secondary); border-radius:50%; opacity:0.5;"></span> Missing authors</span>'
-                        : p.authors;
+                        ? `<span style="${badgeStyle}">Missing authors</span>`
+                        : displayAuthors;
 
                     let journalHTML = isMissingJournal
-                        ? '<span style="display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); opacity:0.6;"><span style="display:inline-block; width:6px; height:6px; background:var(--text-secondary); border-radius:50%; opacity:0.5;"></span> Missing journal</span>'
+                        ? `<span style="${badgeStyle}">Missing journal</span>`
                         : p.journal;
 
-                    let titleHTML = (!p.title || p.title.trim() === '') ? 'Untitled paper' : p.title;
+                    let titleHTML = isMissing(p.title) ? 'Untitled paper' : p.title;
+
+                    // Ensure safe escaping for tooltips
+                    let safeAuthorsAttr = !isMissingAuthor && typeof displayAuthors === 'string'
+                        ? displayAuthors.replace(/"/g, '&quot;')
+                        : '';
 
                     tr.innerHTML = `
                         <td style="padding:8px 12px; color:var(--text-secondary); font-family:monospace; font-size:12px; vertical-align:top;">${p.year || ''}</td>
                         <td style="padding:8px 12px; color:var(--text-primary); font-weight:600; font-size:13px; line-height:1.4; white-space:normal; overflow-wrap:anywhere; vertical-align:top;">${titleHTML}</td>
-                        <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top;" ${!isMissingAuthor ? `title="${p.authors.replace(/"/g, '&quot;')}"` : ''}>${authorsHTML}</td>
+                        <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top;" ${!isMissingAuthor ? `title="${safeAuthorsAttr}"` : ''}>${authorsHTML}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-style:italic; font-size:12px; line-height:1.4; vertical-align:top;">${journalHTML}</td>
                     `;
                     tbody.appendChild(tr);
