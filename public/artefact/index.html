@@ -1573,17 +1573,17 @@
                                     style="width: 100%; border-collapse: collapse; margin-top: 16px;">
                                     <thead>
                                         <tr style="border-bottom: 1px solid var(--chart-panel-border);">
-                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                            <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 60px; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('year')">
                                                 Year <span id="sort-icon-year" style="font-size:10px;">▼</span></th>
-                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%; transition: color 0.2s;"
+                                            <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 55%; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('title')">
                                                 Title <span id="sort-icon-title" style="font-size:10px;"></span></th>
-                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                            <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 20%; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('authors')">
                                                 Author(s) <span id="sort-icon-authors" style="font-size:10px;"></span>
                                             </th>
-                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                            <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 20%; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('journal')">
                                                 Journal <span id="sort-icon-journal" style="font-size:10px;"></span>
                                             </th>
@@ -6108,11 +6108,24 @@
                     tr.onmouseover = () => tr.style.background = 'var(--chart-row-hover)';
                     tr.onmouseout = () => tr.style.background = 'transparent';
 
+                    let isMissingAuthor = !p.authors || p.authors.trim() === '' || p.authors.trim() === 'MISSING_AUTHOR';
+                    let isMissingJournal = !p.journal || p.journal.trim() === '';
+
+                    let authorsHTML = isMissingAuthor
+                        ? '<span style="display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); opacity:0.6;"><span style="display:inline-block; width:6px; height:6px; background:var(--text-secondary); border-radius:50%; opacity:0.5;"></span> Missing authors</span>'
+                        : p.authors;
+
+                    let journalHTML = isMissingJournal
+                        ? '<span style="display:inline-flex; align-items:center; gap:6px; font-size:11px; color:var(--text-secondary); opacity:0.6;"><span style="display:inline-block; width:6px; height:6px; background:var(--text-secondary); border-radius:50%; opacity:0.5;"></span> Missing journal</span>'
+                        : p.journal;
+
+                    let titleHTML = (!p.title || p.title.trim() === '') ? 'Untitled paper' : p.title;
+
                     tr.innerHTML = `
-                        <td style="padding:12px; color:var(--text-secondary); font-family:monospace;">${p.year || ''}</td>
-                        <td style="padding:12px; color:var(--text-primary); font-weight:500;">${p.title || 'Untitled'}</td>
-                        <td style="padding:12px; color:var(--text-secondary); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${p.authors ? p.authors.replace(/"/g, '&quot;') : ''}">${p.authors || ''}</td>
-                        <td style="padding:12px; color:var(--text-secondary); font-style:italic;">${p.journal || ''}</td>
+                        <td style="padding:8px 12px; color:var(--text-secondary); font-family:monospace; font-size:12px; vertical-align:top;">${p.year || ''}</td>
+                        <td style="padding:8px 12px; color:var(--text-primary); font-weight:600; font-size:13px; line-height:1.4; white-space:normal; overflow-wrap:anywhere; vertical-align:top;">${titleHTML}</td>
+                        <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top;" ${!isMissingAuthor ? `title="${p.authors.replace(/"/g, '&quot;')}"` : ''}>${authorsHTML}</td>
+                        <td style="padding:8px 12px; color:var(--text-secondary); font-style:italic; font-size:12px; line-height:1.4; vertical-align:top;">${journalHTML}</td>
                     `;
                     tbody.appendChild(tr);
                 });
