@@ -1522,191 +1522,194 @@
                         <!-- Card 5: Bigram Trends (Chart 5) -->
                         <div class="stitch-card">
                             <div class="stitch-card-title">Bigram trends over time (selected topic)</div>
-                            style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
-                            margin-bottom:16px;">
-                            <div class="stitch-card-subtitle" style="margin-bottom:0; flex:1;">
-                                1980–2025 (top 5 bigrams)
-                            </div>
-                            <div id="chart5-topic-selector" style="position:relative; min-width:200px; flex-shrink:0;">
-                                <!-- JS injects dropdown here -->
-                                <div style="font-size:11px; color:var(--text-secondary);">Loading topics...
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px;">
+                                <div class="stitch-card-subtitle" style="margin-bottom:0; flex:1;">
+                                    1980–2025 (top 5 bigrams)
+                                </div>
+                                <div id="chart5-topic-selector"
+                                    style="position:relative; min-width:200px; flex-shrink:0;">
+                                    <!-- JS injects dropdown here -->
+                                    <div style="font-size:11px; color:var(--text-secondary);">Loading topics...
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Chart Wrapper -->
-                        <div id="bigram-trends-chart" style="height: 400px; width: 100%; position: relative;">
-                            <div
-                                style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
-                                Select a topic to view trends...
+                            <!-- Chart Wrapper -->
+                            <div id="bigram-trends-chart" style="height: 400px; width: 100%; position: relative;">
+                                <div
+                                    style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
+                                    Select a topic to view trends...
+                                </div>
+                            </div>
+                            <div id="bigram-trends-legend"
+                                style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
+                                &nbsp;
                             </div>
                         </div>
-                        <div id="bigram-trends-legend"
-                            style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
-                            &nbsp;
+                    </div>
+                </div> <!-- End #view-temporal -->
+
+                <!-- Paper Library View -->
+                <div id="view-library" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                    <div style="padding-bottom: 40px;">
+                        <div class="stitch-card">
+                            <div class="stitch-card-title"
+                                style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                                <span>Paper Library &mdash; <span id="library-total-count">0 papers</span></span>
+                            </div>
+
+                            <!-- Controls: Search -->
+                            <div style="margin-bottom: 24px;">
+                                <input type="text" id="library-search" class="stitch-input"
+                                    placeholder="Search title, author, or journal..."
+                                    style="width: 100%; max-width: 400px;"
+                                    oninput="if(typeof LibraryManager !== 'undefined'){ LibraryManager.searchQuery = this.value; LibraryManager.applyFilters(); }">
+                            </div>
+
+                            <!-- Table -->
+                            <div style="overflow-x: auto;">
+                                <table id="paper-library-table"
+                                    style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid var(--chart-panel-border);">
+                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('year')">
+                                                Year <span id="sort-icon-year" style="font-size:10px;">▼</span></th>
+                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%; transition: color 0.2s;"
+                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('title')">
+                                                Title <span id="sort-icon-title" style="font-size:10px;"></span></th>
+                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('authors')">
+                                                Author(s) <span id="sort-icon-authors" style="font-size:10px;"></span>
+                                            </th>
+                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('journal')">
+                                                Journal <span id="sort-icon-journal" style="font-size:10px;"></span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="paper-library-tbody">
+                                        <!-- Rows populated via JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div
+                                style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 24px;">
+                                <button id="lib-prev-btn" class="btn" style="width: auto; padding: 6px 16px;"
+                                    onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.changePage(-1)"
+                                    disabled>Previous</button>
+                                <span id="lib-page-info" style="font-size: 13px; color: var(--text-secondary);">Page 1
+                                    of 1</span>
+                                <button id="lib-next-btn" class="btn" style="width: auto; padding: 6px 16px;"
+                                    onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.changePage(1)"
+                                    disabled>Next</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div> <!-- End #view-temporal -->
 
-            <!-- Paper Library View -->
-            <div id="view-library" class="dashboard-view-section custom-scrollbar" style="display: none;">
-                <div style="padding-bottom: 40px;">
+                <!-- Individual Topic Dashboard -->
+                <div id="view-topic" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                    <div style="max-width: 1400px; margin: 0 auto; padding-bottom: 40px;">
+
+                        <!-- Header Region: Two-Column (Topic Brief + Network Graph) -->
+                        <div style="display: grid; grid-template-columns: 350px 1fr; gap: 24px; margin-bottom: 24px;">
+                            <!-- Left: Topic Brief -->
+                            <div class="stitch-card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+                                <div class="stitch-card-title" id="topic-brief-title">Loading...</div>
+                                <div class="stitch-card-subtitle" id="topic-brief-subtitle"
+                                    style="margin-bottom: 16px;">
+                                    Topic definition</div>
+                                <div id="topic-brief-definition"
+                                    style="color: var(--text-primary); font-size: 14px; line-height: 1.6; flex: 1;">
+                                    Loading definition...
+                                </div>
+                            </div>
+
+                            <!-- Right: Network Graph Card -->
+                            <div class="stitch-card"
+                                style="margin-bottom: 0; padding: 0; height: 500px; position: relative; overflow: hidden; background: var(--bg-color);">
+                                <!-- Canvas Container -->
+                                <div id="topic-network-container" style="width:100%; height:100%;">
+                                    <div
+                                        style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 10;">
+                                        <button id="topic-zoom-in" class="btn"
+                                            style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">+</button>
+                                        <button id="topic-zoom-out" class="btn"
+                                            style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">-</button>
+                                    </div>
+                                </div> <!-- D3 Canvas will be moved here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Terms -->
                     <div class="stitch-card">
-                        <div class="stitch-card-title"
-                            style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-                            <span>Paper Library &mdash; <span id="library-total-count">0 papers</span></span>
+                        <div class="stitch-card-title">Top terms shaping this topic</div>
+                        <div id="topic-top-terms" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+                            <!-- Chips injected here -->
                         </div>
+                    </div>
 
-                        <!-- Controls: Search -->
-                        <div style="margin-bottom: 24px;">
-                            <input type="text" id="library-search" class="stitch-input"
-                                placeholder="Search title, author, or journal..." style="width: 100%; max-width: 400px;"
-                                oninput="if(typeof LibraryManager !== 'undefined'){ LibraryManager.searchQuery = this.value; LibraryManager.applyFilters(); }">
-                        </div>
+                    <!-- Bigram Trends -->
+                    <div class="stitch-card">
+                        <div class="stitch-card-title" id="topic-trends-title">Bigram trends over time</div>
+                        <div class="stitch-card-subtitle">Tracks how the topic’s five defining terms rise and
+                            fall
+                            across the corpus timeline.</div>
+                        <div id="topic-trends-chart-container" style="height: 300px; width: 100%;"></div>
+                    </div>
 
-                        <!-- Table -->
+                    <!-- Papers Table -->
+                    <div class="stitch-card">
+                        <div class="stitch-card-title" id="topic-papers-title">Papers informing this topic</div>
                         <div style="overflow-x: auto;">
-                            <table id="paper-library-table"
+                            <table id="topic-papers-table"
                                 style="width: 100%; border-collapse: collapse; margin-top: 16px;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--chart-panel-border);">
-                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
-                                            onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('year')">
-                                            Year <span id="sort-icon-year" style="font-size:10px;">▼</span></th>
-                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%; transition: color 0.2s;"
-                                            onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('title')">
-                                            Title <span id="sort-icon-title" style="font-size:10px;"></span></th>
-                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
-                                            onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('authors')">
-                                            Author(s) <span id="sort-icon-authors" style="font-size:10px;"></span>
-                                        </th>
-                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
-                                            onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('journal')">
-                                            Journal <span id="sort-icon-journal" style="font-size:10px;"></span>
-                                        </th>
+                                        <th
+                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                            Year</th>
+                                        <th
+                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%;">
+                                            Title</th>
+                                        <th
+                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                            Author(s)</th>
+                                        <th
+                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                            Journal</th>
+                                        <th style="width: 40px;"></th>
                                     </tr>
                                 </thead>
-                                <tbody id="paper-library-tbody">
-                                    <!-- Rows populated via JS -->
-                                </tbody>
+                                <tbody id="topic-papers-tbody"></tbody>
                             </table>
                         </div>
 
                         <!-- Pagination -->
-                        <div
+                        <div id="topic-papers-pagination"
                             style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 24px;">
-                            <button id="lib-prev-btn" class="btn" style="width: auto; padding: 6px 16px;"
-                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.changePage(-1)"
-                                disabled>Previous</button>
-                            <span id="lib-page-info" style="font-size: 13px; color: var(--text-secondary);">Page 1
-                                of 1</span>
-                            <button id="lib-next-btn" class="btn" style="width: auto; padding: 6px 16px;"
-                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.changePage(1)"
-                                disabled>Next</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Individual Topic Dashboard -->
-            <div id="view-topic" class="dashboard-view-section custom-scrollbar" style="display: none;">
-                <div style="max-width: 1400px; margin: 0 auto; padding-bottom: 40px;">
-
-                    <!-- Header Region: Two-Column (Topic Brief + Network Graph) -->
-                    <div style="display: grid; grid-template-columns: 350px 1fr; gap: 24px; margin-bottom: 24px;">
-                        <!-- Left: Topic Brief -->
-                        <div class="stitch-card" style="margin-bottom: 0; display: flex; flex-direction: column;">
-                            <div class="stitch-card-title" id="topic-brief-title">Loading...</div>
-                            <div class="stitch-card-subtitle" id="topic-brief-subtitle" style="margin-bottom: 16px;">
-                                Topic definition</div>
-                            <div id="topic-brief-definition"
-                                style="color: var(--text-primary); font-size: 14px; line-height: 1.6; flex: 1;">
-                                Loading definition...
+                            <button id="papers-prev-btn" class="btn" style="width: auto;">Previous</button>
+                            <div id="papers-page-info" style="color: var(--text-secondary); font-size: 13px;">
+                                Page 1
                             </div>
-                        </div>
-
-                        <!-- Right: Network Graph Card -->
-                        <div class="stitch-card"
-                            style="margin-bottom: 0; padding: 0; height: 500px; position: relative; overflow: hidden; background: var(--bg-color);">
-                            <!-- Canvas Container -->
-                            <div id="topic-network-container" style="width:100%; height:100%;">
-                                <div
-                                    style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 10;">
-                                    <button id="topic-zoom-in" class="btn"
-                                        style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">+</button>
-                                    <button id="topic-zoom-out" class="btn"
-                                        style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">-</button>
-                                </div>
-                            </div> <!-- D3 Canvas will be moved here -->
+                            <button id="papers-next-btn" class="btn" style="width: auto;">Next</button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Top Terms -->
-                <div class="stitch-card">
-                    <div class="stitch-card-title">Top terms shaping this topic</div>
-                    <div id="topic-top-terms" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
-                        <!-- Chips injected here -->
+                    <!-- Topic Navigation -->
+                    <div style="display: flex; justify-content: space-between; margin-top: 32px;">
+                        <button id="prev-topic-btn" class="btn" style="width: auto;">← Previous Topic</button>
+                        <button id="next-topic-btn" class="btn" style="width: auto;">Next Topic →</button>
                     </div>
-                </div>
-
-                <!-- Bigram Trends -->
-                <div class="stitch-card">
-                    <div class="stitch-card-title" id="topic-trends-title">Bigram trends over time</div>
-                    <div class="stitch-card-subtitle">Tracks how the topic’s five defining terms rise and
-                        fall
-                        across the corpus timeline.</div>
-                    <div id="topic-trends-chart-container" style="height: 300px; width: 100%;"></div>
-                </div>
-
-                <!-- Papers Table -->
-                <div class="stitch-card">
-                    <div class="stitch-card-title" id="topic-papers-title">Papers informing this topic</div>
-                    <div style="overflow-x: auto;">
-                        <table id="topic-papers-table"
-                            style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-                            <thead>
-                                <tr style="border-bottom: 1px solid var(--chart-panel-border);">
-                                    <th
-                                        style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                        Year</th>
-                                    <th
-                                        style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%;">
-                                        Title</th>
-                                    <th
-                                        style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                        Author(s)</th>
-                                    <th
-                                        style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                        Journal</th>
-                                    <th style="width: 40px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="topic-papers-tbody"></tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div id="topic-papers-pagination"
-                        style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 24px;">
-                        <button id="papers-prev-btn" class="btn" style="width: auto;">Previous</button>
-                        <div id="papers-page-info" style="color: var(--text-secondary); font-size: 13px;">
-                            Page 1
-                        </div>
-                        <button id="papers-next-btn" class="btn" style="width: auto;">Next</button>
-                    </div>
-                </div>
-
-                <!-- Topic Navigation -->
-                <div style="display: flex; justify-content: space-between; margin-top: 32px;">
-                    <button id="prev-topic-btn" class="btn" style="width: auto;">← Previous Topic</button>
-                    <button id="next-topic-btn" class="btn" style="width: auto;">Next Topic →</button>
                 </div>
             </div>
-        </div>
 
-    </div> <!-- End Dashboard Content Col -->
+        </div> <!-- End Dashboard Content Col -->
 
     </div> <!-- End Dashboard Area -->
     </div> <!-- End UI Layer -->
