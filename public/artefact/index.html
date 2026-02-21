@@ -1078,620 +1078,616 @@
     <div id="container">
         <canvas id="canvas"></canvas>
         <div id="topicTitle"></div>
+    </div>
 
+    <!-- UI OVERLAY LAYER -->
+    <div id="ui-layer">
 
-        <!-- UI OVERLAY LAYER -->
-        <div id="ui-layer">
+        <!-- 1. Top Navigation Bar (Full Width) -->
+        <div class="stitch-top-bar">
+            <a href="/" class="stitch-brand" style="text-decoration:none;color:inherit;">Enterprise Policy
+                Literacy
+                Tool</a>
+            <nav class="stitch-menu">
+                <a href="/artefact/index.html" class="stitch-menu-link active">Network visualisation</a>
+                <a href="/about" class="stitch-menu-link">About the project</a>
+                <a href="/policy" class="stitch-menu-link">Policy engagement</a>
+                <a href="/contact" class="stitch-menu-link">Contact</a>
+            </nav>
+        </div>
 
-            <!-- 1. Top Navigation Bar (Full Width) -->
-            <div class="stitch-top-bar">
-                <a href="/" class="stitch-brand" style="text-decoration:none;color:inherit;">Enterprise Policy
-                    Literacy
-                    Tool</a>
-                <nav class="stitch-menu">
-                    <a href="/artefact/index.html" class="stitch-menu-link active">Network visualisation</a>
-                    <a href="/about" class="stitch-menu-link">About the project</a>
-                    <a href="/policy" class="stitch-menu-link">Policy engagement</a>
-                    <a href="/contact" class="stitch-menu-link">Contact</a>
-                </nav>
-            </div>
+        <!-- 2. Dashboard Grid (Sidebar + Content) -->
+        <div class="dashboard-area">
 
-            <!-- 2. Dashboard Grid (Sidebar + Content) -->
-            <div class="dashboard-area">
+            <!-- Left Sidebar (Controls) -->
+            <div class="dashboard-sidebar-col">
+                <div id="controls">
+                    <!-- Scrollable Content Wrapper -->
+                    <div class="controls-scroll-content">
+                        <!-- Header / Compass -->
+                        <div class="panel-header">
 
-                <!-- Left Sidebar (Controls) -->
-                <div class="dashboard-sidebar-col">
-                    <div id="controls">
-                        <!-- Scrollable Content Wrapper -->
-                        <div class="controls-scroll-content">
-                            <!-- Header / Compass -->
-                            <div class="panel-header">
+                            <h3 class="panel-title">NETWORK PANEL</h3>
+                            <p class="panel-summary">
+                                You’re exploring <strong style="color: var(--text-primary);"><span
+                                        id="paperCount">5,776</span></strong> papers, across 40+ journals, mapped
+                                into <strong style="color: var(--text-primary);"><span
+                                        id="topicCount">25</span></strong> topics and 125 key
+                                terms, spanning 1980–2024.
+                                <span id="bigramCount" style="display:none"></span>
+                            </p>
+                        </div>
 
-                                <h3 class="panel-title">NETWORK PANEL</h3>
-                                <p class="panel-summary">
-                                    You’re exploring <strong style="color: var(--text-primary);"><span
-                                            id="paperCount">5,776</span></strong> papers, across 40+ journals, mapped
-                                    into <strong style="color: var(--text-primary);"><span
-                                            id="topicCount">25</span></strong> topics and 125 key
-                                    terms, spanning 1980–2024.
-                                    <span id="bigramCount" style="display:none"></span>
-                                </p>
+                        <!-- 1) Start here - Explore mode (Tabs) -->
+                        <div class="control-section" style="padding-top:0; margin-bottom: 24px;">
+                            <div class="section-label">
+                                <span>1) Start here — Explore mode</span>
+                                <span class="info-icon"
+                                    title="Browse Topics is for exploration and Advanced Search is for targeted queries.">i</span>
                             </div>
+                            <div class="tabs-header"
+                                style="display: flex; background: var(--input-bg); border-radius: 8px; padding: 2px; border: 1px solid var(--input-border);">
+                                <div id="tab-browse" class="tab-btn active" onclick="switchTab('browse')"
+                                    style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; background: var(--glass-bg); color: var(--text-primary); transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                    Browse Topics
+                                </div>
+                                <div id="tab-search" class="tab-btn" onclick="switchTab('search')"
+                                    style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; color: var(--text-secondary); transition: all 0.2s;">
+                                    Advanced Search
+                                </div>
+                            </div>
+                        </div>
 
-                            <!-- 1) Start here - Explore mode (Tabs) -->
-                            <div class="control-section" style="padding-top:0; margin-bottom: 24px;">
+                        <!-- Tab Content: Browse Topics -->
+                        <div id="content-browse" class="tab-content" style="display: block;">
+
+                            <!-- 2) Choose your lens -->
+                            <div class="control-section">
                                 <div class="section-label">
-                                    <span>1) Start here — Explore mode</span>
+                                    <span>2) Choose your lens</span>
                                     <span class="info-icon"
-                                        title="Browse Topics is for exploration and Advanced Search is for targeted queries.">i</span>
+                                        title="Select what the network shows: all topics or a specific topic.">i</span>
                                 </div>
-                                <div class="tabs-header"
-                                    style="display: flex; background: var(--input-bg); border-radius: 8px; padding: 2px; border: 1px solid var(--input-border);">
-                                    <div id="tab-browse" class="tab-btn active" onclick="switchTab('browse')"
-                                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; background: var(--glass-bg); color: var(--text-primary); transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                                        Browse Topics
+                                <!-- Existing ID -->
+                                <select id="topicSelect">
+                                    <option value="all">Macro View (All Topics)</option>
+                                </select>
+                            </div>
+
+                            <!-- 3) Define your scope -->
+                            <div class="control-section">
+                                <div class="section-label">
+                                    <span>3) Define your scope</span>
+                                    <span class="info-icon"
+                                        title="Narrow the time window to see how the landscape changes.">i</span>
+                                </div>
+                                <label
+                                    style="font-weight: 400; color: var(--text-secondary); margin-bottom: 4px;">Timeframe:
+                                    <span id="yearValue" style="color: var(--accent-color); font-weight: 600;">1980
+                                        –
+                                        2024</span></label>
+                                <div class="range-slider">
+                                    <div class="range-track"></div>
+                                    <div class="range-progress" id="rangeProgress" style="left: 0%; width: 100%;">
                                     </div>
-                                    <div id="tab-search" class="tab-btn" onclick="switchTab('search')"
-                                        style="flex: 1; text-align: center; padding: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border-radius: 6px; color: var(--text-secondary); transition: all 0.2s;">
-                                        Advanced Search
+                                    <input type="range" id="yearSliderStart" min="1980" max="2024" value="1980"
+                                        step="1">
+                                    <input type="range" id="yearSliderEnd" min="1980" max="2024" value="2024" step="1">
+                                </div>
+                                <div class="slider-labels">
+                                    <span>1980</span>
+                                    <span>2024</span>
+                                </div>
+                            </div>
+
+                            <!-- 4) What to show -->
+                            <div class="control-section">
+                                <div class="section-label">
+                                    <span>4) What to show</span>
+                                    <span class="info-icon"
+                                        title="These are visual layers, not ranking or recommendations.">i</span>
+                                </div>
+                                <div
+                                    style="margin-bottom: 12px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                                    Layers</div>
+
+                                <!-- Terms linked to papers -->
+                                <div class="row-align-center" style="margin-bottom: 8px;">
+                                    <label for="bigramPaperToggle"
+                                        style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms
+                                        linked to
+                                        papers</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="bigramPaperToggle" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+
+                                <!-- Terms-to-terms link -->
+                                <div class="row-align-center">
+                                    <label for="bigramToggle"
+                                        style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms-to-terms
+                                        link</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="bigramToggle">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 5) Journals -->
+                            <div class="control-section">
+                                <div class="section-label">
+                                    <span>5) Journals</span>
+                                    <span class="info-icon"
+                                        title="Filter the evidence base without changing the topic model.">i</span>
+                                </div>
+
+                                <!-- Multi-select Dropdown UI -->
+                                <div style="position: relative;">
+                                    <div id="journalDropdownBtn" onclick="toggleJournalDropdown()"
+                                        style="padding: 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary);">
+                                        <span>Select Journals</span>
+                                        <span style="font-size: 10px; opacity: 0.7;">▼</span>
+                                    </div>
+
+                                    <div id="journalDropdownContent"
+                                        style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--l-sidebar-bg); border: 1px solid var(--l-border); border-radius: 8px; margin-top: 4px; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 8px;">
+                                        <div style="display: flex; gap: 5px; margin-bottom: 8px;">
+                                            <button id="selectAllJournals" class="btn"
+                                                style="flex:1; font-size: 10px; padding: 4px;">All</button>
+                                            <button id="clearAllJournals" class="btn"
+                                                style="flex:1; font-size: 10px; padding: 4px;">None</button>
+                                        </div>
+                                        <div id="journalList" class="scroll-y" style="max-height: 150px;">
+                                            <div
+                                                style="padding: 10px; color: #888; text-align: center; font-size: 11px;">
+                                                Loading
+                                                journals...</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Tab Content: Browse Topics -->
-                            <div id="content-browse" class="tab-content" style="display: block;">
+                        </div>
+                        <!-- End Tab Content: Browse -->
 
-                                <!-- 2) Choose your lens -->
-                                <div class="control-section">
-                                    <div class="section-label">
-                                        <span>2) Choose your lens</span>
-                                        <span class="info-icon"
-                                            title="Select what the network shows: all topics or a specific topic.">i</span>
-                                    </div>
-                                    <!-- Existing ID -->
-                                    <select id="topicSelect">
-                                        <option value="all">Macro View (All Topics)</option>
-                                    </select>
+
+                        <!-- Tab Content: Advanced Search -->
+                        <div id="content-search" class="tab-content"
+                            style="display: none; height: 100%; flex-direction: column; overflow: hidden;">
+                            <div
+                                style="font-size: 10px; color: var(--text-secondary); margin-bottom: 12px; font-style: italic; line-height: 1.4;">
+                                Search runs only within this corpus (papers, topics, and extracted terms).
+                            </div>
+
+                            <!-- A) Search Input (Tag Enabled) -->
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <!-- Tag Container Wrapper -->
+                                <div
+                                    style="flex: 2; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 4px; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; min-height: 32px;">
+                                    <div id="advSearchTags" style="display: contents;"></div>
+                                    <input type="text" id="advSearchInput" placeholder="Search..."
+                                        style="border: none; background: transparent; color: #fff; font-size: 12px; outline: none; flex: 1; min-width: 60px; padding: 2px;">
                                 </div>
+                                <select id="advSearchScope" style="flex: 1; font-size: 11px; padding: 0 4px;">
+                                    <option value="all">All</option>
+                                    <option value="paper">Papers (title)</option>
+                                    <option value="author">Authors</option>
+                                    <option value="journal">Journals</option>
+                                    <option value="term">Terms</option>
+                                    <option value="topic">Topics</option>
+                                </select>
+                            </div>
+                            <div style="font-size: 10px; color: #888; margin-bottom: 16px;">Press Enter/Comma to add
+                                tag</div>
 
-                                <!-- 3) Define your scope -->
-                                <div class="control-section">
-                                    <div class="section-label">
-                                        <span>3) Define your scope</span>
-                                        <span class="info-icon"
-                                            title="Narrow the time window to see how the landscape changes.">i</span>
-                                    </div>
-                                    <label
-                                        style="font-weight: 400; color: var(--text-secondary); margin-bottom: 4px;">Timeframe:
-                                        <span id="yearValue" style="color: var(--accent-color); font-weight: 600;">1980
-                                            –
-                                            2024</span></label>
-                                    <div class="range-slider">
+                            <!-- B) Match Toggle -->
+                            <div class="row-align-center"
+                                style="justify-content: flex-start; gap: 16px; margin-bottom: 20px;">
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: #ccc; font-size: 11px;">
+                                    <input type="radio" name="matchType" value="contains" checked style="margin: 0;">
+                                    Contains
+                                </label>
+                                <label
+                                    style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: #ccc; font-size: 11px;">
+                                    <input type="radio" name="matchType" value="exact" style="margin: 0;"> Exact
+                                </label>
+                            </div>
+
+                            <!-- C) Refine (Collapsible) -->
+                            <div
+                                style="margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">
+                                <div onclick="toggleRefine()"
+                                    style="cursor: pointer; font-size: 11px; font-weight: 700; color: var(--text-secondary); padding: 4px 0; display: flex; justify-content: space-between;">
+                                    <span>Refine Filters</span>
+                                    <span id="refineToggleIcon">+</span>
+                                </div>
+                                <div id="refineContent" style="display: none; padding-top: 12px;">
+
+                                    <label style="font-size: 10px; color: var(--text-secondary);">Timeframe
+                                        constraint</label>
+                                    <div class="range-slider" style="margin-top: 2px; margin-bottom: 16px;">
                                         <div class="range-track"></div>
-                                        <div class="range-progress" id="rangeProgress" style="left: 0%; width: 100%;">
-                                        </div>
-                                        <input type="range" id="yearSliderStart" min="1980" max="2024" value="1980"
+                                        <div class="range-progress" id="advRangeProgress"
+                                            style="left: 0%; width: 100%;"></div>
+                                        <input type="range" id="advYearSliderStart" min="1980" max="2024" value="1980"
                                             step="1">
-                                        <input type="range" id="yearSliderEnd" min="1980" max="2024" value="2024"
+                                        <input type="range" id="advYearSliderEnd" min="1980" max="2024" value="2024"
                                             step="1">
                                     </div>
-                                    <div class="slider-labels">
-                                        <span>1980</span>
-                                        <span>2024</span>
-                                    </div>
-                                </div>
 
-                                <!-- 4) What to show -->
-                                <div class="control-section">
-                                    <div class="section-label">
-                                        <span>4) What to show</span>
-                                        <span class="info-icon"
-                                            title="These are visual layers, not ranking or recommendations.">i</span>
-                                    </div>
-                                    <div
-                                        style="margin-bottom: 12px; font-size: 10px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
-                                        Layers</div>
-
-                                    <!-- Terms linked to papers -->
-                                    <div class="row-align-center" style="margin-bottom: 8px;">
-                                        <label for="bigramPaperToggle"
-                                            style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms
-                                            linked to
-                                            papers</label>
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" id="bigramPaperToggle" checked>
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-
-                                    <!-- Terms-to-terms link -->
-                                    <div class="row-align-center">
-                                        <label for="bigramToggle"
-                                            style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms-to-terms
-                                            link</label>
-                                        <label class="toggle-switch">
-                                            <input type="checkbox" id="bigramToggle">
-                                            <span class="slider"></span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 5) Journals -->
-                                <div class="control-section">
-                                    <div class="section-label">
-                                        <span>5) Journals</span>
-                                        <span class="info-icon"
-                                            title="Filter the evidence base without changing the topic model.">i</span>
-                                    </div>
-
-                                    <!-- Multi-select Dropdown UI -->
-                                    <div style="position: relative;">
-                                        <div id="journalDropdownBtn" onclick="toggleJournalDropdown()"
-                                            style="padding: 10px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-secondary);">
-                                            <span>Select Journals</span>
-                                            <span style="font-size: 10px; opacity: 0.7;">▼</span>
-                                        </div>
-
-                                        <div id="journalDropdownContent"
-                                            style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--l-sidebar-bg); border: 1px solid var(--l-border); border-radius: 8px; margin-top: 4px; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 8px;">
-                                            <div style="display: flex; gap: 5px; margin-bottom: 8px;">
-                                                <button id="selectAllJournals" class="btn"
-                                                    style="flex:1; font-size: 10px; padding: 4px;">All</button>
-                                                <button id="clearAllJournals" class="btn"
-                                                    style="flex:1; font-size: 10px; padding: 4px;">None</button>
-                                            </div>
-                                            <div id="journalList" class="scroll-y" style="max-height: 150px;">
-                                                <div
-                                                    style="padding: 10px; color: #888; text-align: center; font-size: 11px;">
-                                                    Loading
-                                                    journals...</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <!-- End Tab Content: Browse -->
-
-
-                            <!-- Tab Content: Advanced Search -->
-                            <div id="content-search" class="tab-content"
-                                style="display: none; height: 100%; flex-direction: column; overflow: hidden;">
-                                <div
-                                    style="font-size: 10px; color: var(--text-secondary); margin-bottom: 12px; font-style: italic; line-height: 1.4;">
-                                    Search runs only within this corpus (papers, topics, and extracted terms).
-                                </div>
-
-                                <!-- A) Search Input (Tag Enabled) -->
-                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                    <!-- Tag Container Wrapper -->
-                                    <div
-                                        style="flex: 2; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 4px; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; min-height: 32px;">
-                                        <div id="advSearchTags" style="display: contents;"></div>
-                                        <input type="text" id="advSearchInput" placeholder="Search..."
-                                            style="border: none; background: transparent; color: #fff; font-size: 12px; outline: none; flex: 1; min-width: 60px; padding: 2px;">
-                                    </div>
-                                    <select id="advSearchScope" style="flex: 1; font-size: 11px; padding: 0 4px;">
-                                        <option value="all">All</option>
-                                        <option value="paper">Papers (title)</option>
-                                        <option value="author">Authors</option>
-                                        <option value="journal">Journals</option>
-                                        <option value="term">Terms</option>
-                                        <option value="topic">Topics</option>
+                                    <label style="font-size: 10px; color: var(--text-secondary);">Select
+                                        Topic</label>
+                                    <select id="advTopicSelect" style="font-size: 11px; margin-bottom: 12px;">
+                                        <option value="all">All Topics</option>
                                     </select>
-                                </div>
-                                <div style="font-size: 10px; color: #888; margin-bottom: 16px;">Press Enter/Comma to add
-                                    tag</div>
 
-                                <!-- B) Match Toggle -->
-                                <div class="row-align-center"
-                                    style="justify-content: flex-start; gap: 16px; margin-bottom: 20px;">
-                                    <label
-                                        style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: #ccc; font-size: 11px;">
-                                        <input type="radio" name="matchType" value="contains" checked
-                                            style="margin: 0;"> Contains
-                                    </label>
-                                    <label
-                                        style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: #ccc; font-size: 11px;">
-                                        <input type="radio" name="matchType" value="exact" style="margin: 0;"> Exact
-                                    </label>
-                                </div>
-
-                                <!-- C) Refine (Collapsible) -->
-                                <div
-                                    style="margin-bottom: 16px; border-bottom: 1px solid var(--glass-border); padding-bottom: 8px;">
-                                    <div onclick="toggleRefine()"
-                                        style="cursor: pointer; font-size: 11px; font-weight: 700; color: var(--text-secondary); padding: 4px 0; display: flex; justify-content: space-between;">
-                                        <span>Refine Filters</span>
-                                        <span id="refineToggleIcon">+</span>
-                                    </div>
-                                    <div id="refineContent" style="display: none; padding-top: 12px;">
-
-                                        <label style="font-size: 10px; color: var(--text-secondary);">Timeframe
-                                            constraint</label>
-                                        <div class="range-slider" style="margin-top: 2px; margin-bottom: 16px;">
-                                            <div class="range-track"></div>
-                                            <div class="range-progress" id="advRangeProgress"
-                                                style="left: 0%; width: 100%;"></div>
-                                            <input type="range" id="advYearSliderStart" min="1980" max="2024"
-                                                value="1980" step="1">
-                                            <input type="range" id="advYearSliderEnd" min="1980" max="2024" value="2024"
-                                                step="1">
-                                        </div>
-
-                                        <label style="font-size: 10px; color: var(--text-secondary);">Select
-                                            Topic</label>
-                                        <select id="advTopicSelect" style="font-size: 11px; margin-bottom: 12px;">
-                                            <option value="all">All Topics</option>
-                                        </select>
-
-                                        <!-- Simple Journal Multi-select for Refine -->
-                                        <label style="font-size: 10px; color: var(--text-secondary);">Journals</label>
-                                        <div id="advJournalList" class="scroll-y"
-                                            style="max-height: 80px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
-                                            <!-- Populated via JS -->
-                                        </div>
+                                    <!-- Simple Journal Multi-select for Refine -->
+                                    <label style="font-size: 10px; color: var(--text-secondary);">Journals</label>
+                                    <div id="advJournalList" class="scroll-y"
+                                        style="max-height: 80px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
+                                        <!-- Populated via JS -->
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- D) Results Panel -->
-                                <div class="section-label" style="margin-bottom: 8px;">Results</div>
-                                <div id="searchResultsPanel" class="scroll-y"
-                                    style="flex: 1; min-height: 0; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; border: 1px solid rgba(255,255,255,0.05);">
-                                    <div id="searchResultsCount"
-                                        style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                        Enter search term to begin</div>
-                                    <div id="searchResultsList"
-                                        style="display: flex; flex-direction: column; gap: 4px;"></div>
-                                </div>
-
-                                <!-- E) Manual Toggle -->
-                                <div class="row-align-center" style="margin-top: 16px;">
-                                    <label style="font-size: 11px; color: var(--text-secondary); margin: 0;">How to
-                                        navigate</label>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" id="navGuideToggle">
-                                        <span class="slider"></span>
-                                    </label>
+                            <!-- D) Results Panel -->
+                            <div class="section-label" style="margin-bottom: 8px;">Results</div>
+                            <div id="searchResultsPanel" class="scroll-y"
+                                style="flex: 1; min-height: 0; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                <div id="searchResultsCount"
+                                    style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    Enter search term to begin</div>
+                                <div id="searchResultsList" style="display: flex; flex-direction: column; gap: 4px;">
                                 </div>
                             </div>
-                            <!-- End Tab Content: Search -->
 
-
-                            <!-- End Scrollable Content -->
-                        </div>
-
-                        <!-- Sticky Footer (Moved outside scroll area) -->
-                        <div class="utilities-sticky-footer">
-                            <div class="utilities-footer" style="padding-top:0; border:none; margin-top:0;">
-                                <div class="row-align-center">
-                                    <button id="sidebarZoomIn" class="btn" style="flex: 1;">+ Zoom In</button>
-                                    <div id="zoomPercentage"
-                                        style="font-family: monospace; font-size: 12px; color: var(--text-secondary); width: 45px; text-align: center;">
-                                        100%</div>
-                                    <button id="sidebarZoomOut" class="btn" style="flex: 1;">- Zoom Out</button>
-                                </div>
-
-                                <button id="resetBtn" class="btn">
-                                    <span>↺</span> Reset View
-                                </button>
-
-                                <div class="row-align-center">
-                                    <span
-                                        style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Grey/Dark
-                                        mode</span>
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" id="themeToggle" checked>
-                                        <span class="slider"></span>
-                                    </label>
-                                </div>
-                                <input type="hidden" id="searchInput" value="">
+                            <!-- E) Manual Toggle -->
+                            <div class="row-align-center" style="margin-top: 16px;">
+                                <label style="font-size: 11px; color: var(--text-secondary); margin: 0;">How to
+                                    navigate</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="navGuideToggle">
+                                    <span class="slider"></span>
+                                </label>
                             </div>
                         </div>
-                    </div> <!-- End #controls -->
-                </div> <!-- End Sidebar Col -->
+                        <!-- End Tab Content: Search -->
 
-                <!-- Right Content Column (Header + Canvas View) -->
-                <div class="dashboard-content-col">
-                    <!-- Dashboard Helper Header -->
-                    <div class="dashboard-header-row">
-                        <div class="stitch-sub-bar">
-                            <a href="#" id="nav-network" class="stitch-sub-link active"
-                                onclick="switchView('network'); return false;">Network View</a>
-                            <a href="#" class="stitch-sub-link">Field Structure</a>
-                            <a href="#" id="nav-temporal" class="stitch-sub-link"
-                                onclick="switchView('temporal'); return false;">Temporal Evolution</a>
-                            <a href="#" id="nav-library" class="stitch-sub-link"
-                                onclick="switchView('library'); return false;">Paper Library</a>
-                        </div>
-                        <div class="stitch-breadcrumbs">
-                            <span style="opacity: 0.6; margin-right: 5px; font-weight: 400;">You are here:</span>
-                            <a href="#" onclick="goHome(); return false;"
-                                style="color: inherit; text-decoration: none; font-weight: 600;">NETWORK
-                                VISUALISATION</a>
-                            <span style="margin: 0 6px; opacity: 0.6;">/</span>
-                            <span class="stitch-bc-current">NETWORK VIEW</span>
-                        </div>
+
+                        <!-- End Scrollable Content -->
                     </div>
 
-                    <!-- Canvas Interaction Layer (Empty, just reserves space if needed, 
+                    <!-- Sticky Footer (Moved outside scroll area) -->
+                    <div class="utilities-sticky-footer">
+                        <div class="utilities-footer" style="padding-top:0; border:none; margin-top:0;">
+                            <div class="row-align-center">
+                                <button id="sidebarZoomIn" class="btn" style="flex: 1;">+ Zoom In</button>
+                                <div id="zoomPercentage"
+                                    style="font-family: monospace; font-size: 12px; color: var(--text-secondary); width: 45px; text-align: center;">
+                                    100%</div>
+                                <button id="sidebarZoomOut" class="btn" style="flex: 1;">- Zoom Out</button>
+                            </div>
+
+                            <button id="resetBtn" class="btn">
+                                <span>↺</span> Reset View
+                            </button>
+
+                            <div class="row-align-center">
+                                <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Grey/Dark
+                                    mode</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="themeToggle" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <input type="hidden" id="searchInput" value="">
+                        </div>
+                    </div>
+                </div> <!-- End #controls -->
+            </div> <!-- End Sidebar Col -->
+
+            <!-- Right Content Column (Header + Canvas View) -->
+            <div class="dashboard-content-col">
+                <!-- Dashboard Helper Header -->
+                <div class="dashboard-header-row">
+                    <div class="stitch-sub-bar">
+                        <a href="#" id="nav-network" class="stitch-sub-link active"
+                            onclick="switchView('network'); return false;">Network View</a>
+                        <a href="#" class="stitch-sub-link">Field Structure</a>
+                        <a href="#" id="nav-temporal" class="stitch-sub-link"
+                            onclick="switchView('temporal'); return false;">Temporal Evolution</a>
+                        <a href="#" id="nav-library" class="stitch-sub-link"
+                            onclick="switchView('library'); return false;">Paper Library</a>
+                    </div>
+                    <div class="stitch-breadcrumbs">
+                        <span style="opacity: 0.6; margin-right: 5px; font-weight: 400;">You are here:</span>
+                        <a href="#" onclick="goHome(); return false;"
+                            style="color: inherit; text-decoration: none; font-weight: 600;">NETWORK
+                            VISUALISATION</a>
+                        <span style="margin: 0 6px; opacity: 0.6;">/</span>
+                        <span class="stitch-bc-current">NETWORK VIEW</span>
+                    </div>
+                </div>
+
+                <!-- Canvas Interaction Layer (Empty, just reserves space if needed, 
                  but canvas is bg so we let it be) -->
-                    <!-- Temporal View Overlay -->
-                    <div id="view-temporal" class="dashboard-view-section custom-scrollbar" style="display: none;">
-                        <div style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
+                <!-- Temporal View Overlay -->
+                <div id="view-temporal" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                    <div style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
 
-                            <!-- Card 1: Corpus Growth (Placeholder) -->
-                            <div class="stitch-card">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <div class="stitch-card-title">Corpus Growth</div>
-                                    <div
-                                        style="font-size:10px; font-weight:600; color:var(--text-secondary); border:1px solid var(--input-border); padding:3px 8px; border-radius:12px; cursor:default; letter-spacing:0.05em; opacity:0.9;">
-                                        ANNUAL
-                                    </div>
-                                </div>
-                                <div class="stitch-card-subtitle">Shows how the volume of policy research has expanded
-                                    over
-                                    the analysis period.</div>
-                                <div id="corpus-growth-chart"
-                                    style="height: 200px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); color:var(--text-secondary); border-radius:4px;">
-                                    [Corpus Growth Bar Chart Placeholder]
+                        <!-- Card 1: Corpus Growth (Placeholder) -->
+                        <div class="stitch-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div class="stitch-card-title">Corpus Growth</div>
+                                <div
+                                    style="font-size:10px; font-weight:600; color:var(--text-secondary); border:1px solid var(--input-border); padding:3px 8px; border-radius:12px; cursor:default; letter-spacing:0.05em; opacity:0.9;">
+                                    ANNUAL
                                 </div>
                             </div>
-
-                            <!-- Card 2: Topic Prevalence -->
-                            <div class="stitch-card">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <div class="stitch-card-title">Topic Prevalence Over Time</div>
-                                    <div onclick="openTemporalModal()"
-                                        style="font-size:16px; cursor:pointer; color:var(--text-secondary); padding:4px;"
-                                        title="Expand View">⛶</div>
-                                </div>
-                                <div class="stitch-card-subtitle">Longitudinal shift in thematic priorities as a
-                                    percentage
-                                    of total annual corpus.</div>
-
-                                <div id="topic-prevalence-chart"></div> <!-- Chart renders here -->
-
-                                <!-- Legend Container -->
-                                <div id="topic-prevalence-legend"
-                                    style="display:flex; flex-wrap:wrap; gap:16px; margin-top:24px; justify-content:center; padding-top:16px; border-top:1px solid var(--l-border);">
-                                </div>
+                            <div class="stitch-card-subtitle">Shows how the volume of policy research has expanded
+                                over
+                                the analysis period.</div>
+                            <div id="corpus-growth-chart"
+                                style="height: 200px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); color:var(--text-secondary); border-radius:4px;">
+                                [Corpus Growth Bar Chart Placeholder]
                             </div>
+                        </div>
 
-                            <!-- Card 3: Emerging vs Declining (Placeholder) -->
-                            <div class="stitch-card">
-                                <div class="stitch-card-title">Emerging vs Declining Topics</div>
-                                <div class="stitch-card-subtitle">Comparative shift in topic share between the first and
-                                    last decade of the dataset.</div>
-                                <div id="emerging-declining-container"
-                                    style="height: auto; min-height: fit-content; overflow: visible; display:flex; align-items:flex-start; justify-content:center; background:transparent; color:var(--text-secondary); border-radius:4px; gap: 16px;">
-                                    [Emerging/Declining Table Placeholder]
-                                </div>
+                        <!-- Card 2: Topic Prevalence -->
+                        <div class="stitch-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div class="stitch-card-title">Topic Prevalence Over Time</div>
+                                <div onclick="openTemporalModal()"
+                                    style="font-size:16px; cursor:pointer; color:var(--text-secondary); padding:4px;"
+                                    title="Expand View">⛶</div>
                             </div>
+                            <div class="stitch-card-subtitle">Longitudinal shift in thematic priorities as a
+                                percentage
+                                of total annual corpus.</div>
 
-                            <!-- Card 4: Topic Trends (All Topics) -->
-                            <div class="stitch-card">
-                                <div class="stitch-card-title">Topic trends over time (all topics)</div>
+                            <div id="topic-prevalence-chart"></div> <!-- Chart renders here -->
 
-                                <!-- Header Row: Subtitle + Dropdown -->
-                                <div class="stitch-card-header-row"
-                                    style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px;">
-                                    <div class="stitch-card-subtitle" style="margin-bottom:0; flex:1;">
-                                        1980–2025 (hover to isolate a topic)
-                                    </div>
-                                    <div id="chart4-topic-selector"
-                                        style="position:relative; min-width:200px; flex-shrink:0;"></div>
-                                </div>
-
-                                <!-- Tags Container -->
-                                <div id="chart4-topic-tags"
-                                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
-                                    <!-- Tags injected here -->
-                                </div>
-
-                                <!-- Chart Wrapper -->
-                                <div id="topic-trends-chart" style="height: 400px; width: 100%; position: relative;">
-                                    <div
-                                        style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
-                                        Loading trends...
-                                    </div>
-                                </div>
-                                <div id="topic-trends-legend"
-                                    style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
-                                    &nbsp;
-                                </div>
+                            <!-- Legend Container -->
+                            <div id="topic-prevalence-legend"
+                                style="display:flex; flex-wrap:wrap; gap:16px; margin-top:24px; justify-content:center; padding-top:16px; border-top:1px solid var(--l-border);">
                             </div>
+                        </div>
 
-                            <!-- Card 5: Bigram Trends (Chart 5) -->
-                            <div class="stitch-card">
-                                <div class="stitch-card-title">Bigram trends over time (selected topic)</div>
-                                style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
-                                margin-bottom:16px;">
+                        <!-- Card 3: Emerging vs Declining (Placeholder) -->
+                        <div class="stitch-card">
+                            <div class="stitch-card-title">Emerging vs Declining Topics</div>
+                            <div class="stitch-card-subtitle">Comparative shift in topic share between the first and
+                                last decade of the dataset.</div>
+                            <div id="emerging-declining-container"
+                                style="height: auto; min-height: fit-content; overflow: visible; display:flex; align-items:flex-start; justify-content:center; background:transparent; color:var(--text-secondary); border-radius:4px; gap: 16px;">
+                                [Emerging/Declining Table Placeholder]
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Topic Trends (All Topics) -->
+                        <div class="stitch-card">
+                            <div class="stitch-card-title">Topic trends over time (all topics)</div>
+
+                            <!-- Header Row: Subtitle + Dropdown -->
+                            <div class="stitch-card-header-row"
+                                style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px;">
                                 <div class="stitch-card-subtitle" style="margin-bottom:0; flex:1;">
-                                    1980–2025 (top 5 bigrams)
+                                    1980–2025 (hover to isolate a topic)
                                 </div>
-                                <div id="chart5-topic-selector"
-                                    style="position:relative; min-width:200px; flex-shrink:0;">
-                                    <!-- JS injects dropdown here -->
-                                    <div style="font-size:11px; color:var(--text-secondary);">Loading topics...
-                                    </div>
-                                </div>
+                                <div id="chart4-topic-selector"
+                                    style="position:relative; min-width:200px; flex-shrink:0;"></div>
+                            </div>
+
+                            <!-- Tags Container -->
+                            <div id="chart4-topic-tags"
+                                style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
+                                <!-- Tags injected here -->
                             </div>
 
                             <!-- Chart Wrapper -->
-                            <div id="bigram-trends-chart" style="height: 400px; width: 100%; position: relative;">
+                            <div id="topic-trends-chart" style="height: 400px; width: 100%; position: relative;">
                                 <div
                                     style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
-                                    Select a topic to view trends...
+                                    Loading trends...
                                 </div>
                             </div>
-                            <div id="bigram-trends-legend"
+                            <div id="topic-trends-legend"
                                 style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
                                 &nbsp;
                             </div>
                         </div>
-                    </div>
-                </div> <!-- End #view-temporal -->
 
-                <!-- Paper Library View -->
-                <div id="view-library" class="dashboard-view-section custom-scrollbar" style="display: none;">
-                    <div style="max-width: 1000px; margin: 0 auto; padding-bottom: 40px;">
+                        <!-- Card 5: Bigram Trends (Chart 5) -->
                         <div class="stitch-card">
-                            <div class="stitch-card-title"
-                                style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-                                <span>Paper Library &mdash; <span id="library-total-count">0 papers</span></span>
+                            <div class="stitch-card-title">Bigram trends over time (selected topic)</div>
+                            style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+                            margin-bottom:16px;">
+                            <div class="stitch-card-subtitle" style="margin-bottom:0; flex:1;">
+                                1980–2025 (top 5 bigrams)
                             </div>
-
-                            <!-- Controls: Search -->
-                            <div style="margin-bottom: 24px;">
-                                <input type="text" id="library-search" class="stitch-input"
-                                    placeholder="Search title, author, or journal..."
-                                    style="width: 100%; max-width: 400px;"
-                                    oninput="if(typeof LibraryManager !== 'undefined'){ LibraryManager.searchQuery = this.value; LibraryManager.applyFilters(); }">
+                            <div id="chart5-topic-selector" style="position:relative; min-width:200px; flex-shrink:0;">
+                                <!-- JS injects dropdown here -->
+                                <div style="font-size:11px; color:var(--text-secondary);">Loading topics...
+                                </div>
                             </div>
+                        </div>
 
-                            <!-- Table -->
-                            <div style="overflow-x: auto;">
-                                <table id="paper-library-table"
-                                    style="width: 100%; border-collapse: collapse; margin-top: 16px;">
-                                    <thead>
-                                        <tr style="border-bottom: 1px solid var(--chart-panel-border);">
-                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
-                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('year')">
-                                                Year <span id="sort-icon-year" style="font-size:10px;">▼</span></th>
-                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%; transition: color 0.2s;"
-                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('title')">
-                                                Title <span id="sort-icon-title" style="font-size:10px;"></span></th>
-                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
-                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('authors')">
-                                                Author(s) <span id="sort-icon-authors" style="font-size:10px;"></span>
-                                            </th>
-                                            <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
-                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('journal')">
-                                                Journal <span id="sort-icon-journal" style="font-size:10px;"></span>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="paper-library-tbody">
-                                        <!-- Rows populated via JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <!-- Pagination -->
+                        <!-- Chart Wrapper -->
+                        <div id="bigram-trends-chart" style="height: 400px; width: 100%; position: relative;">
                             <div
-                                style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 24px;">
-                                <button id="lib-prev-btn" class="btn" style="width: auto; padding: 6px 16px;"
-                                    onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.changePage(-1)"
-                                    disabled>Previous</button>
-                                <span id="lib-page-info" style="font-size: 13px; color: var(--text-secondary);">Page 1
-                                    of 1</span>
-                                <button id="lib-next-btn" class="btn" style="width: auto; padding: 6px 16px;"
-                                    onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.changePage(1)"
-                                    disabled>Next</button>
+                                style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
+                                Select a topic to view trends...
                             </div>
+                        </div>
+                        <div id="bigram-trends-legend"
+                            style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
+                            &nbsp;
                         </div>
                     </div>
                 </div>
+            </div> <!-- End #view-temporal -->
 
-                <!-- Individual Topic Dashboard -->
-                <div id="view-topic" class="dashboard-view-section custom-scrollbar" style="display: none;">
-                    <div style="max-width: 1400px; margin: 0 auto; padding-bottom: 40px;">
-
-                        <!-- Header Region: Two-Column (Topic Brief + Network Graph) -->
-                        <div style="display: grid; grid-template-columns: 350px 1fr; gap: 24px; margin-bottom: 24px;">
-                            <!-- Left: Topic Brief -->
-                            <div class="stitch-card" style="margin-bottom: 0; display: flex; flex-direction: column;">
-                                <div class="stitch-card-title" id="topic-brief-title">Loading...</div>
-                                <div class="stitch-card-subtitle" id="topic-brief-subtitle"
-                                    style="margin-bottom: 16px;">Topic definition</div>
-                                <div id="topic-brief-definition"
-                                    style="color: var(--text-primary); font-size: 14px; line-height: 1.6; flex: 1;">
-                                    Loading definition...
-                                </div>
-                            </div>
-
-                            <!-- Right: Network Graph Card -->
-                            <div class="stitch-card"
-                                style="margin-bottom: 0; padding: 0; height: 500px; position: relative; overflow: hidden; background: var(--bg-color);">
-                                <!-- Canvas Container -->
-                                <div id="topic-network-container" style="width:100%; height:100%;">
-                                    <div
-                                        style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 10;">
-                                        <button id="topic-zoom-in" class="btn"
-                                            style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">+</button>
-                                        <button id="topic-zoom-out" class="btn"
-                                            style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">-</button>
-                                    </div>
-                                </div> <!-- D3 Canvas will be moved here -->
-                            </div>
+            <!-- Paper Library View -->
+            <div id="view-library" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                <div style="padding-bottom: 40px;">
+                    <div class="stitch-card">
+                        <div class="stitch-card-title"
+                            style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Paper Library &mdash; <span id="library-total-count">0 papers</span></span>
                         </div>
-                    </div>
 
-                    <!-- Top Terms -->
-                    <div class="stitch-card">
-                        <div class="stitch-card-title">Top terms shaping this topic</div>
-                        <div id="topic-top-terms" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
-                            <!-- Chips injected here -->
+                        <!-- Controls: Search -->
+                        <div style="margin-bottom: 24px;">
+                            <input type="text" id="library-search" class="stitch-input"
+                                placeholder="Search title, author, or journal..." style="width: 100%; max-width: 400px;"
+                                oninput="if(typeof LibraryManager !== 'undefined'){ LibraryManager.searchQuery = this.value; LibraryManager.applyFilters(); }">
                         </div>
-                    </div>
 
-                    <!-- Bigram Trends -->
-                    <div class="stitch-card">
-                        <div class="stitch-card-title" id="topic-trends-title">Bigram trends over time</div>
-                        <div class="stitch-card-subtitle">Tracks how the topic’s five defining terms rise and
-                            fall
-                            across the corpus timeline.</div>
-                        <div id="topic-trends-chart-container" style="height: 300px; width: 100%;"></div>
-                    </div>
-
-                    <!-- Papers Table -->
-                    <div class="stitch-card">
-                        <div class="stitch-card-title" id="topic-papers-title">Papers informing this topic</div>
+                        <!-- Table -->
                         <div style="overflow-x: auto;">
-                            <table id="topic-papers-table"
+                            <table id="paper-library-table"
                                 style="width: 100%; border-collapse: collapse; margin-top: 16px;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--chart-panel-border);">
-                                        <th
-                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                            Year</th>
-                                        <th
-                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%;">
-                                            Title</th>
-                                        <th
-                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                            Author(s)</th>
-                                        <th
-                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                            Journal</th>
-                                        <th style="width: 40px;"></th>
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                            onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('year')">
+                                            Year <span id="sort-icon-year" style="font-size:10px;">▼</span></th>
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%; transition: color 0.2s;"
+                                            onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('title')">
+                                            Title <span id="sort-icon-title" style="font-size:10px;"></span></th>
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                            onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('authors')">
+                                            Author(s) <span id="sort-icon-authors" style="font-size:10px;"></span>
+                                        </th>
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; transition: color 0.2s;"
+                                            onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('journal')">
+                                            Journal <span id="sort-icon-journal" style="font-size:10px;"></span>
+                                        </th>
                                     </tr>
                                 </thead>
-                                <tbody id="topic-papers-tbody"></tbody>
+                                <tbody id="paper-library-tbody">
+                                    <!-- Rows populated via JS -->
+                                </tbody>
                             </table>
                         </div>
 
                         <!-- Pagination -->
-                        <div id="topic-papers-pagination"
+                        <div
                             style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 24px;">
-                            <button id="papers-prev-btn" class="btn" style="width: auto;">Previous</button>
-                            <div id="papers-page-info" style="color: var(--text-secondary); font-size: 13px;">
-                                Page 1
-                            </div>
-                            <button id="papers-next-btn" class="btn" style="width: auto;">Next</button>
+                            <button id="lib-prev-btn" class="btn" style="width: auto; padding: 6px 16px;"
+                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.changePage(-1)"
+                                disabled>Previous</button>
+                            <span id="lib-page-info" style="font-size: 13px; color: var(--text-secondary);">Page 1
+                                of 1</span>
+                            <button id="lib-next-btn" class="btn" style="width: auto; padding: 6px 16px;"
+                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.changePage(1)"
+                                disabled>Next</button>
                         </div>
-                    </div>
-
-                    <!-- Topic Navigation -->
-                    <div style="display: flex; justify-content: space-between; margin-top: 32px;">
-                        <button id="prev-topic-btn" class="btn" style="width: auto;">← Previous Topic</button>
-                        <button id="next-topic-btn" class="btn" style="width: auto;">Next Topic →</button>
                     </div>
                 </div>
             </div>
 
-        </div> <!-- End Dashboard Content Col -->
+            <!-- Individual Topic Dashboard -->
+            <div id="view-topic" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                <div style="max-width: 1400px; margin: 0 auto; padding-bottom: 40px;">
+
+                    <!-- Header Region: Two-Column (Topic Brief + Network Graph) -->
+                    <div style="display: grid; grid-template-columns: 350px 1fr; gap: 24px; margin-bottom: 24px;">
+                        <!-- Left: Topic Brief -->
+                        <div class="stitch-card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+                            <div class="stitch-card-title" id="topic-brief-title">Loading...</div>
+                            <div class="stitch-card-subtitle" id="topic-brief-subtitle" style="margin-bottom: 16px;">
+                                Topic definition</div>
+                            <div id="topic-brief-definition"
+                                style="color: var(--text-primary); font-size: 14px; line-height: 1.6; flex: 1;">
+                                Loading definition...
+                            </div>
+                        </div>
+
+                        <!-- Right: Network Graph Card -->
+                        <div class="stitch-card"
+                            style="margin-bottom: 0; padding: 0; height: 500px; position: relative; overflow: hidden; background: var(--bg-color);">
+                            <!-- Canvas Container -->
+                            <div id="topic-network-container" style="width:100%; height:100%;">
+                                <div
+                                    style="position: absolute; bottom: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 10;">
+                                    <button id="topic-zoom-in" class="btn"
+                                        style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">+</button>
+                                    <button id="topic-zoom-out" class="btn"
+                                        style="width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center;">-</button>
+                                </div>
+                            </div> <!-- D3 Canvas will be moved here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Terms -->
+                <div class="stitch-card">
+                    <div class="stitch-card-title">Top terms shaping this topic</div>
+                    <div id="topic-top-terms" style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+                        <!-- Chips injected here -->
+                    </div>
+                </div>
+
+                <!-- Bigram Trends -->
+                <div class="stitch-card">
+                    <div class="stitch-card-title" id="topic-trends-title">Bigram trends over time</div>
+                    <div class="stitch-card-subtitle">Tracks how the topic’s five defining terms rise and
+                        fall
+                        across the corpus timeline.</div>
+                    <div id="topic-trends-chart-container" style="height: 300px; width: 100%;"></div>
+                </div>
+
+                <!-- Papers Table -->
+                <div class="stitch-card">
+                    <div class="stitch-card-title" id="topic-papers-title">Papers informing this topic</div>
+                    <div style="overflow-x: auto;">
+                        <table id="topic-papers-table"
+                            style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--chart-panel-border);">
+                                    <th
+                                        style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                        Year</th>
+                                    <th
+                                        style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%;">
+                                        Title</th>
+                                    <th
+                                        style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                        Author(s)</th>
+                                    <th
+                                        style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                        Journal</th>
+                                    <th style="width: 40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="topic-papers-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div id="topic-papers-pagination"
+                        style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 24px;">
+                        <button id="papers-prev-btn" class="btn" style="width: auto;">Previous</button>
+                        <div id="papers-page-info" style="color: var(--text-secondary); font-size: 13px;">
+                            Page 1
+                        </div>
+                        <button id="papers-next-btn" class="btn" style="width: auto;">Next</button>
+                    </div>
+                </div>
+
+                <!-- Topic Navigation -->
+                <div style="display: flex; justify-content: space-between; margin-top: 32px;">
+                    <button id="prev-topic-btn" class="btn" style="width: auto;">← Previous Topic</button>
+                    <button id="next-topic-btn" class="btn" style="width: auto;">Next Topic →</button>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- End Dashboard Content Col -->
 
     </div> <!-- End Dashboard Area -->
     </div> <!-- End UI Layer -->
@@ -5763,13 +5759,14 @@
         };
 
         // Global Views Helper
-        // Global Views Helper
         window.hideAllMainViews = function () {
+            const containerEl = document.getElementById('container');
             const canvasEl = document.getElementById('canvas');
             const tView = document.getElementById('view-temporal');
             const libView = document.getElementById('view-library');
             const topicView = document.getElementById('view-topic');
 
+            if (containerEl) containerEl.style.display = 'none';
             if (canvasEl) canvasEl.style.display = 'none';
             if (tView) tView.style.display = 'none';
             if (libView) libView.style.display = 'none';
@@ -5800,6 +5797,7 @@
             }
 
             // 2) Show only the selected container
+            const containerEl = document.getElementById('container');
             const canvasEl = document.getElementById('canvas');
             const networkCol = document.querySelector('.dashboard-sidebar-col');
             const tView = document.getElementById('view-temporal');
@@ -5821,6 +5819,7 @@
                 // Preserving existing logic
                 if (typeof loadTemporalView !== 'undefined') loadTemporalView();
             } else if (view === 'topic') {
+                if (containerEl) containerEl.style.display = 'block';
                 if (topicView) topicView.style.display = 'block';
                 if (canvasEl) canvasEl.style.display = 'block'; // Topic view needs canvas
             } else if (view === 'library') {
@@ -5832,6 +5831,7 @@
                 // Preserving existing logic
                 if (typeof LibraryManager !== 'undefined') LibraryManager.init();
             } else if (view === 'network') {
+                if (containerEl) containerEl.style.display = 'block';
                 // Ensure canvas is back in main container (preserving existing logic)
                 const container = document.getElementById('container');
                 if (container && canvas && canvas.parentElement !== container) {
@@ -5842,14 +5842,12 @@
                 if (canvasEl) canvasEl.style.display = 'block';
             }
 
-            // 3) VIEW STATE AUDIT
-            console.group('VIEW STATE AUDIT');
-            console.log('Selected View:', view);
-            console.log('Network Wrapper (.dashboard-sidebar-col):', networkCol ? (networkCol.classList.contains('is-disabled') ? 'Visible (Disabled)' : 'Visible (Active)') : 'N/A');
-            console.log('Network (canvas):', canvasEl ? getComputedStyle(canvasEl).display : 'N/A');
-            console.log('Temporal (#view-temporal):', tView ? getComputedStyle(tView).display : 'N/A');
-            console.log('Library (#view-library):', libView ? getComputedStyle(libView).display : 'N/A');
-            console.log('Topic (#view-topic):', topicView ? getComputedStyle(topicView).display : 'N/A');
+            // 3) VIEW LAYOUT AUDIT
+            console.group('VIEW LAYOUT AUDIT');
+            console.log('viewName:', view);
+            console.log('sidebar display + disabled state:', networkCol ? `${getComputedStyle(networkCol).display} (${networkCol.classList.contains('is-disabled') ? 'disabled' : 'active'})` : 'N/A');
+            console.log('network viewport wrapper display:', containerEl ? getComputedStyle(containerEl).display : 'N/A');
+            console.log('#view-library display:', libView ? getComputedStyle(libView).display : 'N/A');
             console.groupEnd();
         };
 
