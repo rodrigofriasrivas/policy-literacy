@@ -1039,6 +1039,38 @@
         body.embed-mode #loading {
             /* keep spinner but transparent bg */
         }
+
+        /* Disabled Sidebar State */
+        .dashboard-sidebar-col.is-disabled {
+            opacity: 0.5;
+            filter: grayscale(100%);
+            position: relative;
+        }
+
+        .dashboard-sidebar-col.is-disabled::after {
+            content: "Controls disabled in this view";
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            right: 24px;
+            text-align: center;
+            padding: 12px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            pointer-events: none;
+            /* Let clicks pass through to underneath, although underneath is disabled via pointer-events */
+        }
+
+        .dashboard-sidebar-col.is-disabled #controls {
+            pointer-events: none;
+            /* Disable all interactions */
+        }
     </style>
 </head>
 
@@ -5731,15 +5763,14 @@
         };
 
         // Global Views Helper
+        // Global Views Helper
         window.hideAllMainViews = function () {
             const canvasEl = document.getElementById('canvas');
-            const networkCol = document.querySelector('.dashboard-sidebar-col');
             const tView = document.getElementById('view-temporal');
             const libView = document.getElementById('view-library');
             const topicView = document.getElementById('view-topic');
 
             if (canvasEl) canvasEl.style.display = 'none';
-            if (networkCol) networkCol.style.display = 'none';
             if (tView) tView.style.display = 'none';
             if (libView) libView.style.display = 'none';
             if (topicView) topicView.style.display = 'none';
@@ -5775,6 +5806,16 @@
             const libView = document.getElementById('view-library');
             const topicView = document.getElementById('view-topic');
 
+            // Handle sidebar disabled state
+            const disabledViews = ['temporal', 'library', 'field-structure'];
+            if (networkCol) {
+                if (disabledViews.includes(view)) {
+                    networkCol.classList.add('is-disabled');
+                } else {
+                    networkCol.classList.remove('is-disabled');
+                }
+            }
+
             if (view === 'temporal') {
                 if (tView) tView.style.display = 'block';
                 // Preserving existing logic
@@ -5782,7 +5823,6 @@
             } else if (view === 'topic') {
                 if (topicView) topicView.style.display = 'block';
                 if (canvasEl) canvasEl.style.display = 'block'; // Topic view needs canvas
-                if (networkCol) networkCol.style.display = 'flex'; // Topic view needs sidebar
             } else if (view === 'library') {
                 if (libView) {
                     libView.style.display = 'block';
@@ -5792,7 +5832,6 @@
                 // Preserving existing logic
                 if (typeof LibraryManager !== 'undefined') LibraryManager.init();
             } else if (view === 'network') {
-                if (networkCol) networkCol.style.display = 'flex';
                 // Ensure canvas is back in main container (preserving existing logic)
                 const container = document.getElementById('container');
                 if (container && canvas && canvas.parentElement !== container) {
@@ -5806,7 +5845,7 @@
             // 3) VIEW STATE AUDIT
             console.group('VIEW STATE AUDIT');
             console.log('Selected View:', view);
-            console.log('Network Wrapper (.dashboard-sidebar-col):', networkCol ? getComputedStyle(networkCol).display : 'N/A');
+            console.log('Network Wrapper (.dashboard-sidebar-col):', networkCol ? (networkCol.classList.contains('is-disabled') ? 'Visible (Disabled)' : 'Visible (Active)') : 'N/A');
             console.log('Network (canvas):', canvasEl ? getComputedStyle(canvasEl).display : 'N/A');
             console.log('Temporal (#view-temporal):', tView ? getComputedStyle(tView).display : 'N/A');
             console.log('Library (#view-library):', libView ? getComputedStyle(libView).display : 'N/A');
