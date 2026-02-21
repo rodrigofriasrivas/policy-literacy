@@ -1587,6 +1587,7 @@
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('journal')">
                                                 Journal <span id="sort-icon-journal" style="font-size:10px;"></span>
                                             </th>
+                                            <th style="width: 40px; padding: 10px 12px;"></th>
                                         </tr>
                                     </thead>
                                     <tbody id="paper-library-tbody">
@@ -5933,6 +5934,16 @@
             sortAsc: false,
             searchQuery: '',
             filteredPapers: [],
+            expandedPaperId: null,
+
+            toggleAbstract: function (paperId) {
+                if (this.expandedPaperId === paperId) {
+                    this.expandedPaperId = null; // Close if already open
+                } else {
+                    this.expandedPaperId = paperId; // Open new one
+                }
+                this.render();
+            },
 
             init: async function () {
                 // Wait for allData.papers to be ready
@@ -6114,7 +6125,10 @@
 
                 const badgeStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:500; background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1);";
 
-                pageData.forEach(p => {
+                pageData.forEach((p, index) => {
+                    const paperId = p.id || p.paper_id || `paper-${start + index}`;
+                    const isExpanded = (this.expandedPaperId === paperId);
+
                     const tr = document.createElement('tr');
                     tr.style.borderBottom = '1px solid var(--chart-row-border)';
                     tr.style.transition = 'background 0.1s';
@@ -6141,13 +6155,44 @@
                         ? displayAuthors.replace(/"/g, '&quot;')
                         : '';
 
+                    const chevronTransform = isExpanded ? 'transform: rotate(180deg);' : '';
+                    const chevronHTML = `<div style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:rgba(255,255,255,0.05); cursor:pointer; transition:transform 0.2s; font-size:10px; color:var(--text-secondary); ${chevronTransform}" onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.toggleAbstract('${paperId}')">▼</div>`;
+
                     tr.innerHTML = `
                         <td style="padding:8px 12px; color:var(--text-secondary); font-family:monospace; font-size:12px; vertical-align:top;">${p.year || ''}</td>
                         <td style="padding:8px 12px; color:var(--text-primary); font-weight:600; font-size:13px; line-height:1.4; white-space:normal; overflow-wrap:anywhere; vertical-align:top;">${titleHTML}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top;" ${!isMissingAuthor ? `title="${safeAuthorsAttr}"` : ''}>${authorsHTML}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-style:italic; font-size:12px; line-height:1.4; vertical-align:top;">${journalHTML}</td>
+                        <td style="padding:8px 12px; vertical-align:top; display:flex; justify-content:flex-end;">${chevronHTML}</td>
                     `;
                     tbody.appendChild(tr);
+
+                    if (isExpanded) {
+                        const abstractTr = document.createElement('tr');
+                        abstractTr.className = 'paper-abstract-row';
+
+                        const isMissingAbstract = isMissing(p.abstract);
+                        const abstractText = isMissingAbstract ? '<span style="color:var(--text-secondary); font-style:italic;">Abstract not available in this dataset.</span>' : p.abstract;
+
+                        // Compact metadata line using same fallback values cleanly
+                        const metaYear = p.year || 'Unknown Year';
+                        const metaJournal = isMissingJournal ? 'Unknown Journal' : p.journal;
+                        const metaAuthors = isMissingAuthor ? 'Unknown Author(s)' : displayAuthors;
+                        const metadataLine = `${metaYear} &bull; <span style="font-style:italic;">${metaJournal}</span> &bull; ${metaAuthors}`;
+
+                        abstractTr.innerHTML = `
+                            <td colspan="5" style="padding:16px 24px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--chart-row-border);">
+                                <div style="font-size:11px; color:var(--text-secondary); margin-bottom:12px; line-height:1.4;">
+                                    ${metadataLine}
+                                </div>
+                                <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; font-weight:600;">Abstract</div>
+                                <div style="font-size:13px; color:var(--text-primary); line-height:1.6; opacity:0.85; white-space:normal;">
+                                    ${abstractText}
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(abstractTr);
+                    }
                 });
 
                 // Update Controls
