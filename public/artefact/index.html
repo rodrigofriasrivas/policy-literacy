@@ -5705,6 +5705,31 @@
             }
         };
 
+        // Global Lifecycle Hooks
+        window.pauseNetwork = function () {
+            console.log('Network paused');
+            if (typeof animationFrame !== 'undefined' && animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            if (typeof simulation !== 'undefined' && simulation) {
+                simulation.stop();
+            }
+        };
+
+        window.resumeNetwork = function () {
+            // Only resume if already initialized (simulation exists)
+            if (typeof simulation === 'undefined' || !simulation) return;
+
+            console.log('Network resumed');
+            if (typeof animate === 'function' && !animationFrame) {
+                animate(); // Kickstart RAF
+            }
+            if (typeof simulation !== 'undefined' && simulation) {
+                simulation.alpha(1).restart();
+            }
+        };
+
         // Global Views Helper
         window.hideAllMainViews = function () {
             const canvasEl = document.getElementById('canvas');
@@ -5733,6 +5758,13 @@
 
             // 1) Hide all views
             window.hideAllMainViews();
+
+            // Pause or Resume network based on whether canvas is needed
+            if (view === 'network' || view === 'topic') {
+                window.resumeNetwork();
+            } else {
+                window.pauseNetwork();
+            }
 
             // 2) Show only the selected container
             const canvasEl = document.getElementById('canvas');
