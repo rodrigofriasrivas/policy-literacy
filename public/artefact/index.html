@@ -5697,6 +5697,19 @@
             }
         };
 
+        // Global Views Helper
+        window.hideAllMainViews = function () {
+            const canvasEl = document.getElementById('canvas');
+            const tView = document.getElementById('view-temporal');
+            const libView = document.getElementById('view-library');
+            const topicView = document.getElementById('view-topic');
+
+            if (canvasEl) canvasEl.style.display = 'none';
+            if (tView) tView.style.display = 'none';
+            if (libView) libView.style.display = 'none';
+            if (topicView) topicView.style.display = 'none';
+        };
+
         // Global Switch View Function
         window.switchView = function (view) {
             // Update Nav Active State
@@ -5710,25 +5723,21 @@
                 view === 'temporal' ? 'TEMPORAL EVOLUTION' :
                     view === 'library' ? 'PAPER LIBRARY' : view.toUpperCase();
 
-            // Toggle Views
-            const tView = document.getElementById('view-temporal');
-            const topicView = document.getElementById('view-topic');
-            const libView = document.getElementById('view-library');
-            const canvasEl = document.getElementById('network-canvas') || document.querySelector('canvas');
+            // 1) Hide all views
+            window.hideAllMainViews();
 
-            if (tView) tView.style.display = 'none';
-            if (topicView) topicView.style.display = 'none';
-            if (libView) libView.style.display = 'none';
+            // 2) Show only the selected container
+            const canvasEl = document.getElementById('canvas');
+            const tView = document.getElementById('view-temporal');
+            const libView = document.getElementById('view-library');
+            const topicView = document.getElementById('view-topic');
 
             if (view === 'temporal') {
-                if (tView) {
-                    tView.style.display = 'block';
-                    loadTemporalView();
-                }
-                if (canvasEl) canvasEl.style.display = 'none';
+                if (tView) tView.style.display = 'block';
+                // Preserving existing logic
+                if (typeof loadTemporalView !== 'undefined') loadTemporalView();
             } else if (view === 'topic') {
                 if (topicView) topicView.style.display = 'block';
-                // Canvas is handled by initIndividualTopicDashboard
                 if (canvasEl) canvasEl.style.display = 'block'; // Topic view needs canvas
             } else if (view === 'library') {
                 if (libView) {
@@ -5736,31 +5745,27 @@
                     libView.style.visibility = 'visible';
                     libView.style.pointerEvents = 'auto'; // Ensure clickable
                 }
-
-                // Hide Network
-                if (canvasEl) canvasEl.style.display = 'none';
-
-                console.group('VIEW SWITCH: LIBRARY');
-                console.log('Active view:', view);
-                console.log('#view-library exists:', !!libView);
-                console.log('AFTER toggle, #view-library display:', libView ? getComputedStyle(libView).display : 'N/A');
-                console.log('#network canvas visible:', canvasEl ? getComputedStyle(canvasEl).display : 'N/A');
-                console.groupEnd();
-
+                // Preserving existing logic
                 if (typeof LibraryManager !== 'undefined') LibraryManager.init();
             } else if (view === 'network') {
-                // Ensure canvas is back in main container
+                // Ensure canvas is back in main container (preserving existing logic)
                 const container = document.getElementById('container');
                 if (container && canvas && canvas.parentElement !== container) {
                     container.appendChild(canvas);
-                    // canvas.style.position = 'absolute'; // Should be default
-                    // Restore dimensions if needed? 
-                    // Usually window resize or initMacroView will handle it, but we can force width match
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
                 }
                 if (canvasEl) canvasEl.style.display = 'block';
             }
+
+            // 3) VIEW STATE AUDIT
+            console.group('VIEW STATE AUDIT');
+            console.log('Selected View:', view);
+            console.log('Network (canvas):', canvasEl ? getComputedStyle(canvasEl).display : 'N/A');
+            console.log('Temporal (#view-temporal):', tView ? getComputedStyle(tView).display : 'N/A');
+            console.log('Library (#view-library):', libView ? getComputedStyle(libView).display : 'N/A');
+            console.log('Topic (#view-topic):', topicView ? getComputedStyle(topicView).display : 'N/A');
+            console.groupEnd();
         };
 
 
