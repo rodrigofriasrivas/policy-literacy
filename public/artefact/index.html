@@ -5937,11 +5937,13 @@
             expandedPaperId: null,
 
             toggleAbstract: function (paperId) {
+                const prevId = this.expandedPaperId;
                 if (this.expandedPaperId === paperId) {
                     this.expandedPaperId = null; // Close if already open
                 } else {
                     this.expandedPaperId = paperId; // Open new one
                 }
+                console.log(`ACC TOGGLE ${prevId} -> ${this.expandedPaperId}`);
                 this.render();
             },
 
@@ -6156,7 +6158,7 @@
                         : '';
 
                     const chevronTransform = isExpanded ? 'transform: rotate(180deg);' : '';
-                    const chevronHTML = `<div style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:rgba(255,255,255,0.05); cursor:pointer; transition:transform 0.2s; font-size:10px; color:var(--text-secondary); ${chevronTransform}" onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.toggleAbstract('${paperId}')">▼</div>`;
+                    const chevronHTML = `<div class="js-accordion-toggle" data-paper-id="${paperId}" style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:rgba(255,255,255,0.05); cursor:pointer; transition:transform 0.2s; font-size:10px; color:var(--text-secondary); ${chevronTransform}">▼</div>`;
 
                     tr.innerHTML = `
                         <td style="padding:8px 12px; color:var(--text-secondary); font-family:monospace; font-size:12px; vertical-align:top;">${p.year || ''}</td>
@@ -6222,6 +6224,29 @@
                 console.groupEnd();
             }
         };
+
+        // Event delegation for accordion
+        document.addEventListener('click', function (e) {
+            // Verify click target
+            const targetClasses = e.target && e.target.className ? e.target.className : '';
+            if (e.target.closest('#view-library')) {
+                const chevronBtn = e.target.closest('.js-accordion-toggle');
+
+                console.log('ACC CLICK', {
+                    target: e.target.tagName,
+                    classes: targetClasses,
+                    isChevron: !!chevronBtn,
+                    foundId: chevronBtn ? chevronBtn.getAttribute('data-paper-id') : null
+                });
+
+                if (chevronBtn) {
+                    const paperId = chevronBtn.getAttribute('data-paper-id');
+                    if (paperId && typeof LibraryManager !== 'undefined') {
+                        LibraryManager.toggleAbstract(paperId);
+                    }
+                }
+            }
+        });
 
 
 
