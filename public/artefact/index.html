@@ -5855,20 +5855,33 @@
             },
 
             applyFilters: function () {
-                const rawPapers = allData.papers; // Use scoped variable
+                const rawPapers = allData.papers || [];
 
-                // 1. Filter
-                if (!this.searchQuery) {
-                    this.filteredPapers = [...rawPapers];
-                } else {
-                    const q = this.searchQuery;
-                    this.filteredPapers = rawPapers.filter(p => {
+                // 1. Filter logic (Search + Timeframe + Journals)
+                const q = (this.searchQuery || '').toLowerCase();
+                const startYear = typeof minYear !== 'undefined' ? minYear : 1980;
+                const endYear = typeof maxYear !== 'undefined' ? maxYear : 2024;
+
+                this.filteredPapers = rawPapers.filter(p => {
+                    const pYear = Number(p.year) || 0;
+
+                    // Time filter
+                    if (pYear < startYear || pYear > endYear) return false;
+
+                    // Journal filter
+                    if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0 && p.journal) {
+                        if (!selectedJournals.has(p.journal)) return false;
+                    }
+
+                    // Search filter
+                    if (q) {
                         return (p.title && p.title.toLowerCase().includes(q)) ||
                             (p.authors && p.authors.toLowerCase().includes(q)) ||
                             (p.journal && p.journal.toLowerCase().includes(q));
-                    });
-                }
-                // ... rest of applyFilters ...
+                    }
+                    return true;
+                });
+
                 // 2. Sort
                 this.filteredPapers.sort((a, b) => {
                     let valA = a[this.sortKey];
@@ -5889,14 +5902,33 @@
                     return 0;
                 });
 
+                // Calculate summary stats for audit
+                let minFilteredYear = Infinity;
+                let maxFilteredYear = -Infinity;
+                this.filteredPapers.forEach(p => {
+                    const y = Number(p.year);
+                    if (y < minFilteredYear) minFilteredYear = y;
+                    if (y > maxFilteredYear) maxFilteredYear = y;
+                });
+                if (minFilteredYear === Infinity) minFilteredYear = null;
+                if (maxFilteredYear === -Infinity) maxFilteredYear = null;
+
                 // Log Audit
-                console.groupCollapsed('Paper Library Audit');
-                console.log(`Total Cached Papers: ${rawPapers.length}`);
-                console.log(`Total After Filter: ${this.filteredPapers.length}`);
-                console.log(`Sort: ${this.sortKey} (${this.sortAsc ? 'ASC' : 'DESC'})`);
-                console.log(`Page: ${this.currentPage} / ${Math.ceil(this.filteredPapers.length / this.pageSize)}`);
+                console.group('PAPER LIBRARY FILTER AUDIT');
+                console.log(`startYear: ${startYear}, endYear: ${endYear}`);
+                console.log(`selectedJournals count: ${typeof selectedJournals !== 'undefined' ? selectedJournals.size : 0}`);
+                console.log(`papers before filter: ${rawPapers.length}, papers after filter: ${this.filteredPapers.length}`);
+                console.log(`minYear in filtered: ${minFilteredYear}, maxYear in filtered: ${maxFilteredYear}`);
                 console.groupEnd();
 
+                // Update total count
+                const totalLabel = document.getElementById('library-total-count');
+                if (totalLabel) {
+                    totalLabel.textContent = `${this.filteredPapers.length} papers`;
+                }
+
+                // Make sure pagination restarts to first page when filtering
+                this.currentPage = 1;
                 this.render();
             },
 
