@@ -5733,11 +5733,13 @@
         // Global Views Helper
         window.hideAllMainViews = function () {
             const canvasEl = document.getElementById('canvas');
+            const networkCol = document.querySelector('.dashboard-sidebar-col');
             const tView = document.getElementById('view-temporal');
             const libView = document.getElementById('view-library');
             const topicView = document.getElementById('view-topic');
 
             if (canvasEl) canvasEl.style.display = 'none';
+            if (networkCol) networkCol.style.display = 'none';
             if (tView) tView.style.display = 'none';
             if (libView) libView.style.display = 'none';
             if (topicView) topicView.style.display = 'none';
@@ -5768,6 +5770,7 @@
 
             // 2) Show only the selected container
             const canvasEl = document.getElementById('canvas');
+            const networkCol = document.querySelector('.dashboard-sidebar-col');
             const tView = document.getElementById('view-temporal');
             const libView = document.getElementById('view-library');
             const topicView = document.getElementById('view-topic');
@@ -5779,6 +5782,7 @@
             } else if (view === 'topic') {
                 if (topicView) topicView.style.display = 'block';
                 if (canvasEl) canvasEl.style.display = 'block'; // Topic view needs canvas
+                if (networkCol) networkCol.style.display = 'flex'; // Topic view needs sidebar
             } else if (view === 'library') {
                 if (libView) {
                     libView.style.display = 'block';
@@ -5788,6 +5792,7 @@
                 // Preserving existing logic
                 if (typeof LibraryManager !== 'undefined') LibraryManager.init();
             } else if (view === 'network') {
+                if (networkCol) networkCol.style.display = 'flex';
                 // Ensure canvas is back in main container (preserving existing logic)
                 const container = document.getElementById('container');
                 if (container && canvas && canvas.parentElement !== container) {
@@ -5801,6 +5806,7 @@
             // 3) VIEW STATE AUDIT
             console.group('VIEW STATE AUDIT');
             console.log('Selected View:', view);
+            console.log('Network Wrapper (.dashboard-sidebar-col):', networkCol ? getComputedStyle(networkCol).display : 'N/A');
             console.log('Network (canvas):', canvasEl ? getComputedStyle(canvasEl).display : 'N/A');
             console.log('Temporal (#view-temporal):', tView ? getComputedStyle(tView).display : 'N/A');
             console.log('Library (#view-library):', libView ? getComputedStyle(libView).display : 'N/A');
