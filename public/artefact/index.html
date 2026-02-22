@@ -6114,6 +6114,8 @@
                 if (!tbody) return;
                 tbody.innerHTML = '';
 
+                console.log("ACC RENDER expandedPaperId=" + this.expandedPaperId);
+
                 // Helper to detect missing data reliably
                 const isMissing = (value, token) => {
                     if (value === null || value === undefined) return true;
@@ -6128,7 +6130,7 @@
                 const badgeStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:500; background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1);";
 
                 pageData.forEach((p, index) => {
-                    const paperId = p.id || p.paper_id || `paper-${start + index}`;
+                    const paperId = String(p.id || p.paper_id || `paper-${start + index}`);
                     const isExpanded = (this.expandedPaperId === paperId);
 
                     const tr = document.createElement('tr');
@@ -6170,11 +6172,13 @@
                     tbody.appendChild(tr);
 
                     if (isExpanded) {
+                        console.log("ACC INSERT row for " + paperId);
                         const abstractTr = document.createElement('tr');
                         abstractTr.className = 'paper-abstract-row';
 
-                        const isMissingAbstract = isMissing(p.abstract);
-                        const abstractText = isMissingAbstract ? '<span style="color:var(--text-secondary); font-style:italic;">Abstract not available in this dataset.</span>' : p.abstract;
+                        const rawAbs = p.abstract ?? p.full_abstract ?? p.Abstract ?? "";
+                        const isMissingAbstract = isMissing(rawAbs);
+                        const abstractText = isMissingAbstract ? '<span style="color:var(--text-secondary); font-style:italic;">Abstract not available in this dataset.</span>' : rawAbs;
 
                         // Compact metadata line using same fallback values cleanly
                         const metaYear = p.year || 'Unknown Year';
@@ -6232,12 +6236,12 @@
             if (e.target.closest('#view-library')) {
                 const chevronBtn = e.target.closest('.js-accordion-toggle');
 
-                console.log('ACC CLICK', {
-                    target: e.target.tagName,
-                    classes: targetClasses,
-                    isChevron: !!chevronBtn,
-                    foundId: chevronBtn ? chevronBtn.getAttribute('data-paper-id') : null
-                });
+                if (chevronBtn) {
+                    const parsedPaperId = chevronBtn.getAttribute('data-paper-id');
+                    console.log('ACC CLICK ' + targetClasses);
+                    console.log('paperId raw: ' + (chevronBtn.dataset.paperId || 'undefined'));
+                    console.log('paperId parsed: ' + parsedPaperId);
+                }
 
                 if (chevronBtn) {
                     const paperId = chevronBtn.getAttribute('data-paper-id');
