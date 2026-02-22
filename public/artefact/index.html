@@ -1571,11 +1571,15 @@
                             </div>
 
                             <!-- Controls: Search -->
-                            <div style="margin-bottom: 24px;">
+                            <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 16px;">
                                 <input type="text" id="library-search" class="stitch-input"
                                     placeholder="Search title, author, or journal..."
                                     style="width: 100%; max-width: 400px;"
                                     oninput="if(typeof LibraryManager !== 'undefined'){ LibraryManager.searchQuery = this.value; LibraryManager.applyFilters(); }">
+                                <span onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.resetSort()"
+                                    style="font-size: 12px; color: var(--text-secondary); cursor: pointer; text-decoration: underline; transition: color 0.1s;"
+                                    onmouseover="this.style.color='var(--text-primary)'"
+                                    onmouseout="this.style.color='var(--text-secondary)'">Reset sorting</span>
                             </div>
 
                             <!-- Table -->
@@ -1584,19 +1588,19 @@
                                     style="width: 100%; border-collapse: collapse; margin-top: 16px;">
                                     <thead>
                                         <tr style="border-bottom: 1px solid var(--chart-panel-border);">
-                                            <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 60px; transition: color 0.2s;"
+                                            <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-primary); font-size: 11px; width: 60px; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('year')">
                                                 Year <span id="sort-icon-year" style="font-size:10px;">▼</span></th>
                                             <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 55%; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('title')">
-                                                Title <span id="sort-icon-title" style="font-size:10px;"></span></th>
+                                                Title <span id="sort-icon-title" style="font-size:10px;">↕</span></th>
                                             <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 20%; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('authors')">
-                                                Author(s) <span id="sort-icon-authors" style="font-size:10px;"></span>
+                                                Author(s) <span id="sort-icon-authors" style="font-size:10px;">↕</span>
                                             </th>
                                             <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 20%; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('journal')">
-                                                Journal <span id="sort-icon-journal" style="font-size:10px;"></span>
+                                                Journal <span id="sort-icon-journal" style="font-size:10px;">↕</span>
                                             </th>
                                             <th style="width: 40px; padding: 10px 12px;"></th>
                                         </tr>
@@ -6079,17 +6083,14 @@
                 this.render();
             },
 
-            sort: function (key) {
-                if (this.sortKey === key) {
-                    this.sortAsc = !this.sortAsc;
-                } else {
-                    this.sortKey = key;
-                    this.sortAsc = true; // Default asc for new column? Or desc for year? Let's stick to true.
-                    // Exception: Year usually better desc by default, but let's keep simple logic.
-                    if (key === 'year') this.sortAsc = false; // Year default DESC
-                }
+            resetSort: function () {
+                this.sortKey = 'year';
+                this.sortAsc = false;
+                this.updateIcons();
+                this.applyFilters();
+            },
 
-                // Update Icons
+            updateIcons: function () {
                 ['year', 'title', 'authors', 'journal'].forEach(k => {
                     const icon = document.getElementById(`sort-icon-${k}`);
                     if (icon) {
@@ -6097,12 +6098,29 @@
                             icon.textContent = this.sortAsc ? '▲' : '▼';
                             icon.parentElement.style.color = 'var(--text-primary)';
                         } else {
-                            icon.textContent = '';
+                            icon.textContent = '↕';
                             icon.parentElement.style.color = 'var(--text-secondary)';
                         }
                     }
                 });
 
+                console.groupCollapsed('PAPER LIBRARY SORT AUDIT');
+                console.log(`activeSortKey: ${this.sortKey}`);
+                console.log(`activeSortDir: ${this.sortAsc ? 'asc' : 'desc'}`);
+                console.log(`isDefaultSort: ${this.sortKey === 'year' && this.sortAsc === false}`);
+                console.groupEnd();
+            },
+
+            sort: function (key) {
+                if (this.sortKey === key) {
+                    this.sortAsc = !this.sortAsc;
+                } else {
+                    this.sortKey = key;
+                    this.sortAsc = true;
+                    if (key === 'year') this.sortAsc = false; // Year default DESC
+                }
+
+                this.updateIcons();
                 this.applyFilters();
             },
 
