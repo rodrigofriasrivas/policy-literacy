@@ -1243,6 +1243,19 @@
                                         <span class="slider"></span>
                                     </label>
                                 </div>
+
+                                <!-- Macro Layout Mode -->
+                                <div style="margin-top: 16px;">
+                                    <label for="macroLayoutSelect"
+                                        style="display: block; font-size: 11px; margin-bottom: 6px; color: #ccc;">Macro
+                                        Layout Force</label>
+                                    <select id="macroLayoutSelect"
+                                        style="width: 100%; padding: 6px; border-radius: 4px; background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary); font-size: 11px;">
+                                        <option value="organic">Organic</option>
+                                        <option value="structured">Structured</option>
+                                        <option value="clustered">Clustered</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <!-- 5) Journals -->
@@ -2522,17 +2535,21 @@
             // 2. Prepare Bigrams (Physics nodes - larger)
             allData.bigrams.forEach(b => {
                 b.radius = b.radius || 15;
-                // Initial random positions near center
-                b.x = centerX + (Math.random() - 0.5) * 200;
-                b.y = centerY + (Math.random() - 0.5) * 200;
+                if (b.x === undefined && b.y === undefined) {
+                    // Initial random positions near center
+                    b.x = centerX + (Math.random() - 0.5) * 200;
+                    b.y = centerY + (Math.random() - 0.5) * 200;
+                }
             });
 
             // 3. Prepare Papers (Physics nodes - dust)
             allData.papers.forEach(p => {
                 p.radius = 3.5; // Slightly larger for recognizability
-                // Initial random positions
-                p.x = centerX + (Math.random() - 0.5) * 500;
-                p.y = centerY + (Math.random() - 0.5) * 500;
+                if (p.x === 0 && p.y === 0 && p.vx === undefined) {
+                    // Initial random positions
+                    p.x = centerX + (Math.random() - 0.5) * 500;
+                    p.y = centerY + (Math.random() - 0.5) * 500;
+                }
             });
 
             // 4. Build Links (Paper -> Bigram)
@@ -2555,16 +2572,51 @@
             // 5. Initialize D3 Simulation
             if (simulation) simulation.stop();
 
-            simulation = d3.forceSimulation([...allData.bigrams, ...allData.papers])
-                .force("link", d3.forceLink(physicsLinks).distance(80).strength(0.02)) // Loose attraction
-                .force("charge", d3.forceManyBody().strength(d => {
-                    return d.type === 'bigram' ? -300 : -1; // Bigrams repel strongly, papers minimal
-                }))
-                // Use slightly larger collision radius to account for new sizes
-                .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 5 : 2.5).iterations(2))
-                .force("center", d3.forceCenter(centerX * 0.8, centerY).strength(0.05)) // Shift center left slightly to balance topics
-                .force("radial", d3.forceRadial(radius * 0.5, centerX * 0.8, centerY).strength(0.01))
-                .alphaDecay(0.01); // Slower decay for continuous movement
+            const layoutSelect = document.getElementById('macroLayoutSelect');
+            const layoutMode = layoutSelect ? layoutSelect.value : 'organic';
+
+            simulation = d3.forceSimulation([...allData.bigrams, ...allData.papers]);
+
+            if (layoutMode === 'structured') {
+                // STRUCTURED LAYOUT: Pulls nodes strongly toward their assigned topic's spatial coordinates
+                simulation
+                    .force("link", d3.forceLink(physicsLinks).distance(40).strength(0.15))
+                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -150 : -2))
+                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 2 : 3.5).iterations(2))
+                    .force("x", d3.forceX(d => {
+                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
+                        const t = allData.topics.find(top => top.id === tId);
+                        return t ? t.x : centerX;
+                    }).strength(0.12))
+                    .force("y", d3.forceY(d => {
+                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
+                        const t = allData.topics.find(top => top.id === tId);
+                        return t ? t.y : centerY;
+                    }).strength(0.12))
+                    .alphaDecay(0.02);
+            }
+            else if (layoutMode === 'clustered') {
+                // CLUSTERED LAYOUT (Stubbed logic for future refinement): dense central blobs
+                simulation
+                    .force("link", d3.forceLink(physicsLinks).distance(10).strength(0.3))
+                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -50 : -3))
+                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 6 : 4).iterations(2))
+                    .force("center", d3.forceCenter(centerX * 0.8, centerY).strength(0.08))
+                    .alphaDecay(0.04);
+            }
+            else {
+                // ORGANIC LAYOUT (Default): Loose generic physical map
+                simulation
+                    .force("link", d3.forceLink(physicsLinks).distance(80).strength(0.02))
+                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -300 : -1))
+                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 5 : 2.5).iterations(2))
+                    .force("center", d3.forceCenter(centerX * 0.8, centerY).strength(0.05))
+                    .force("radial", d3.forceRadial(radius * 0.5, centerX * 0.8, centerY).strength(0.01))
+                    .alphaDecay(0.01);
+            }
+
+            // 'Heat' the simulation alpha so nodes smoothly animate to their new layout forces
+            simulation.alpha(1).restart();
         }
 
         // Check if two nodes are connected
@@ -3505,6 +3557,15 @@
         if (paperIdToggle) {
             paperIdToggle.addEventListener('change', (e) => {
                 showAllPaperIds = e.target.checked;
+            });
+        }
+
+        // Layout Mode Listener
+        const macroLayoutSelect = document.getElementById('macroLayoutSelect');
+        if (macroLayoutSelect) {
+            macroLayoutSelect.addEventListener('change', () => {
+                // Re-run the simulation logic to apply the new forces layout
+                if (allData.topics.length > 0) initMacroView();
             });
         }
 
