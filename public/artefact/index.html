@@ -3122,12 +3122,30 @@
             rangeProgress.style.left = `${leftPercent}%`;
             rangeProgress.style.width = `${widthPercent}%`;
 
-            // Update Stats
+            // Calculate visible subset
             const visiblePapers = allData.papers.filter(p => {
                 const y = p.year || 2024;
                 return y >= minYear && y <= maxYear;
             }).length;
-            document.getElementById('paperCount').textContent = visiblePapers;
+
+            // Only update a small secondary label if we want, do NOT touch main paperCount
+            let visNode = document.getElementById('visiblePaperCountNode');
+            if (!visNode) {
+                // create it minimally next to yearValue
+                visNode = document.createElement('span');
+                visNode.id = 'visiblePaperCountNode';
+                visNode.style.fontSize = '12px';
+                visNode.style.fontWeight = 'normal';
+                visNode.style.color = 'var(--text-secondary)';
+                visNode.style.marginLeft = '8px';
+                yearValueDisplay.parentNode.appendChild(visNode);
+            }
+
+            if (visiblePapers !== allData.papers.length) {
+                visNode.textContent = `(${visiblePapers} visible)`;
+            } else {
+                visNode.textContent = '';
+            }
         }
 
         yearStartInput.addEventListener('input', updateYearRange);
