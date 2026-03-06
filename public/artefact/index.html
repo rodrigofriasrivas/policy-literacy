@@ -1232,6 +1232,17 @@
                                         <span class="slider"></span>
                                     </label>
                                 </div>
+
+                                <!-- Show all paper IDs -->
+                                <div class="row-align-center" style="margin-top: 8px;">
+                                    <label for="paperIdToggle"
+                                        style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Show all paper
+                                        IDs</label>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="paperIdToggle">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- 5) Journals -->
@@ -1920,6 +1931,7 @@
         let currentView = 'macro';
         let showBigramNetwork = false;
         let showBigramPaperConnections = true; // New state (Default ON)
+        let showAllPaperIds = false; // New auditability toggle (Default OFF)
         let isRingView = false;
         let animationFrame = null;
         let selectedNode = null;
@@ -2909,8 +2921,8 @@
                 let shouldDrawLabel = false;
                 if (currentView === 'topic_network') {
                     shouldDrawLabel = true; // Always in topic
-                } else if (isHoveredOrSelected) {
-                    shouldDrawLabel = true;
+                } else if (showAllPaperIds || isHoveredOrSelected) {
+                    shouldDrawLabel = true; // Forced or Explicit
                 } else if (isNearMouse) {
                     // Render if hovered near focal area
                     shouldDrawLabel = true;
@@ -2919,7 +2931,8 @@
                 if (shouldDrawLabel) {
                     let collision = false;
                     // Collision check only explicitly active in Macro view to prevent clutter
-                    if (!isHoveredOrSelected && currentView !== 'topic_network') {
+                    // Skip collision checks if audit toggle is ON
+                    if (!showAllPaperIds && !isHoveredOrSelected && currentView !== 'topic_network') {
                         const threshold = 18 / transform.k;
                         for (let ln of drawnLabels) {
                             const dlx = ln.x - paper.x;
@@ -2939,10 +2952,10 @@
                         if (isHoveredOrSelected) {
                             ctx.fillStyle = document.body.classList.contains('theme-light') ? '#000' : '#FFF';
                         }
-                        ctx.fillText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius + 2, paper.y);
+                        ctx.fillText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius, paper.y);
 
                         // Register drawn position if not an explicit active target
-                        if (!isHoveredOrSelected && currentView !== 'topic_network') {
+                        if (!showAllPaperIds && !isHoveredOrSelected && currentView !== 'topic_network') {
                             drawnLabels.push({ x: paper.x, y: paper.y });
                         }
                     }
@@ -3484,6 +3497,14 @@
         if (bigramToggle) {
             bigramToggle.addEventListener('change', (e) => {
                 showBigramNetwork = e.target.checked;
+            });
+        }
+
+        // Auditability Toggle Listener
+        const paperIdToggle = document.getElementById('paperIdToggle');
+        if (paperIdToggle) {
+            paperIdToggle.addEventListener('change', (e) => {
+                showAllPaperIds = e.target.checked;
             });
         }
 
