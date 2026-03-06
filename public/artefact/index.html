@@ -2152,7 +2152,32 @@
                     console.log(`✅ Loaded ${papers.length} papers total`);
                     updateStatus(`Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Loaded ${papers.length} papers...</span>`);
 
-                    topicPaperLinks = await fetchFromSupabase('topic_paper_links');
+                    // Paginate topic_paper_links to fetch all
+                    topicPaperLinks = [];
+                    let linkPage = 0;
+                    const linkPageSize = 1000;
+                    let fetchingLinks = true;
+
+                    while (fetchingLinks) {
+                        const start = linkPage * linkPageSize;
+                        const end = start + linkPageSize - 1;
+                        updateStatus(`Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Loading network structure (${start} - ${end})</span>`);
+
+                        const batch = await fetchFromSupabase('topic_paper_links', null, `${start}-${end}`);
+
+                        // Check if we got data
+                        if (batch.length === 0) {
+                            fetchingLinks = false;
+                        } else {
+                            topicPaperLinks = topicPaperLinks.concat(batch);
+                            if (batch.length < linkPageSize) {
+                                fetchingLinks = false;
+                            } else {
+                                linkPage++;
+                            }
+                        }
+                    }
+                    console.log(`✅ Loaded ${topicPaperLinks.length} structural links total`);
                     updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Finalizing network...</span>');
                 }
 
