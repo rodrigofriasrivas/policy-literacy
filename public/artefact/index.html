@@ -2175,8 +2175,13 @@
                         }
                     }
                     console.log(`✅ Loaded ${topicPaperLinks.length} structural links total`);
-                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Rendering canonical network...</span>');
+                    updateStatus(`Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Resolving ${topicPaperLinks.length} structural links...</span>`);
+
+                    // Minor deferral so the UI paints the resolved count before synchronous data processing 
+                    await new Promise(r => setTimeout(r, 100));
                 }
+
+                updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Rendering canonical network...</span>');
 
                 // Process data
                 allData.topics = topics.map((t, i) => ({
