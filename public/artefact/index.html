@@ -2514,7 +2514,7 @@
 
             // 3. Prepare Papers (Physics nodes - dust)
             allData.papers.forEach(p => {
-                p.radius = 2; // Small dust particles
+                p.radius = 3.5; // Slightly larger for recognizability
                 // Initial random positions
                 p.x = centerX + (Math.random() - 0.5) * 500;
                 p.y = centerY + (Math.random() - 0.5) * 500;
@@ -2893,13 +2893,14 @@
                 ctx.fill();
 
                 // Draw paper ID inline if we are in Individual Topic View, 
-                // where clutter is reduced and traceablity is paramount.
-                if (currentView === 'topic_network') {
+                // where clutter is reduced and traceablity is paramount, 
+                // OR conditionally in macro view if zoom is sufficiently tight.
+                if (currentView === 'topic_network' || (currentView !== 'topic_network' && transform.k > 2.5)) {
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'middle';
                     ctx.font = '10px Inter, sans-serif';
                     ctx.fillStyle = document.body.classList.contains('theme-light') ? '#666' : '#999';
-                    ctx.fillText(`P${paper.id}`, paper.x + 4, paper.y);
+                    ctx.fillText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius + 2, paper.y);
                 }
             });
 
@@ -3327,7 +3328,7 @@
                         <div style="margin-bottom: 4px;">
                              <span class="tooltip-tag" style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">${hoveredNode.year || 'N/A'}</span>
                         </div>
-                        <div class="tooltip-header" style="color:${hoveredNode.color}; margin-bottom: 2px;">Paper ${hoveredNode.id}</div>
+                        <div class="tooltip-header" style="color:${hoveredNode.color}; margin-bottom: 2px;">Paper ${hoveredNode.paper_id || hoveredNode.id || 'Unknown'}</div>
                         <div class="tooltip-title" style="margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3;">${hoveredNode.title || 'Untitled Paper'}</div>
                         
                         <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.15); margin-bottom: 12px;"></div>
