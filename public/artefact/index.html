@@ -1129,7 +1129,7 @@
                             <h3 class="panel-title">NETWORK PANEL</h3>
                             <p class="panel-summary">
                                 You’re exploring <strong style="color: var(--text-primary);"><span
-                                        id="paperCount">5,776</span></strong> papers, across 40+ journals, mapped
+                                        id="paperCount">...</span></strong> papers, across 40+ journals, mapped
                                 into <strong style="color: var(--text-primary);"><span
                                         id="topicCount">25</span></strong> topics and 125 key
                                 terms, spanning 1980–2024.
@@ -2117,12 +2117,10 @@
                     papers = demo.papers;
                     topicPaperLinks = demo.topicPaperLinks;
                 } else {
-                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Connecting to database...</span>');
+                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Fetching data...</span>');
                     topics = await fetchFromSupabase('topics');
-                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Loaded topics...</span>');
 
                     bigrams = await fetchFromSupabase('bigrams');
-                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Loaded bigrams...</span>');
 
                     // Paginate papers to fetch all
                     papers = [];
@@ -2133,7 +2131,6 @@
                     while (fetching) {
                         const start = page * pageSize;
                         const end = start + pageSize - 1;
-                        updateStatus(`Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Loading papers computation (${start} - ${end})</span>`);
 
                         const batch = await fetchFromSupabase('papers', null, `${start}-${end}`);
 
@@ -2150,7 +2147,8 @@
                         }
                     }
                     console.log(`✅ Loaded ${papers.length} papers total`);
-                    updateStatus(`Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Loaded ${papers.length} papers...</span>`);
+
+                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Resolving structural links...</span>');
 
                     // Paginate topic_paper_links to fetch all
                     topicPaperLinks = [];
@@ -2161,7 +2159,6 @@
                     while (fetchingLinks) {
                         const start = linkPage * linkPageSize;
                         const end = start + linkPageSize - 1;
-                        updateStatus(`Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Loading network structure (${start} - ${end})</span>`);
 
                         const batch = await fetchFromSupabase('topic_paper_links', null, `${start}-${end}`);
 
@@ -2178,7 +2175,7 @@
                         }
                     }
                     console.log(`✅ Loaded ${topicPaperLinks.length} structural links total`);
-                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Finalizing network...</span>');
+                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Rendering canonical network...</span>');
                 }
 
                 // Process data
