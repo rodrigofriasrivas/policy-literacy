@@ -2109,7 +2109,7 @@
                 let topics, bigrams, papers, topicPaperLinks;
 
                 if (useDemo) {
-                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Generating demo data...</span>');
+                    updateStatus('Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Generating demo data...</span>');
                     await new Promise(r => setTimeout(r, 800)); // Fake delay
                     const demo = getDemoData();
                     topics = demo.topics;
@@ -2117,7 +2117,7 @@
                     papers = demo.papers;
                     topicPaperLinks = demo.topicPaperLinks;
                 } else {
-                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Fetching data...</span>');
+                    updateStatus('Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Fetching data...</span>');
                     topics = await fetchFromSupabase('topics');
 
                     bigrams = await fetchFromSupabase('bigrams');
@@ -2148,7 +2148,7 @@
                     }
                     console.log(`✅ Loaded ${papers.length} papers total`);
 
-                    updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Resolving structural links...</span>');
+                    updateStatus('Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Linking research papers to policy topics...</span>');
 
                     // Paginate topic_paper_links to fetch all
                     topicPaperLinks = [];
@@ -2167,6 +2167,7 @@
                             fetchingLinks = false;
                         } else {
                             topicPaperLinks = topicPaperLinks.concat(batch);
+                            updateStatus(`Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Linking research papers to policy topics: ${topicPaperLinks.length} of 14,546 connections</span>`);
                             if (batch.length < linkPageSize) {
                                 fetchingLinks = false;
                             } else {
@@ -2175,13 +2176,13 @@
                         }
                     }
                     console.log(`✅ Loaded ${topicPaperLinks.length} structural links total`);
-                    updateStatus(`Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Resolving ${topicPaperLinks.length} structural links...</span>`);
+                    updateStatus(`Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Linking research papers to policy topics: ${topicPaperLinks.length} of 14,546 connections</span>`);
 
                     // Minor deferral so the UI paints the resolved count before synchronous data processing 
                     await new Promise(r => setTimeout(r, 100));
                 }
 
-                updateStatus('Assembling the policy research galaxy...<br><span style="font-size:12px; opacity:0.7">Rendering canonical network...</span>');
+                updateStatus('Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Rendering canonical network...</span>');
 
                 // Process data
                 allData.topics = topics.map((t, i) => ({
