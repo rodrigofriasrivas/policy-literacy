@@ -2579,57 +2579,70 @@
 
             if (layoutMode === 'structured') {
                 // STRUCTURED LAYOUT: Legible network order.
-                // Gently pulls nodes to their topics, keeps adequate separation so it doesn't form a tight column.
+                // We use a wide, even circle for spatial distribution.
+                const numTopics = allData.topics.length || 1;
+                const angleStep = (Math.PI * 2) / Math.max(1, numTopics);
+                const layoutRadius = radius * 1.0;
+
                 simulation
-                    .force("link", d3.forceLink(physicsLinks).distance(50).strength(0.08))
-                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -400 : -2))
-                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 8 : 4).iterations(2))
+                    .force("link", d3.forceLink(physicsLinks).distance(60).strength(0.05))
+                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -300 : -2))
+                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 6 : 4).iterations(2))
                     .force("x", d3.forceX(d => {
-                        const t = allData.topics.find(top => top.id === (d.type === 'bigram' ? d.topic_id : d.topicId));
-                        return t ? t.x : centerX;
-                    }).strength(0.04)) // Very soft pull to avoid collapsing onto the strict line
+                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
+                        const tIndex = allData.topics.findIndex(top => top.id === tId);
+                        if (tIndex >= 0) {
+                            return (centerX * 0.8) + Math.cos(tIndex * angleStep) * layoutRadius;
+                        }
+                        return centerX * 0.8;
+                    }).strength(0.08)) // Strong enough to organize
                     .force("y", d3.forceY(d => {
-                        const t = allData.topics.find(top => top.id === (d.type === 'bigram' ? d.topic_id : d.topicId));
-                        return t ? t.y : centerY;
-                    }).strength(0.04))
-                    .force("center", d3.forceCenter(centerX * 0.8, centerY).strength(0.02))
+                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
+                        const tIndex = allData.topics.findIndex(top => top.id === tId);
+                        if (tIndex >= 0) {
+                            return centerY + Math.sin(tIndex * angleStep) * layoutRadius;
+                        }
+                        return centerY;
+                    }).strength(0.08))
                     .alphaDecay(0.015);
             }
             else if (layoutMode === 'clustered') {
                 // CLUSTERED LAYOUT: Extreme spatial separation into islands.
+                const numTopics = allData.topics.length || 1;
+                const angleStep = (Math.PI * 2) / Math.max(1, numTopics);
+                const clusterRadius = radius * 2.5; // Push them even further away into isolated island orbits
+
                 simulation
-                    .force("link", d3.forceLink(physicsLinks).distance(20).strength(0.2)) // Tighter links inside islands
-                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -200 : -2))
-                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 5 : 3.5).iterations(2))
+                    .force("link", d3.forceLink(physicsLinks).distance(15).strength(0.3)) // Tighter links inside islands
+                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -150 : -4))
+                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 8 : 4).iterations(2))
                     .force("x", d3.forceX(d => {
-                        const t = allData.topics.find(top => top.id === (d.type === 'bigram' ? d.topic_id : d.topicId));
-                        if (t) {
-                            const angle = Math.atan2(t.y - centerY, t.x - centerX);
-                            // Push way out into distinct orbits
-                            return centerX + Math.cos(angle) * (radius * 1.8);
+                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
+                        const tIndex = allData.topics.findIndex(top => top.id === tId);
+                        if (tIndex >= 0) {
+                            return (centerX * 0.8) + Math.cos(tIndex * angleStep) * clusterRadius;
                         }
-                        return centerX;
-                    }).strength(0.12)) // Stronger pull to the isolated islands
+                        return centerX * 0.8;
+                    }).strength(0.2)) // Strong pull to form distinct tight islands
                     .force("y", d3.forceY(d => {
-                        const t = allData.topics.find(top => top.id === (d.type === 'bigram' ? d.topic_id : d.topicId));
-                        if (t) {
-                            const angle = Math.atan2(t.y - centerY, t.x - centerX);
-                            // Push way out
-                            return centerY + Math.sin(angle) * (radius * 1.8);
+                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
+                        const tIndex = allData.topics.findIndex(top => top.id === tId);
+                        if (tIndex >= 0) {
+                            return centerY + Math.sin(tIndex * angleStep) * clusterRadius;
                         }
                         return centerY;
-                    }).strength(0.12))
-                    .alphaDecay(0.02);
+                    }).strength(0.2))
+                    .alphaDecay(0.025);
             }
             else {
                 // ORGANIC LAYOUT (Default): Restore the exact original living complexity.
-                // We use a stronger alpha restart to ensure it "unpacks" fully if it was previously clustered.
+                // Expansive, organic, distributed. Minimal center gravity, high natural repulsion.
                 simulation
-                    .force("link", d3.forceLink(physicsLinks).distance(80).strength(0.02))
-                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -350 : -1.5)) // Slightly stronger to unpack
+                    .force("link", d3.forceLink(physicsLinks).distance(100).strength(0.015)) // Looser living web
+                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -450 : -2)) // Stronger repulsion to unpack massive network
                     .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 5 : 3).iterations(2))
-                    .force("center", d3.forceCenter(centerX * 0.8, centerY).strength(0.03))  // Less aggressive center pull to allow expansion
-                    .force("radial", d3.forceRadial(radius * 0.6, centerX * 0.8, centerY).strength(0.01))
+                    .force("center", d3.forceCenter(centerX * 0.8, centerY).strength(0.01))  // Very low gravity so it breathes and spreads 
+                    .force("radial", d3.forceRadial(radius * 0.7, centerX * 0.8, centerY).strength(0.02)) // Gently forms a massive wide sphere
                     .alphaDecay(0.01);
             }
 
