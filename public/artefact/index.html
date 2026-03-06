@@ -1923,6 +1923,9 @@
         let isRingView = false;
         let animationFrame = null;
         let selectedNode = null;
+        let globalHoveredNode = null;
+        let currentMouseX = 0;
+        let currentMouseY = 0;
 
 
 
@@ -2751,6 +2754,7 @@
 
             const centerX = width / 2;
             const centerY = height / 2;
+            const drawnLabels = [];
 
             ctx.save();
             // Apply Zoom/Pan Transform
@@ -2892,15 +2896,56 @@
                 ctx.arc(paper.x, paper.y, paper.radius * scale, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Draw paper ID inline if we are in Individual Topic View, 
-                // where clutter is reduced and traceablity is paramount, 
-                // OR conditionally in macro view if zoom is sufficiently tight.
-                if (currentView === 'topic_network' || (currentView !== 'topic_network' && transform.k > 2.5)) {
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'middle';
-                    ctx.font = '10px Inter, sans-serif';
-                    ctx.fillStyle = document.body.classList.contains('theme-light') ? '#666' : '#999';
-                    ctx.fillText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius + 2, paper.y);
+                // Smarter labeling logic in Macro View:
+                // We avoid overlapping labels and only label nearby/hovered/selected items.
+                const dxText = currentMouseX - paper.x;
+                const dyText = currentMouseY - paper.y;
+                const distToMouseSq = dxText * dxText + dyText * dyText;
+
+                const isHoveredOrSelected = (globalHoveredNode === paper) || (selectedNode === paper);
+                // Within 150 screen-pixels equivalent radius mapping
+                const isNearMouse = (distToMouseSq < Math.pow(150 / transform.k, 2));
+
+                let shouldDrawLabel = false;
+                if (currentView === 'topic_network') {
+                    shouldDrawLabel = true; // Always in topic
+                } else if (isHoveredOrSelected) {
+                    shouldDrawLabel = true;
+                } else if (isNearMouse) {
+                    // Render if hovered near focal area
+                    shouldDrawLabel = true;
+                }
+
+                if (shouldDrawLabel) {
+                    let collision = false;
+                    // Collision check only explicitly active in Macro view to prevent clutter
+                    if (!isHoveredOrSelected && currentView !== 'topic_network') {
+                        const threshold = 18 / transform.k;
+                        for (let ln of drawnLabels) {
+                            const dlx = ln.x - paper.x;
+                            const dly = ln.y - paper.y;
+                            if ((dlx * dlx + dly * dly) < (threshold * threshold)) {
+                                collision = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!collision) {
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'middle';
+                        ctx.font = '10px Inter, sans-serif';
+                        ctx.fillStyle = document.body.classList.contains('theme-light') ? '#666' : '#999';
+                        if (isHoveredOrSelected) {
+                            ctx.fillStyle = document.body.classList.contains('theme-light') ? '#000' : '#FFF';
+                        }
+                        ctx.fillText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius + 2, paper.y);
+
+                        // Register drawn position if not an explicit active target
+                        if (!isHoveredOrSelected && currentView !== 'topic_network') {
+                            drawnLabels.push({ x: paper.x, y: paper.y });
+                        }
+                    }
                 }
             });
 
@@ -3253,6 +3298,8 @@
             // Apply Inverse Transform
             const mouseX = (e.clientX - rect.left - transform.x) / transform.k;
             const mouseY = (e.clientY - rect.top - transform.y) / transform.k;
+            currentMouseX = mouseX;
+            currentMouseY = mouseY;
 
             let hoveredNode = null;
 
@@ -3290,6 +3337,7 @@
             }
 
             if (hoveredNode) {
+                globalHoveredNode = hoveredNode;
                 canvas.style.cursor = 'pointer';
                 tooltip.classList.add('visible');
                 // Tooltip position remains in SCREEN coordinates
@@ -3342,6 +3390,7 @@
                     `;
                 }
             } else {
+                globalHoveredNode = null;
                 canvas.style.cursor = 'default';
                 hideTooltip();
             }
@@ -3402,6 +3451,7 @@
 
         // Mouseout listener to clear tooltip when leaving canvas
         canvas.addEventListener('mouseout', () => {
+            globalHoveredNode = null;
             hideTooltip();
         });
 
