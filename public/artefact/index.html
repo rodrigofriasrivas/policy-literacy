@@ -1097,6 +1097,13 @@
     <div id="container">
         <canvas id="canvas"></canvas>
         <div id="topicTitle"></div>
+        <!-- Clustered View Container -->
+        <div id="clusteredViewContainer"
+            style="display: none; position: absolute; top: 170px; left: 380px; right: 24px; bottom: 24px; z-index: 5; background: var(--bg-color); overflow-y: auto; padding-right: 8px;">
+            <div id="clusteredGrid"
+                style="display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 16px; width: 100%; min-height: 100%;">
+            </div>
+        </div>
     </div>
 
     <!-- UI OVERLAY LAYER -->
@@ -1252,7 +1259,6 @@
                                     <select id="macroLayoutSelect"
                                         style="width: 100%; padding: 6px; border-radius: 4px; background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary); font-size: 11px;">
                                         <option value="organic">Organic</option>
-                                        <option value="structured">Structured</option>
                                         <option value="clustered">Clustered</option>
                                     </select>
                                 </div>
@@ -1439,7 +1445,8 @@
                     <div class="stitch-sub-bar">
                         <a href="#" id="nav-network" class="stitch-sub-link active"
                             onclick="switchView('network'); return false;">Network View</a>
-                        <a href="#" class="stitch-sub-link">Field Structure</a>
+                        <a href="#" id="nav-field-structure" class="stitch-sub-link"
+                            onclick="switchView('field-structure'); return false;">Field Structure</a>
                         <a href="#" id="nav-temporal" class="stitch-sub-link"
                             onclick="switchView('temporal'); return false;">Temporal Evolution</a>
                         <a href="#" id="nav-library" class="stitch-sub-link"
@@ -1696,11 +1703,43 @@
 
                     <!-- Bigram Trends -->
                     <div class="stitch-card">
-                        <div class="stitch-card-title" id="topic-trends-title">Bigram trends over time</div>
-                        <div class="stitch-card-subtitle">Tracks how the topic’s five defining terms rise and
-                            fall
-                            across the corpus timeline.</div>
-                        <div id="topic-trends-chart-container" style="height: 300px; width: 100%;"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <div class="stitch-card-title" id="topic-trends-title">Bigram trends over time</div>
+                                <div id="topic-sparse-warning"
+                                    style="display:none; color:var(--text-secondary); font-size:11px; margin-bottom:8px; font-style:italic;">
+                                    This topic has limited temporal density, so yearly changes appear more abrupt.</div>
+                                <div class="stitch-card-subtitle">Tracks how the topic’s five defining terms rise and
+                                    fall
+                                    across the corpus timeline.</div>
+                                <div style="color:var(--text-secondary); font-size:11px; margin-top:6px; opacity:0.8;">
+                                    Each line shows one bigram over time. The same paper can count in more than one
+                                    line.
+                                </div>
+                            </div>
+                            <div id="topic-trends-view-toggle"
+                                style="display: none; align-items: center; background: var(--chart-panel-bg); border: 1px solid var(--chart-panel-border); border-radius: 6px; padding: 2px;">
+                                <button id="btn-trend-view"
+                                    style="background: transparent; border: none; padding: 4px 8px; font-size: 11px; color: var(--text-secondary); cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                    </svg>
+                                    Trend view
+                                </button>
+                                <button id="btn-sparse-view"
+                                    style="background: transparent; border: none; padding: 4px 8px; font-size: 11px; color: var(--text-secondary); cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                        <circle cx="5" cy="12" r="2" />
+                                        <circle cx="12" cy="12" r="2" />
+                                        <circle cx="19" cy="12" r="2" />
+                                    </svg>
+                                    Sparse view
+                                </button>
+                            </div>
+                        </div>
+                        <div id="topic-trends-chart-container" style="height: 300px; width: 100%; margin-top: 16px;">
+                        </div>
                     </div>
 
                     <!-- Papers Table -->
@@ -2521,9 +2560,67 @@
             console.log(`🕸️ Generated ${allData.bigramLinks.length} bigram network connections`);
         }
 
+        function renderClusteredView() {
+            const grid = document.getElementById('clusteredGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.style.border = '1px solid var(--glass-border)';
+                cell.style.borderRadius = '8px';
+                cell.style.padding = '12px';
+                cell.style.backgroundColor = 'var(--chart-panel-bg)';
+                cell.style.display = 'flex';
+                cell.style.flexDirection = 'column';
+
+                // Stage 3: Populate only ONE grid cell with real topic signature (Topic 1)
+                if (i === 0 && allData.topics && allData.topics.length > 0) {
+                    const topic = allData.topics[0];
+                    const safeName = topic.topic_name || topic.name || `Topic ${topic.id}`;
+                    cell.innerHTML = `
+                        <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Topic ${topic.id}</div>
+                        <div style="font-size: 13px; font-weight: 700; color: ${topic.color || 'var(--accent-color)'}; margin-top: 4px; margin-bottom: 8px; line-height: 1.2;">${safeName}</div>
+                    `;
+                }
+
+                grid.appendChild(cell);
+            }
+        }
+
         let simulation;
 
         function initMacroView() {
+            const layoutSelect = document.getElementById('macroLayoutSelect');
+            const layoutMode = layoutSelect ? layoutSelect.value : 'organic';
+            const canvas = document.getElementById('canvas');
+            const clusteredContainer = document.getElementById('clusteredViewContainer');
+
+            if (layoutMode === 'clustered') {
+                if (simulation) simulation.stop();
+                if (canvas) canvas.style.display = 'none';
+                if (clusteredContainer) {
+                    clusteredContainer.style.display = 'block';
+                    renderClusteredView();
+                }
+                return;
+            } else {
+                // 1. hide/remove the Clustered container
+                if (clusteredContainer) {
+                    clusteredContainer.style.display = 'none';
+                }
+
+                // 2. restore the main canvas visibility
+                if (canvas) {
+                    canvas.style.display = 'block';
+                }
+
+                // 3. Silently reset zoom geometry for the animation loop
+                if (typeof transform !== 'undefined') {
+                    transform = d3.zoomIdentity;
+                }
+            }
+
             const centerX = width / 2;
             const centerY = height / 2;
             const radius = Math.min(width, height) * 0.45;
@@ -2554,10 +2651,17 @@
 
             // 4. Build Links (Paper -> Bigram)
             const physicsLinks = [];
+            const bigramMap = new Map();
+            if (allData.bigrams) {
+                for (const b of allData.bigrams) {
+                    bigramMap.set(b.id, b);
+                }
+            }
+
             allData.papers.forEach(p => {
                 if (p.bigramIds && p.bigramIds.length > 0) {
                     p.bigramIds.forEach(bid => {
-                        const target = allData.bigrams.find(b => b.id === bid);
+                        const target = bigramMap.get(bid);
                         if (target) {
                             physicsLinks.push({
                                 source: p,
@@ -2572,79 +2676,17 @@
             // 5. Initialize D3 Simulation
             if (simulation) simulation.stop();
 
-            const layoutSelect = document.getElementById('macroLayoutSelect');
-            const layoutMode = layoutSelect ? layoutSelect.value : 'organic';
-
             simulation = d3.forceSimulation([...allData.bigrams, ...allData.papers]);
 
-            if (layoutMode === 'structured') {
-                // STRUCTURED LAYOUT: Legible network order.
-                // We use a wide, even circle for spatial distribution.
-                const numTopics = allData.topics.length || 1;
-                const angleStep = (Math.PI * 2) / Math.max(1, numTopics);
-                const layoutRadius = radius * 1.0;
-
-                simulation
-                    .force("link", d3.forceLink(physicsLinks).distance(60).strength(0.05))
-                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -300 : -2))
-                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 6 : 4).iterations(2))
-                    .force("x", d3.forceX(d => {
-                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
-                        const tIndex = allData.topics.findIndex(top => top.id === tId);
-                        if (tIndex >= 0) {
-                            return (centerX * 0.8) + Math.cos(tIndex * angleStep) * layoutRadius;
-                        }
-                        return centerX * 0.8;
-                    }).strength(0.08)) // Strong enough to organize
-                    .force("y", d3.forceY(d => {
-                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
-                        const tIndex = allData.topics.findIndex(top => top.id === tId);
-                        if (tIndex >= 0) {
-                            return centerY + Math.sin(tIndex * angleStep) * layoutRadius;
-                        }
-                        return centerY;
-                    }).strength(0.08))
-                    .alphaDecay(0.015);
-            }
-            else if (layoutMode === 'clustered') {
-                // CLUSTERED LAYOUT: Extreme spatial separation into islands.
-                const numTopics = allData.topics.length || 1;
-                const angleStep = (Math.PI * 2) / Math.max(1, numTopics);
-                const clusterRadius = radius * 2.5; // Push them even further away into isolated island orbits
-
-                simulation
-                    .force("link", d3.forceLink(physicsLinks).distance(15).strength(0.3)) // Tighter links inside islands
-                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -150 : -4))
-                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 8 : 4).iterations(2))
-                    .force("x", d3.forceX(d => {
-                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
-                        const tIndex = allData.topics.findIndex(top => top.id === tId);
-                        if (tIndex >= 0) {
-                            return (centerX * 0.8) + Math.cos(tIndex * angleStep) * clusterRadius;
-                        }
-                        return centerX * 0.8;
-                    }).strength(0.2)) // Strong pull to form distinct tight islands
-                    .force("y", d3.forceY(d => {
-                        const tId = d.type === 'bigram' ? d.topic_id : d.topicId;
-                        const tIndex = allData.topics.findIndex(top => top.id === tId);
-                        if (tIndex >= 0) {
-                            return centerY + Math.sin(tIndex * angleStep) * clusterRadius;
-                        }
-                        return centerY;
-                    }).strength(0.2))
-                    .alphaDecay(0.025);
-            }
-            else {
-                // ORGANIC LAYOUT (Default): Restore the exact original living complexity.
-                // Expansive, organic, distributed. Minimal center gravity, high natural repulsion.
-                simulation
-                    .force("link", d3.forceLink(physicsLinks).distance(100).strength(0.015)) // Looser living web
-                    .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -450 : -2)) // Stronger repulsion to unpack massive network
-                    .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 5 : 3).iterations(2))
-                    .force("center", d3.forceCenter(centerX * 0.8, centerY).strength(0.01))  // Very low gravity so it breathes and spreads 
-                    .force("radial", d3.forceRadial(radius * 0.7, centerX * 0.8, centerY).strength(0.02)) // Gently forms a massive wide sphere
-                    .alphaDecay(0.01);
-            }
+            // ORGANIC LAYOUT (Default): Restore the exact original living complexity.
+            // Expansive, organic, distributed. Minimal center gravity, high natural repulsion.
+            simulation
+                .force("link", d3.forceLink(physicsLinks).distance(100).strength(0.015)) // Looser living web
+                .force("charge", d3.forceManyBody().strength(d => d.type === 'bigram' ? -450 : -2)) // Stronger repulsion to unpack massive network
+                .force("collide", d3.forceCollide().radius(d => d.type === 'bigram' ? d.radius + 5 : 3).iterations(2))
+                .force("center", d3.forceCenter(centerX * 0.8, centerY).strength(0.01))  // Very low gravity so it breathes and spreads 
+                .force("radial", d3.forceRadial(radius * 0.7, centerX * 0.8, centerY).strength(0.02)) // Gently forms a massive wide sphere
+                .alphaDecay(0.01);
 
             // 'Heat' the simulation alpha so nodes smoothly animate to their new layout forces
             simulation.alpha(1).restart();
@@ -2856,6 +2898,14 @@
             ctx.translate(transform.x, transform.y);
             ctx.scale(transform.k, transform.k);
 
+            // Pre-compute map for faster lookup in loops (fixes rendering bottleneck)
+            const bigramMap = new Map();
+            if (allData.bigrams) {
+                for (const b of allData.bigrams) {
+                    bigramMap.set(b.id, b);
+                }
+            }
+
             // ONLY draw connections if something is selected
             if (selectedNode) {
                 ctx.globalAlpha = 0.4;
@@ -2920,7 +2970,7 @@
                 if (showBigramPaperConnections && isRelevant) {
                     // Draw lines to connected bigrams
                     paper.bigramIds.forEach(bid => {
-                        const bigram = allData.bigrams.find(b => b.id === bid);
+                        const bigram = bigramMap.get(bid);
                         if (bigram) {
                             ctx.beginPath();
                             ctx.strokeStyle = bigram.color;
@@ -2965,7 +3015,7 @@
                 if (showBigramPaperConnections && isRelevant) {
                     // Draw lines to connected bigrams
                     paper.bigramIds.forEach(bid => {
-                        const bigram = allData.bigrams.find(b => b.id === bid);
+                        const bigram = bigramMap.get(bid);
                         if (bigram) {
                             ctx.beginPath();
                             ctx.strokeStyle = bigram.color;
@@ -3009,6 +3059,12 @@
                 } else if (isNearMouse) {
                     // Render if hovered near focal area
                     shouldDrawLabel = true;
+                }
+
+                const layoutSelectForLabels = document.getElementById('macroLayoutSelect');
+                const isClustered = layoutSelectForLabels && layoutSelectForLabels.value === 'clustered';
+                if (isClustered && !isHoveredOrSelected) {
+                    shouldDrawLabel = false; // Minimal labels in Clustered View
                 }
 
                 if (shouldDrawLabel) {
@@ -3129,42 +3185,91 @@
 
             // Bigram labels (only if matching search or zoomed/relevant)
             ctx.font = 'bold 14px Inter, sans-serif';
-            allData.bigrams.forEach((bigram, i) => {
-                // Show label if searched OR if node is large/important OR if just general exploration (some sampling)
-                // With physics, bigrams move.
-                if (!matchesSearch(bigram)) return;
+            const layoutSelectForLabels = document.getElementById('macroLayoutSelect');
+            const isClustered = layoutSelectForLabels && layoutSelectForLabels.value === 'clustered';
 
-                // Show all bigram labels? might be cluttered. 125 bigrams.
-                // Let's show them.
+            if (!isClustered) {
+                allData.bigrams.forEach((bigram, i) => {
+                    // Show label if searched OR if node is large/important OR if just general exploration (some sampling)
+                    // With physics, bigrams move.
+                    if (!matchesSearch(bigram)) return;
 
-                let alpha = 1.0;
-                if (activeSpotlights.size > 0) {
-                    // Check if bigram is connected to ANY active spotlight node
-                    let linked = false;
-                    for (let spot of activeSpotlights) {
-                        if (isConnected(bigram, spot)) { linked = true; break; }
+                    // Show all bigram labels? might be cluttered. 125 bigrams.
+                    // Let's show them.
+
+                    let alpha = 1.0;
+                    if (activeSpotlights.size > 0) {
+                        // Check if bigram is connected to ANY active spotlight node
+                        let linked = false;
+                        for (let spot of activeSpotlights) {
+                            if (isConnected(bigram, spot)) { linked = true; break; }
+                        }
+                        if (!linked) alpha = 0.1;
                     }
-                    if (!linked) alpha = 0.1;
-                }
-                else if (selectedNode && !isConnected(bigram, selectedNode)) alpha = 0.1;
+                    else if (selectedNode && !isConnected(bigram, selectedNode)) alpha = 0.1;
 
-                ctx.globalAlpha = alpha;
-                ctx.globalAlpha = alpha;
+                    ctx.globalAlpha = alpha;
 
-                // Text Color Logic: Check for Light Mode
-                if (document.body.classList.contains('theme-light')) {
-                    ctx.fillStyle = '#222'; // Dark text for light background
-                } else {
-                    ctx.fillStyle = '#ddd'; // Light text for dark background
-                }
+                    // Text Color Logic: Check for Light Mode
+                    if (document.body.classList.contains('theme-light')) {
+                        ctx.fillStyle = '#222'; // Dark text for light background
+                    } else {
+                        ctx.fillStyle = '#ddd'; // Light text for dark background
+                    }
+
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+
+                    // FULL UNTRUNCATED LABEL
+                    ctx.fillText(bigram.bigram, bigram.x, bigram.y - bigram.radius - 2);
+                    ctx.globalAlpha = 1.0;
+                });
+            }
+
+            // Draw 5x5 grid topic titles if Clustered View is active
+            if (isClustered) {
+                const numTopics = allData.topics.length || 1;
+                const numCols = 5;
+                const numRows = Math.ceil(numTopics / numCols);
+
+                const panelW = 380;
+                const topM = 80;
+                const rightM = 40;
+                const bottomM = 40;
+
+                const usableW = Math.max(width - panelW - rightM, 500);
+                const usableH = Math.max(height - topM - bottomM, 500);
+
+                const cellW = usableW / numCols;
+                const cellH = usableH / numRows;
 
                 ctx.textAlign = 'center';
-                ctx.textBaseline = 'bottom';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = document.body.classList.contains('theme-light') ? '#666' : '#999';
 
-                // FULL UNTRUNCATED LABEL
-                ctx.fillText(bigram.bigram, bigram.x, bigram.y - bigram.radius - 2);
+                allData.topics.forEach((topic, i) => {
+                    const col = i % numCols;
+                    const row = Math.floor(i / numCols);
+                    const cx = panelW + (col * cellW) + (cellW / 2);
+                    const cy = topM + (row * cellH) + (cellH / 2);
+
+                    const yOffset = - (cellH * 0.45); // Move to top of the cell space
+
+                    ctx.font = `600 ${14 / transform.k}px Inter, sans-serif`;
+
+                    const rawName = topic.topic_name || topic.name || `Topic ${topic.id}`;
+                    const label = rawName.length > 50 ? rawName.substring(0, 47) + "..." : rawName;
+
+                    ctx.globalAlpha = 1.0;
+                    ctx.fillText(label, cx, cy + yOffset);
+
+                    // Optional: Draw subtle cell borders
+                    ctx.strokeStyle = document.body.classList.contains('theme-light') ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+                    ctx.lineWidth = 1 / transform.k;
+                    ctx.strokeRect(panelW + (col * cellW), topM + (row * cellH), cellW, cellH);
+                });
                 ctx.globalAlpha = 1.0;
-            });
+            }
 
             ctx.restore();
         }
@@ -3497,6 +3602,48 @@
             // Apply Inverse Transform
             const mouseX = (e.clientX - rect.left - transform.x) / transform.k;
             const mouseY = (e.clientY - rect.top - transform.y) / transform.k;
+
+            const layoutSelectForClick = document.getElementById('macroLayoutSelect');
+            if (layoutSelectForClick && layoutSelectForClick.value === 'clustered') {
+                const numTopics = allData.topics.length || 1;
+                const numCols = 5;
+                const numRows = Math.ceil(numTopics / numCols);
+
+                const panelWidth = 380;
+                const topMargin = 80;
+                const rightMargin = 40;
+                const bottomMargin = 40;
+
+                const usableWidth = Math.max(width - panelWidth - rightMargin, 500);
+                const usableHeight = Math.max(height - topMargin - bottomMargin, 500);
+
+                const cellW = usableWidth / numCols;
+                const cellH = usableHeight / numRows;
+
+                if (mouseX >= panelWidth && mouseX <= panelWidth + usableWidth &&
+                    mouseY >= topMargin && mouseY <= topMargin + usableHeight) {
+
+                    const col = Math.floor((mouseX - panelWidth) / cellW);
+                    const row = Math.floor((mouseY - topMargin) / cellH);
+                    const tIndex = row * numCols + col;
+
+                    if (tIndex >= 0 && tIndex < allData.topics.length) {
+                        const clickedTopic = allData.topics[tIndex];
+                        console.log(`✨ Clicked Clustered Cell for Topic ${clickedTopic.id}`);
+
+                        // Use existing logic for opening topic
+                        const tId = Number(clickedTopic.id);
+                        if (!Number.isNaN(tId) && tId > 0) {
+                            if (window.urlState && window.urlState.mode === 'topic') {
+                                window.location.href = `index.html?mode=topic&topicId=${tId}`;
+                            } else {
+                                window.open(`index.html?mode=topic&topicId=${tId}`, '_blank');
+                            }
+                        }
+                        return; // Stop further click processing inside canvas
+                    }
+                }
+            }
 
             let clickedNode = null;
 
@@ -5749,32 +5896,42 @@
                 bc.textContent = `TOPIC ${topic.id}: ${cleanName}`;
             }
 
+            // Filter strictly to bigrams belonging to this topic
+            const topicBigrams = allData.bigrams.filter(b => b.topic_id === topic.id);
+
             // Top Terms - Metadata Added
-            const sortedBigrams = [...allData.bigrams]
+            const sortedBigrams = [...topicBigrams]
                 .sort((a, b) => (b.normalized_frequency || 0) - (a.normalized_frequency || 0))
                 .slice(0, 5);
 
             // Calculate total frequency for this topic to compute share
-            const totalTopicFreq = allData.bigrams.reduce((sum, b) => sum + (b.normalized_frequency || 0), 0);
+            const totalTopicFreq = topicBigrams.reduce((sum, b) => sum + (b.normalized_frequency || 0), 0);
 
             const termsContainer = document.getElementById('topic-top-terms');
             if (termsContainer) {
                 if (sortedBigrams.length === 0) termsContainer.innerHTML = '<span style="color:var(--text-secondary);font-size:12px">No terms available</span>';
                 else {
-                    const allBigramsTotal = allData.bigrams.reduce((sum, b) => sum + (b.frequency_sum || b.weight || 0), 0);
+                    const allBigramsTotal = topicBigrams.reduce((sum, b) => sum + (b.frequency_sum || b.weight || 0), 0);
 
                     termsContainer.innerHTML = sortedBigrams.map(b => {
                         // Use frequency_sum for count, fallback to weight if missing
                         const occurrences = b.frequency_sum || b.weight || Math.round(b.normalized_frequency || 0);
+
+                        // Calculate share based on total occurrences in the topic
                         const share = allBigramsTotal > 0 ? ((occurrences / allBigramsTotal) * 100).toFixed(1) : '0.0';
 
-                        // Using a chip-like container but with secondary metadata line
+                        // Identify how many distinct papers in this topic are mapped to this specific bigram
+                        const bigramPapersCount = allData.papers.filter(p => p.bigramIds && p.bigramIds.includes(b.id)).length;
+
+                        // Using a vertically stacked, flexible container to fit all 5 inline
                         return `
-                                <div style="display:inline-flex; flex-direction:column; background:rgba(255,255,255,0.05); border:1px solid var(--chart-panel-border); padding:6px 12px; border-radius:8px; margin-right:8px; margin-bottom:8px;">
-                                    <span style="font-size:13px; color:var(--text-primary); font-weight:500;">${b.bigram}</span>
-                                    <span style="font-size:10px; color:var(--text-secondary); margin-top:2px;">
-                                        Total occurrences: ${occurrences} • Share: ${share}%
-                                    </span>
+                                <div style="display:flex; flex:1; min-width:0; flex-direction:column; background:var(--chart-panel-bg); border:1px solid var(--chart-panel-border); padding:8px 10px; border-radius:8px;">
+                                    <span style="font-size:13px; color:var(--text-primary); font-weight:600; margin-bottom:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${b.bigram}">${b.bigram}</span>
+                                    <div style="font-size:10px; color:var(--text-secondary); display:flex; flex-direction:column; gap:2px;">
+                                        <span>Topic share: <span style="color:var(--text-primary);">${share}%</span></span>
+                                        <span>Papers: <span style="color:var(--text-primary);">${bigramPapersCount}</span></span>
+                                        <span>Total mentions: <span style="color:var(--text-primary);">${occurrences}</span></span>
+                                    </div>
                                 </div>
                             `;
                     }).join('');
@@ -5911,10 +6068,8 @@
             container.innerHTML = 'Loading trends...';
 
             try {
-                const idsIdx = `(${topBigrams.map(b => b.id).join(',')})`;
-                // Re-use logic: fetch bigram trends for these IDs
-                // Manually constructing fetching logic since helper is rigid
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/v_chart5_bigram_trends?select=*&bigram_id=in.${idsIdx}&limit=2000`, {
+                // Fetch canonical bigram trends by topic ID
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/v_chart5_bigram_trends_corrected?topic_id=eq.${topicId}&order=year.asc`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`
@@ -5925,57 +6080,336 @@
                 container.innerHTML = '';
 
                 if (!data || !data.length) {
-                    // Try querying with 'phrase' column if 'bigram' failed or is different structure
-                    // But actually it's likely just empty data for this range/IDs, or mapping issue.
                     // Fallback message as requested.
                     container.innerHTML = `
                             <div style="height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:var(--text-secondary);">
                                 <span style="font-size:13px; margin-bottom:4px;">No trend data available for these terms.</span>
-                                <span style="font-size:11px; opacity:0.7;">(Dataset 'v_chart5_bigram_trends' may be missing or empty for IDs ${topBigrams.map(b => b.id).join(',')})</span>
+                                <span style="font-size:11px; opacity:0.7;">(Dataset 'v_chart5_bigram_trends_corrected' may be missing or empty for Topic ${topicId})</span>
                             </div>
                          `;
                     return;
                 }
 
-                // Render with D3
-                const w = container.offsetWidth;
-                const h = container.offsetHeight;
-                const margin = { top: 20, right: 100, bottom: 30, left: 40 };
-                const svg = d3.select(container).append('svg').attr('width', w).attr('height', h);
+                const toggleContainer = document.getElementById('topic-trends-view-toggle');
+                let btnTrend = document.getElementById('btn-trend-view');
+                let btnSparse = document.getElementById('btn-sparse-view');
+                if (topicId == 2) {
+                    if (toggleContainer) toggleContainer.style.display = 'flex';
+                } else {
+                    if (toggleContainer) toggleContainer.style.display = 'none';
+                }
 
-                const x = d3.scaleLinear().domain([1980, 2025]).range([margin.left, w - margin.right]);
-                const y = d3.scaleLinear().domain([0, d3.max(data, d => d.normalized_frequency)]).nice().range([h - margin.bottom, margin.top]);
+                window.topic2ViewMode = window.topic2ViewMode || 'sparse';
 
-                // Axis
-                svg.append("g").attr("transform", `translate(0,${h - margin.bottom})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("d"))).attr("color", "#666");
-                svg.append("g").attr("transform", `translate(${margin.left},0)`).call(d3.axisLeft(y).ticks(5)).attr("color", "#666");
+                function drawChart() {
+                    container.innerHTML = '';
+                    const isSparse = (topicId == 2 && window.topic2ViewMode === 'sparse');
 
-                // Lines
-                const grouped = d3.group(data, d => d.bigram_id);
-                const colorScale = d3.scaleOrdinal(d3.schemeTableau10);
-
-                grouped.forEach((vals, bid) => {
-                    vals.sort((a, b) => a.year - b.year);
-                    const bName = topBigrams.find(b => b.id == bid)?.bigram || 'Unknown';
-                    const color = colorScale(bid);
-
-                    svg.append("path")
-                        .datum(vals)
-                        .attr("fill", "none")
-                        .attr("stroke", color)
-                        .attr("stroke-width", 2)
-                        .attr("d", d3.line().x(d => x(d.year)).y(d => y(d.normalized_frequency)));
-
-                    // Label
-                    if (vals.length) {
-                        const last = vals[vals.length - 1];
-                        svg.append("text")
-                            .attr("x", x(last.year) + 5).attr("y", y(last.normalized_frequency))
-                            .attr("fill", color)
-                            .style("font-size", "10px")
-                            .text(bName);
+                    const warningEl = document.getElementById('topic-sparse-warning');
+                    if (warningEl) {
+                        warningEl.style.display = isSparse ? 'block' : 'none';
                     }
-                });
+
+                    if (topicId == 2 && btnTrend && btnSparse) {
+                        if (window.topic2ViewMode === 'trend') {
+                            btnTrend.style.background = 'var(--bg-color)';
+                            btnTrend.style.color = 'var(--text-primary)';
+                            btnTrend.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+                            btnSparse.style.background = 'transparent';
+                            btnSparse.style.color = 'var(--text-secondary)';
+                            btnSparse.style.boxShadow = 'none';
+                        } else {
+                            btnSparse.style.background = 'var(--bg-color)';
+                            btnSparse.style.color = 'var(--text-primary)';
+                            btnSparse.style.boxShadow = '0 1px 2px rgba(0,0,0,0.2)';
+                            btnTrend.style.background = 'transparent';
+                            btnTrend.style.color = 'var(--text-secondary)';
+                            btnTrend.style.boxShadow = 'none';
+                        }
+                    }
+
+                    // Render with D3
+                    const w = container.offsetWidth;
+                    const h = container.offsetHeight;
+                    const margin = { top: 20, right: 40, bottom: isSparse ? 30 : 65, left: isSparse ? 140 : 40 };
+                    const svg = d3.select(container).append('svg').attr('width', w).attr('height', h);
+
+                    const x = d3.scaleLinear().domain([1980, 2025]).range([margin.left, w - margin.right]);
+
+                    let y, rScale;
+                    const maxPapers = d3.max(data, d => d.unique_papers_count) || 1;
+
+                    if (isSparse) {
+                        const rowOrder = topBigrams.map(b => b.bigram);
+                        y = d3.scalePoint().domain(rowOrder).range([margin.top + 10, h - margin.bottom - 10]).padding(0.5);
+                        rScale = (count) => {
+                            if (count <= 1) return 3.5;
+                            if (count >= 2 && count <= 3) return 7.5;
+                            if (count >= 4 && count <= 6) return 13;
+                            return 20; // local maximum
+                        };
+                    } else {
+                        y = d3.scaleLinear().domain([0, maxPapers]).nice().range([h - margin.bottom, margin.top]);
+                    }
+
+                    // Axis
+                    const xAxisTicks = d3.range(1980, 2026, 5);
+                    svg.append("g").attr("transform", `translate(0,${h - margin.bottom})`).call(d3.axisBottom(x).tickValues(xAxisTicks).tickFormat(d3.format("d"))).attr("color", "#666");
+
+                    if (isSparse) {
+                        svg.append("g")
+                            .attr("transform", `translate(${margin.left},0)`)
+                            .call(d3.axisLeft(y).tickSize(0).tickPadding(10))
+                            .attr("color", "#666")
+                            .selectAll('text')
+                            .style('font-size', '11px')
+                            .style('fill', 'var(--text-primary)')
+                            .style('font-weight', '500');
+
+                        // Subtle horizontal row guides
+                        svg.append("g").selectAll(".row-guide")
+                            .data(y.domain())
+                            .enter().append("line")
+                            .attr("class", "row-guide")
+                            .attr("x1", margin.left)
+                            .attr("x2", w - margin.right)
+                            .attr("y1", d => y(d))
+                            .attr("y2", d => y(d))
+                            .attr("stroke", "var(--chart-panel-border)")
+                            .style("opacity", 0.5);
+                    } else {
+                        svg.append("g").attr("transform", `translate(${margin.left},0)`).call(d3.axisLeft(y).ticks(5)).attr("color", "#666");
+                    }
+
+                    // Chart 5 Tooltip Element Preparation
+                    if (d3.select('#temporal-tooltip').empty()) {
+                        d3.select('body').append('div').attr('id', 'temporal-tooltip')
+                            .style('position', 'absolute')
+                            .style('background', 'var(--l-sidebar-bg)')
+                            .style('color', 'var(--text-primary)')
+                            .style('padding', '8px 12px')
+                            .style('border-radius', '4px')
+                            .style('border', '1px solid var(--l-border)')
+                            .style('box-shadow', '0 4px 12px rgba(0,0,0,0.15)')
+                            .style('font-size', '12px')
+                            .style('pointer-events', 'none')
+                            .style('z-index', '99999')
+                            .style('opacity', 0);
+                    }
+                    const tooltip = d3.select('#temporal-tooltip');
+
+                    // Lines
+                    const grouped = d3.group(data, d => d.bigram);
+                    const colorScale = d3.scaleOrdinal(d3.schemeTableau10)
+                        .domain(topBigrams.map(b => b.bigram));
+
+                    grouped.forEach((vals, bName) => {
+                        vals.sort((a, b) => a.year - b.year);
+                        const color = colorScale(bName);
+                        const safeClass = bName.replace(/\W/g, '_');
+
+                        if (isSparse) {
+                            // Timeline mode: only dots sized by paper count, strictly row mapped
+                            const nonZeroVals = vals.filter(d => d.unique_papers_count > 0);
+
+                            // Subtle glow backing for significant counts (4+ papers)
+                            svg.selectAll(`.sparse-glow-${safeClass}`)
+                                .data(nonZeroVals.filter(d => d.unique_papers_count >= 4))
+                                .enter().append("circle")
+                                .attr("class", `trend-line line-${safeClass}`)
+                                .attr("cx", d => x(d.year))
+                                .attr("cy", y(bName))
+                                .attr("r", d => rScale(d.unique_papers_count) + 5)
+                                .attr("fill", color)
+                                .style("opacity", 0.15)
+                                .style("pointer-events", "none");
+
+                            // Primary observation node
+                            svg.selectAll(`.sparse-dot-${safeClass}`)
+                                .data(nonZeroVals)
+                                .enter().append("circle")
+                                .attr("class", `trend-line line-${safeClass}`)
+                                .attr("cx", d => x(d.year))
+                                .attr("cy", y(bName))
+                                .attr("r", d => rScale(d.unique_papers_count))
+                                .attr("fill", color)
+                                .attr("stroke", "var(--chart-panel-bg)")
+                                .attr("stroke-width", 1.5)
+                                .style("opacity", 0.95);
+                        } else {
+                            // Dense mode: standard thick continuous line
+                            svg.append("path")
+                                .datum(vals)
+                                .attr("class", `trend-line line-${safeClass}`)
+                                .attr("fill", "none")
+                                .attr("stroke", color)
+                                .attr("stroke-width", 2)
+                                .attr("d", d3.line().x(d => x(d.year)).y(d => y(d.unique_papers_count)));
+                        }
+                    });
+
+                    // Group data by year for the vertical hover logic
+                    const dataByYear = d3.group(data, d => d.year);
+
+                    // Add vertical guide line
+                    const verticalLine = svg.append('line')
+                        .attr('stroke', 'var(--text-secondary)')
+                        .attr('stroke-width', 1)
+                        .attr('stroke-dasharray', '4,4')
+                        .attr('fill', 'none')
+                        .attr('y1', margin.top)
+                        .attr('y2', h - margin.bottom)
+                        .style('opacity', 0)
+                        .style('pointer-events', 'none');
+
+                    // Invisible overlay to track mouse horizontally
+                    svg.append('rect')
+                        .attr('width', w)
+                        .attr('height', h)
+                        .style('fill', 'transparent')
+                        .style('pointer-events', 'all')
+                        .on('mouseout', () => {
+                            verticalLine.style('opacity', 0);
+                            tooltip.style('opacity', 0);
+                        })
+                        .on('mouseover', () => {
+                            verticalLine.style('opacity', 1);
+                            tooltip.style('opacity', 1);
+                        })
+                        .on('mousemove', (event) => {
+                            const [mX] = d3.pointer(event);
+
+                            // Bound the mouse to the chart data area
+                            if (mX < margin.left || mX > w - margin.right) {
+                                verticalLine.style('opacity', 0);
+                                tooltip.style('opacity', 0);
+                                return;
+                            }
+
+                            // Nearest year
+                            const yearFloat = x.invert(mX);
+                            const closestYear = Math.round(yearFloat);
+                            const recordsMap = dataByYear.get(closestYear) || [];
+
+                            // Map existing records to quickly find them
+                            const existingRecords = new Map(recordsMap.map(r => [r.bigram, r]));
+
+                            // Zero-fill based on the canonical topBigrams list
+                            const filledRecords = topBigrams.map(b => {
+                                if (existingRecords.has(b.bigram)) {
+                                    return existingRecords.get(b.bigram);
+                                }
+                                // Zero-fill
+                                return { bigram: b.bigram, unique_papers_count: 0, year: closestYear };
+                            });
+
+                            // Align the line perfectly to the tick
+                            const exactX = x(closestYear);
+                            verticalLine
+                                .attr('x1', exactX)
+                                .attr('x2', exactX)
+                                .style('opacity', 0.5);
+
+                            // Maintain tooltip items in canonical topBigrams order (no numerical sorting)
+                            // Do NOT sort by: filledRecords.sort((a, b) => b.unique_papers_count - a.unique_papers_count);
+
+                            let tHtml = `
+                            <div style="font-weight:700; color:var(--text-primary); border-bottom:1px solid var(--chart-panel-border); padding-bottom:6px; margin-bottom:6px; font-size:13px;">
+                                Year: ${closestYear}
+                            </div>
+                        `;
+
+                            filledRecords.forEach(r => {
+                                const c = colorScale(r.bigram);
+                                tHtml += `
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; font-size:12px; gap:16px;">
+                                    <div style="display:flex; align-items:center;">
+                                        <span style="display:inline-block; width:10px; height:10px; background:${c}; margin-right:8px; border-radius:2px;"></span>
+                                        <span style="font-weight:600; color:var(--text-primary);">${r.bigram}</span>
+                                    </div>
+                                    <div style="color:var(--text-secondary); text-align:right;">
+                                        Papers: <span style="font-weight:700; color:var(--text-primary);">${r.unique_papers_count}</span>
+                                    </div>
+                                </div>
+                            `;
+                            });
+
+                            // Fixed position tooltip on the left side of the chart area
+                            const box = container.getBoundingClientRect();
+                            const fixedX = box.left + window.scrollX + margin.left + 20;
+                            const fixedY = box.top + window.scrollY + margin.top + 10;
+
+                            tooltip.style('opacity', 1)
+                                .html(tHtml)
+                                .style('left', fixedX + 'px')
+                                .style('top', fixedY + 'px');
+                        });
+
+                    // Horizontal Legend below the X-axis (Only for dense mode; sparse mode uses direct row labeling)
+                    if (!isSparse) {
+                        const legend = svg.append("g");
+                        let currentLegendX = 0;
+
+                        Array.from(topBigrams).forEach((b, i) => {
+                            const bName = b.bigram;
+                            const color = colorScale(bName);
+                            const safeClass = bName.replace(/\W/g, '_');
+
+                            const legendRow = legend.append("g")
+                                .attr("transform", `translate(${currentLegendX}, 0)`)
+                                .style("cursor", "pointer")
+                                .on("mouseover", () => {
+                                    d3.selectAll('.trend-line').style("opacity", 0.2);
+                                    d3.selectAll(`.line-${safeClass}`).style("opacity", 1).attr("stroke-width", 3);
+                                })
+                                .on("mouseout", () => {
+                                    d3.selectAll('.trend-line').style("opacity", 1).attr("stroke-width", 2);
+                                });
+
+                            legendRow.append("rect")
+                                .attr("width", 10).attr("height", 10)
+                                .attr("fill", color)
+                                .attr("rx", 2);
+
+                            const textNode = legendRow.append("text")
+                                .attr("x", 16).attr("y", 9)
+                                .attr("fill", "var(--text-primary)")
+                                .style("font-size", "11px")
+                                .style("font-weight", "500")
+                                .text(bName);
+
+                            // Dynamically calculate width of this legend item for tight packing
+                            try {
+                                const textWidth = textNode.node().getComputedTextLength();
+                                currentLegendX += 16 + textWidth + 24; // 16 for box+space, 24 for padding between items
+                            } catch (e) {
+                                currentLegendX += 110; // Failsafe width
+                            }
+                        });
+
+                        // Center the entire legend row horizontally below the chart
+                        const totalLegendWidth = currentLegendX - 24; // Remove trailing space from last item
+                        legend.attr("transform", `translate(${(w - totalLegendWidth) / 2}, ${h - margin.bottom + 42})`);
+                    }
+
+                } // end drawChart
+
+                if (topicId == 2 && btnTrend && btnSparse) {
+                    // clone nodes to remove existing listeners (in case of re-renders)
+                    btnTrend.replaceWith(btnTrend.cloneNode(true));
+                    btnSparse.replaceWith(btnSparse.cloneNode(true));
+                    btnTrend = document.getElementById('btn-trend-view');
+                    btnSparse = document.getElementById('btn-sparse-view');
+
+                    btnTrend.addEventListener('click', () => {
+                        if (window.topic2ViewMode !== 'trend') { window.topic2ViewMode = 'trend'; drawChart(); }
+                    });
+                    btnSparse.addEventListener('click', () => {
+                        if (window.topic2ViewMode !== 'sparse') { window.topic2ViewMode = 'sparse'; drawChart(); }
+                    });
+                }
+
+                drawChart();
 
             } catch (e) {
                 console.error(e);
@@ -6026,12 +6460,14 @@
             const tView = document.getElementById('view-temporal');
             const libView = document.getElementById('view-library');
             const topicView = document.getElementById('view-topic');
+            const clusteredContainer = document.getElementById('clusteredViewContainer');
 
             if (containerEl) containerEl.style.display = 'none';
             if (canvasEl) canvasEl.style.display = 'none';
             if (tView) tView.style.display = 'none';
             if (libView) libView.style.display = 'none';
             if (topicView) topicView.style.display = 'none';
+            if (clusteredContainer) clusteredContainer.style.display = 'none';
         };
 
         // Global Switch View Function
@@ -6110,7 +6546,18 @@
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight;
                 }
-                if (canvasEl) canvasEl.style.display = 'block';
+
+                const layoutSelect = document.getElementById('macroLayoutSelect');
+                const isClustered = layoutSelect && layoutSelect.value === 'clustered';
+                const clusteredContainer = document.getElementById('clusteredViewContainer');
+
+                if (isClustered) {
+                    if (canvasEl) canvasEl.style.display = 'none';
+                    if (clusteredContainer) clusteredContainer.style.display = 'block';
+                } else {
+                    if (canvasEl) canvasEl.style.display = 'block';
+                    if (clusteredContainer) clusteredContainer.style.display = 'none';
+                }
             }
 
             // 3) VIEW LAYOUT AUDIT

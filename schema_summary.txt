@@ -1,0 +1,197 @@
+TABLE/VIEW: papers
+  - paper_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - title (string text) : 
+  - abstract (string text) : 
+  - authors (string text) : 
+  - journal (string character varying) : 
+  - year (integer integer) : 
+
+TABLE/VIEW: v_papers_per_year_v2
+  - year (integer integer) : 
+  - papers_count (integer integer) : 
+
+TABLE/VIEW: v_topic_papers_by_year
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_name (string character varying) : 
+  - year (integer integer) : 
+  - papers_count (integer integer) : 
+
+TABLE/VIEW: v_papers_unique
+  - id (integer integer) : Note: This is a Primary Key.<pk/>
+  - title (string text) : 
+  - abstract (string text) : 
+  - authors (string text) : 
+  - journal (string character varying) : 
+  - year (integer integer) : 
+
+TABLE/VIEW: v_topic_trends_last10_vs_prev10
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_name (string character varying) : 
+  - prev_10y_count (integer integer) : 
+  - last_10y_count (integer integer) : 
+  - delta_count (integer integer) : 
+  - pct_change (number numeric) : 
+  - trend_direction (string text) : 
+
+TABLE/VIEW: v_top_bigrams_by_topic
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_name (string character varying) : 
+  - bigram (string character varying) : 
+  - frequency_sum (integer integer) : 
+  - normalized_frequency (number numeric) : 
+  - rank (integer bigint) : 
+
+TABLE/VIEW: v_topic_prevalence_top8_other_by_year
+  - year (integer integer) : 
+  - series_key (string text) : 
+  - series_name (string character varying) : 
+  - papers_count (integer integer) : 
+
+TABLE/VIEW: v_topics_ranked
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_name (string character varying) : 
+  - definition (string text) : 
+  - topic_weight (number numeric) : 
+  - topic_label (string character varying) : 
+
+TABLE/VIEW: v_topic_prevalence_top8_other_by_year_v2
+  - year (integer integer) : 
+  - series_key (string text) : 
+  - series_rank (integer integer) : 
+  - series_name (string character varying) : 
+  - papers_count (integer integer) : 
+
+TABLE/VIEW: topics
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_name (string character varying) : 
+  - definition (string text) : 
+
+TABLE/VIEW: v_chart4_topic_trends
+  - year (integer integer) : 
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_label (string text) : 
+  - papers_count (integer bigint) : 
+  - series_color (string text) : 
+
+TABLE/VIEW: v_topic_trends_10yr_v2
+  - direction (string text) : 
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_name (string character varying) : 
+  - start_year (integer integer) : 
+  - end_year (integer integer) : 
+  - share_change_pp (number numeric) : 
+  - first_decade_share (number numeric) : 
+  - last_decade_share (number numeric) : 
+
+TABLE/VIEW: v_papers_cumulative
+  - year (integer integer) : 
+  - papers_count (integer integer) : 
+  - papers_cumulative (integer integer) : 
+
+TABLE/VIEW: v_topic_prevalence_top8_other_by_year_v3
+  - year (integer integer) : 
+  - series_key (string text) : 
+  - series_rank (integer integer) : 
+  - series_name (string text) : 
+  - papers_count (integer integer) : 
+  - series_color (string text) : 
+
+TABLE/VIEW: topic_weights
+  - id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_id (integer integer) : Note: This is a Foreign Key to `topics.topic_id`.<fk table='topics' column='topic_id'/>
+  - topic_label (string character varying) : 
+  - topic_weight (number numeric) : 
+  - label (string character varying) : 
+
+TABLE/VIEW: v_topic_prevalence_top8_other_by_year_v4
+  - year (integer integer) : 
+  - series_key (string text) : 
+  - series_rank (integer integer) : 
+  - series_name (string text) : 
+  - papers_count (integer integer) : 
+  - series_color (string text) : 
+
+TABLE/VIEW: v_topic_prevalence_top8_other_by_year_v5
+  - year (integer integer) : 
+  - series_key (string text) : 
+  - series_rank (integer integer) : 
+  - series_name (string text) : 
+  - papers_count (integer integer) : 
+  - series_color (string text) : 
+
+TABLE/VIEW: v_topic_prevalence_top8_other_by_year_v6
+  - year (integer integer) : 
+  - series_key (string text) : 
+  - series_rank (integer integer) : 
+  - series_name (string text) : 
+  - papers_count (integer integer) : 
+  - series_color (string text) : 
+
+TABLE/VIEW: topic_paper_links
+  - id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_id (integer integer) : Note: This is a Foreign Key to `topics.topic_id`.<fk table='topics' column='topic_id'/>
+  - paper_id (integer integer) : Note: This is a Foreign Key to `papers.paper_id`.<fk table='papers' column='paper_id'/>
+  - bigram (string character varying) : 
+  - pmi (number numeric) : 
+  - frequency (integer integer) : 
+
+TABLE/VIEW: bigrams
+  - id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_id (integer integer) : Note: This is a Foreign Key to `topics.topic_id`.<fk table='topics' column='topic_id'/>
+  - bigram (string character varying) : 
+  - frequency_sum (integer integer) : 
+  - normalized_frequency (number numeric) : 
+
+TABLE/VIEW: v_chart1_corpus_growth
+  - year (integer integer) : 
+  - papers_count (integer integer) : 
+
+TABLE/VIEW: coverage_summary
+  - id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topics_count (integer integer) : 
+  - bigrams_total (integer integer) : 
+  - bigrams_unique (integer integer) : 
+  - papers_total (integer integer) : 
+  - unique_papers_connected (integer integer) : 
+  - topic_paper_links_count (integer integer) : 
+  - avg_topics_per_paper (number numeric) : 
+  - avg_papers_per_bigram (number numeric) : 
+  - created_at (string timestamp with time zone) : 
+
+TABLE/VIEW: v_topic_trends_share_last10_vs_prev10
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_name (string character varying) : 
+  - prev_10y_count (integer integer) : 
+  - last_10y_count (integer integer) : 
+  - prev_10y_share_pct (number numeric) : 
+  - last_10y_share_pct (number numeric) : 
+  - share_delta_pp (number numeric) : 
+  - trend_direction (string text) : 
+
+TABLE/VIEW: v_topic_totals
+  - topic_id (integer integer) : Note: This is a Foreign Key to `topics.topic_id`.<fk table='topics' column='topic_id'/>
+  - papers_total (integer integer) : 
+
+TABLE/VIEW: v_chart5_bigram_trends
+  - year (integer integer) : 
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/> This is a Foreign Key to `topics.topic_id`.<fk table='topics' column='topic_id'/>
+  - topic_label (string text) : 
+  - bigram (string character varying) : 
+  - bigram_rank (integer integer) : 
+  - papers_count (integer integer) : 
+
+TABLE/VIEW: v_papers_per_year
+  - year (integer integer) : 
+  - papers_count (integer integer) : 
+
+TABLE/VIEW: v_papers_by_topic
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/>
+  - topic_name (string character varying) : 
+  - paper_count (integer bigint) : 
+
+TABLE/VIEW: ui_topic_colors
+  - topic_id (integer integer) : Note: This is a Primary Key.<pk/> This is a Foreign Key to `topics.topic_id`.<fk table='topics' column='topic_id'/>
+  - color_hex (string text) : 
+  - color_family (string text) : 
+  - notes (string text) : 
+  - updated_at (string timestamp with time zone) : 
