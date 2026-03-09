@@ -1,29 +1,21 @@
 
 
-# Add Temporary Audit Table Below Corpus Growth Chart
+# Fix: Add missing `fetchAndRenderBigramTrends()` call
 
-## What and where
+## Root cause
 
-Insert a compact HTML table directly after the `corpus-growth-chart` div (line 1484), inside the same `stitch-card`. The table will be populated by the same `fetchAndRenderCorpusGrowth()` function using the same `fullData` array.
+The function `fetchAndRenderBigramTrends()` is fully implemented (lines 5316-5600+) but is never invoked. The initialization code around lines 4395-4419 calls `fetchAndRenderCorpusGrowth()` and `fetchAndRenderTopicTrends()` but omits `fetchAndRenderBigramTrends()`.
 
-## Changes
+## Fix
 
-### 1. HTML: Add audit table container (after line 1484)
+Add `fetchAndRenderBigramTrends();` to the temporal view initialization block, alongside the other chart calls. Two locations need it:
 
-Add a `<div id="corpus-growth-audit">` placeholder right after the chart div, before the closing `</div>` of the card (line 1485).
+1. **Line 4397** (after `fetchAndRenderTopicTrends();`) — the primary temporal data load path
+2. **Line 4416** (after `fetchAndRenderCorpusGrowth();`) — the fallback/independent load path
 
-### 2. JS: Render audit table from same data (in `fetchAndRenderCorpusGrowth`, after line 4466)
+This is a one-line addition in each location. No other changes needed — the dropdown, data fetching, and chart rendering logic are already correctly implemented.
 
-After `renderCorpusChartD3(container, fullData)`, build and inject a compact HTML table into `#corpus-growth-audit` using the same `fullData` array:
-- Two columns: Year | Papers
-- Final row: **Total** | sum
-- Compact styling: small font, monospace numbers, border-collapse, themed colors via CSS variables
-- Horizontal scroll wrapper if needed
-- Inline styles using existing CSS variables (`--text-primary`, `--text-secondary`, `--input-bg`, `--input-border`)
+## Files changed
 
-### 3. No other changes
-
-- Chart rendering untouched
-- No other sections modified
-- Temporary — clearly labeled as "Audit Table"
+- `public/artefact/index.html` — add two calls to `fetchAndRenderBigramTrends()`
 
