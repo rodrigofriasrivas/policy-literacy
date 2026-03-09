@@ -561,6 +561,79 @@ export type Database = {
           },
         ]
       }
+      v_chart5_bigram_trends_corrected: {
+        Row: {
+          bigram: string | null
+          topic_id: number | null
+          unique_papers_count: number | null
+          year: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_chart4_topic_trends"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_papers_by_topic"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_top_bigrams_by_topic"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_papers_by_year"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_10yr_v2"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topic_trends_share_last10_vs_prev10"
+            referencedColumns: ["topic_id"]
+          },
+          {
+            foreignKeyName: "topic_paper_links_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "v_topics_ranked"
+            referencedColumns: ["topic_id"]
+          },
+        ]
+      }
       v_papers_by_topic: {
         Row: {
           paper_count: number | null
