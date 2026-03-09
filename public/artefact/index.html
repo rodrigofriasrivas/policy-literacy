@@ -4415,8 +4415,7 @@
 
             // Load other charts independently
             fetchAndRenderCorpusGrowth(); // Now uses papers table directly
-            // fetchAndRenderEmergence();    // Skipped for now
-            // fetchAndRenderTopicTrends();  // Skipped for now
+            fetchAndRenderBigramTrends(); // Uses v_chart5_bigram_trends_corrected
             temporalDataLoaded = true;
         }
 
