@@ -1482,6 +1482,7 @@
                                 style="height: 200px; display:flex; align-items:center; justify-content:center; background:var(--input-bg); color:var(--text-secondary); border-radius:4px;">
                                 [Corpus Growth Bar Chart Placeholder]
                             </div>
+                            <div id="corpus-growth-audit"></div>
                         </div>
 
                         <!-- Card 2: Topic Prevalence -->
@@ -4464,6 +4465,33 @@
                 console.groupEnd();
 
                 renderCorpusChartD3(container, fullData);
+
+                // --- Temporary Audit Table ---
+                const auditEl = document.getElementById('corpus-growth-audit');
+                if (auditEl) {
+                    const auditTotal = fullData.reduce((s, d) => s + d.count, 0);
+                    const rows = fullData.map(d =>
+                        `<tr><td style="padding:2px 12px 2px 6px; font-variant-numeric:tabular-nums;">${d.year}</td><td style="padding:2px 6px; text-align:right; font-variant-numeric:tabular-nums;">${d.count.toLocaleString()}</td></tr>`
+                    ).join('');
+                    auditEl.innerHTML = `
+                        <details style="margin-top:12px;">
+                            <summary style="cursor:pointer; font-size:11px; color:var(--text-secondary); letter-spacing:0.03em; text-transform:uppercase;">Audit Table</summary>
+                            <div style="max-height:320px; overflow-y:auto; margin-top:6px; border:1px solid var(--input-border); border-radius:4px; background:var(--input-bg);">
+                                <table style="width:100%; border-collapse:collapse; font-size:12px; font-family:monospace; color:var(--text-primary);">
+                                    <thead><tr style="border-bottom:1px solid var(--input-border); color:var(--text-secondary); font-size:11px; text-transform:uppercase; letter-spacing:0.04em;">
+                                        <th style="padding:4px 12px 4px 6px; text-align:left; font-weight:600;">Year</th>
+                                        <th style="padding:4px 6px; text-align:right; font-weight:600;">Papers</th>
+                                    </tr></thead>
+                                    <tbody>${rows}
+                                        <tr style="border-top:2px solid var(--input-border); font-weight:700;">
+                                            <td style="padding:4px 12px 4px 6px;">Total</td>
+                                            <td style="padding:4px 6px; text-align:right;">${auditTotal.toLocaleString()}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>`;
+                }
 
             } catch (e) {
                 console.error('Corpus Growth Error:', e);
