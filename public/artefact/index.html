@@ -4395,6 +4395,7 @@
                 fetchAndRenderCorpusGrowth(); // Uses v_corpus_growth_by_year_v1
                 // fetchAndRenderEmergence(); // Removed
                 fetchAndRenderTopicTrends();  // Uses v_chart4_topic_trends
+                fetchAndRenderBigramTrends(); // Uses v_chart5_bigram_trends_corrected
                 temporalDataLoaded = true;
 
                 // Init Tooltip if missing
@@ -4414,8 +4415,7 @@
 
             // Load other charts independently
             fetchAndRenderCorpusGrowth(); // Now uses papers table directly
-            // fetchAndRenderEmergence();    // Skipped for now
-            // fetchAndRenderTopicTrends();  // Skipped for now
+            fetchAndRenderBigramTrends(); // Uses v_chart5_bigram_trends_corrected
             temporalDataLoaded = true;
         }
 
