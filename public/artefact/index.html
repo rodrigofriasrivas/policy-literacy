@@ -1505,16 +1505,7 @@
                             </div>
                         </div>
 
-                        <!-- Card 3: Emerging vs Declining (Placeholder) -->
-                        <div class="stitch-card">
-                            <div class="stitch-card-title">Emerging vs Declining Topics</div>
-                            <div class="stitch-card-subtitle">Comparative shift in topic share between the first and
-                                last decade of the dataset.</div>
-                            <div id="emerging-declining-container"
-                                style="height: auto; min-height: fit-content; overflow: visible; display:flex; align-items:flex-start; justify-content:center; background:transparent; color:var(--text-secondary); border-radius:4px; gap: 16px;">
-                                [Emerging/Declining Table Placeholder]
-                            </div>
-                        </div>
+                        <!-- Card 3: Removed (Emerging vs Declining) -->
 
                         <!-- Card 4: Topic Trends (All Topics) -->
                         <div class="stitch-card">
@@ -4402,7 +4393,7 @@
                 window.temporalData = data; // Store globally for modal
                 renderTemporalChart(data);
                 fetchAndRenderCorpusGrowth(); // Uses v_corpus_growth_by_year_v1
-                fetchAndRenderEmergence();    // Uses v_topic_trend_10y_share_change_v1
+                // fetchAndRenderEmergence(); // Removed
                 fetchAndRenderTopicTrends();  // Uses v_chart4_topic_trends
                 temporalDataLoaded = true;
 
@@ -4574,136 +4565,7 @@
             svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers');
         }
 
-        async function fetchAndRenderEmergence() {
-            const container = document.getElementById('emerging-declining-container');
-            if (!container) return;
-            container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading trends...</div>';
-            try {
-                // Use V2 with corrected 1980-89 vs 2016-25 timeframe
-                // URL: Request ONLY existing columns (direction, topic_id, topic_name, share_change_pp, first_decade_share, last_decade_share)
-                // Does NOT request 'series_color' as it is not in the view.
-                const url = `${SUPABASE_URL}/rest/v1/v_topic_trends_10yr_v2?select=direction,topic_id,topic_name,share_change_pp,first_decade_share,last_decade_share&limit=100`;
-                console.log('Fetching Chart 3 URL:', url);
-
-                const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-
-                if (!response.ok) {
-                    const errBody = await response.text();
-                    console.error('Emergence Fetch Failed:', response.status, errBody);
-                    throw new Error(`HTTP ${response.status}: ${errBody}`);
-                }
-
-                const data = await response.json();
-
-                if (data && data.length > 0) {
-                    console.log('Chart 3 Data Sample:', data[0]);
-                } else {
-                    console.warn('Chart 3 Data is empty');
-                }
-
-                renderEmergenceTables(data);
-            } catch (e) {
-                console.warn('Emergence Error:', e);
-                container.innerHTML = `<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">
-                        Trend data unavailable.<br>
-                        <span style="font-size:10px; opacity:0.7;">${e.message}</span>
-                    </div>`;
-            }
-        }
-
-        function renderEmergenceTables(data) {
-            const container = document.getElementById('emerging-declining-container');
-            if (!container) return;
-
-            // Clear any inline background on the main container to avoid double-boxing
-            container.style.background = 'transparent';
-
-            // Ensure numeric fields are parsed safely
-            data.forEach(d => {
-                d.share_change_pp = parseFloat(d.share_change_pp) || 0;
-                d.first_decade_share = parseFloat(d.first_decade_share) || 0;
-                d.last_decade_share = parseFloat(d.last_decade_share) || 0;
-            });
-
-            // Sort by magnitude of change (descending)
-            data.sort((a, b) => Math.abs(b.share_change_pp) - Math.abs(a.share_change_pp));
-
-            const rising = data.filter(d => d.direction === 'rising').slice(0, 10);
-            const declining = data.filter(d => d.direction === 'declining').slice(0, 10);
-
-            function makeTable(title, rows, isRising) {
-                // Surface styling for contrast
-                // Using var(--chart-panel-bg) gives a solid card look (Light surface in Light, Darker in Dark)
-                // Adding a border for definition
-                const surfaceStyle = `
-                        flex:1; 
-                        min-width:320px; 
-                        padding: 20px; 
-                        background: var(--chart-panel-bg); 
-                        border: 1px solid var(--chart-panel-border); 
-                        border-radius: 12px;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-                    `;
-
-                let html = `<div style="${surfaceStyle}">
-                        <div style="font-size:13px; font-weight:800; margin-bottom:6px; color:var(--text-primary); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
-                            ${isRising ? '<span style="color:#4ECDC4">▲</span>' : '<span style="color:#FF6B6B">▼</span>'} ${title}
-                        </div>
-                        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:16px; border-bottom:1px solid var(--chart-row-border); padding-bottom:12px; font-weight:500;">
-                            Top 10 by share change (1980s vs 2020s)
-                        </div>
-                        <table style="width:100%; border-collapse:collapse; font-size:13px; background: transparent;">
-                            <thead>
-                                <tr style="color:var(--text-secondary); text-align:left; border-bottom:1px solid var(--chart-row-border);">
-                                    <th style="padding:8px 4px; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8;">Topic</th>
-                                    <th style="padding:8px 4px; text-align:right; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; width:96px; opacity:0.8;">Change</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-
-                rows.forEach(r => {
-                    const val = r.share_change_pp > 0 ? '+' + r.share_change_pp.toFixed(1) : r.share_change_pp.toFixed(1);
-                    const col = isRising ? '#4ECDC4' : '#FF6B6B';
-                    const rowColor = r.series_color || '#999';
-
-                    // Naming convention: Topic <id>: <name>
-                    const displayName = `Topic ${r.topic_id}: ${r.topic_name}`;
-
-                    // Escape single quotes (safely)
-                    const safeDisplayName = displayName.replace(/'/g, "&apos;");
-
-                    // Tooltip
-                    const tooltipText = `<strong>${safeDisplayName}</strong><br>1980s share: ${r.first_decade_share.toFixed(1)}%<br>Latest share: ${r.last_decade_share.toFixed(1)}%<br>Change: ${val}pp`;
-
-                    html += `<tr style="border-bottom:1px solid var(--chart-row-border); cursor:default; transition: all 0.2s;" 
-                                     onmouseover="const tt=document.getElementById('temporal-tooltip'); tt.style.opacity=1; tt.innerHTML='${tooltipText}'; tt.style.left=(event.pageX+10)+'px'; tt.style.top=(event.pageY-20)+'px'; this.style.background='var(--chart-row-hover)';" 
-                                     onmouseout="document.getElementById('temporal-tooltip').style.opacity=0; this.style.background='transparent';">
-                            <td style="padding:8px 4px; display:flex; align-items:center; gap:8px;">
-                                <div style="width:6px; height:6px; border-radius:50%; background:${rowColor}; flex-shrink:0;"></div>
-                                <span style="color:var(--text-primary); font-weight:500; font-variant-numeric: tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px;">${displayName}</span>
-                            </td>
-                            <td style="padding:8px 4px; text-align:right; color:${col}; font-weight:600; font-variant-numeric: tabular-nums; width:96px;">${val}pp</td>
-                        </tr>`;
-                });
-                html += `</tbody></table></div>`;
-                return html;
-            }
-
-            container.style.display = 'flex';
-            container.style.flexWrap = 'wrap';
-            // Increase gap to accommodate the card look
-            container.style.gap = '24px';
-            container.style.justifyContent = 'space-between';
-            container.style.alignItems = 'flex-start';
-
-            container.innerHTML = '';
-
-            // Rising Panel
-            container.innerHTML += makeTable('Rising', rising, true);
-
-            // Declining Panel
-            container.innerHTML += makeTable('Declining', declining, false);
-        }
+        // fetchAndRenderEmergence — removed
 
         function renderTemporalChart(data, containerId = 'topic-prevalence-chart', legendId = 'topic-prevalence-legend', customHeight = null) {
             const container = document.getElementById(containerId);
@@ -5450,7 +5312,7 @@
             }
         }
 
-        // Chart 5: Bigram Trends (Single Selected Topic)
+        // Chart 5: Bigram Trends (Single Selected Topic) — paper-based
         async function fetchAndRenderBigramTrends() {
             const container = document.getElementById('bigram-trends-chart');
             const selectorContainer = document.getElementById('chart5-topic-selector');
@@ -5458,62 +5320,62 @@
 
             if (!container || !selectorContainer) return;
 
-            // 1. Fetch distinct topics for dropdown
+            // 1. Fetch topics using correct schema
             let topics = [];
             try {
-                const tUrl = `${SUPABASE_URL}/rest/v1/topics?select=id,label,color&order=id.asc`;
+                const tUrl = `${SUPABASE_URL}/rest/v1/topics?select=topic_id,topic_name&order=topic_id.asc`;
                 const tRes = await fetch(tUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                 if (tRes.ok) topics = await tRes.json();
             } catch (e) { console.warn("Failed to load topics for Chart 5", e); }
 
-            // --- Render Dropdown ---
-            // State
-            let currentTopicId = topics.length > 0 ? topics[0].id : 1;
+            // State: no topic selected initially
+            let currentTopicId = null;
 
             function renderDropdown() {
                 if (!topics.length) {
-                    selectorContainer.innerHTML = 'No topics found.';
+                    selectorContainer.innerHTML = '<span style="font-size:11px;color:var(--text-secondary);">No topics found.</span>';
                     return;
                 }
 
-                const currentTopic = topics.find(t => t.id === currentTopicId) || topics[0];
-                const cleanLabel = (currentTopic.label || '').replace(/^Topic \d+:\s*/i, '').trim();
-                const displayLabel = `Topic ${currentTopic.id}: ${cleanLabel}`;
+                const currentTopic = currentTopicId != null ? topics.find(t => t.topic_id === currentTopicId) : null;
+                const displayLabel = currentTopic
+                    ? `Topic ${currentTopic.topic_id}: ${currentTopic.topic_name}`
+                    : 'Select a topic…';
 
                 selectorContainer.innerHTML = `
-                        <div id="c5-dropdown-trigger" style="
-                            border: 1px solid var(--border-color, #ccc); 
-                            border-radius: 6px; 
-                            padding: 6px 12px; 
-                            background: var(--bg-card, #fff); 
-                            cursor: pointer; 
-                            font-size: 13px;
-                            color: var(--text-primary, #333);
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                        ">
-                            <span id="c5-dropdown-label" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px;">${displayLabel}</span>
-                            <span style="font-size:10px; color:var(--text-secondary);">▼</span>
-                        </div>
-                        <div id="c5-dropdown-menu" style="
-                            display: none;
-                            position: absolute;
-                            top: 100%;
-                            right: 0;
-                            width: 280px; 
-                            max-height: 300px;
-                            overflow-y: auto;
-                            background: var(--bg-card, #fff);
-                            border: 1px solid var(--border-color, #ccc);
-                            border-radius: 6px;
-                            z-index: 1000;
-                            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
-                            margin-top: 4px;
-                        ">
-                             <div id="c5-options-list"></div>
-                        </div>
-                    `;
+                    <div id="c5-dropdown-trigger" style="
+                        border: 1px solid var(--border-color, #ccc); 
+                        border-radius: 6px; 
+                        padding: 6px 12px; 
+                        background: var(--bg-card, #fff); 
+                        cursor: pointer; 
+                        font-size: 13px;
+                        color: var(--text-primary, #333);
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                    ">
+                        <span id="c5-dropdown-label" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px;">${displayLabel}</span>
+                        <span style="font-size:10px; color:var(--text-secondary);">▼</span>
+                    </div>
+                    <div id="c5-dropdown-menu" style="
+                        display: none;
+                        position: absolute;
+                        top: 100%;
+                        right: 0;
+                        width: 280px; 
+                        max-height: 300px;
+                        overflow-y: auto;
+                        background: var(--bg-card, #fff);
+                        border: 1px solid var(--border-color, #ccc);
+                        border-radius: 6px;
+                        z-index: 1000;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+                        margin-top: 4px;
+                    ">
+                         <div id="c5-options-list"></div>
+                    </div>
+                `;
 
                 const trigger = document.getElementById('c5-dropdown-trigger');
                 const menu = document.getElementById('c5-dropdown-menu');
@@ -5523,7 +5385,6 @@
                     e.stopPropagation();
                     menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
                 };
-
                 document.addEventListener('click', (e) => {
                     if (selectorContainer && !selectorContainer.contains(e.target)) menu.style.display = 'none';
                 });
@@ -5531,43 +5392,42 @@
 
                 topics.forEach(t => {
                     const opt = document.createElement('div');
-                    const l = (t.label || '').replace(/^Topic \d+:\s*/i, '').trim();
-                    opt.textContent = `Topic ${t.id}: ${l}`;
+                    opt.textContent = `Topic ${t.topic_id}: ${t.topic_name}`;
                     opt.style.cssText = `
-                            padding: 8px 12px;
-                            font-size: 12px;
-                            color: var(--text-secondary);
-                            cursor: pointer;
-                            border-bottom: 1px solid var(--border-color, #eee);
-                            transition: background 0.1s;
-                        `;
-                    if (t.id === currentTopicId) {
+                        padding: 8px 12px;
+                        font-size: 12px;
+                        color: var(--text-secondary);
+                        cursor: pointer;
+                        border-bottom: 1px solid var(--border-color, #eee);
+                        transition: background 0.1s;
+                    `;
+                    if (t.topic_id === currentTopicId) {
                         opt.style.color = 'var(--accent-color)';
                         opt.style.fontWeight = 'bold';
                     }
-
                     opt.onmouseover = () => { opt.style.background = 'var(--bg-hover, #f5f5f5)'; };
                     opt.onmouseout = () => { opt.style.background = 'transparent'; };
                     opt.onclick = () => {
-                        currentTopicId = t.id;
+                        currentTopicId = t.topic_id;
                         menu.style.display = 'none';
-                        renderDropdown(); // Update label
-                        loadChartData(currentTopicId); // Fetch new data
+                        renderDropdown();
+                        loadChartData(currentTopicId);
                     };
                     list.appendChild(opt);
                 });
             }
 
             renderDropdown();
-            if (topics.length > 0) loadChartData(topics[0].id);
-
+            // Show placeholder — no auto-load
+            container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);font-size:13px;padding:40px;text-align:center;">Choose a topic to see how its five main bigrams evolve over time.</div>';
 
             async function loadChartData(topicId) {
                 container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);">Loading bigrams...</div>';
                 if (legendContainer) legendContainer.innerHTML = '';
 
                 try {
-                    const url = `${SUPABASE_URL}/rest/v1/v_chart5_bigram_trends?topic_id=eq.${topicId}&order=year.asc,bigram_rank.asc`;
+                    // Use corrected paper-based view
+                    const url = `${SUPABASE_URL}/rest/v1/v_chart5_bigram_trends_corrected?topic_id=eq.${topicId}&order=year.asc,bigram.asc&limit=1000`;
                     const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
                     if (!response.ok) throw new Error("Fetch failed");
 
@@ -5587,9 +5447,35 @@
             function renderChart(data) {
                 container.innerHTML = '';
 
-                // Group by bigram
-                const bigramMap = d3.group(data, d => d.bigram);
-                const bigrams = Array.from(bigramMap.keys());
+                // Get unique bigrams in stable order (first appearance)
+                const bigramOrder = [];
+                const seen = new Set();
+                data.forEach(d => {
+                    if (d.bigram && !seen.has(d.bigram)) {
+                        seen.add(d.bigram);
+                        bigramOrder.push(d.bigram);
+                    }
+                });
+                const bigrams = bigramOrder.slice(0, 5);
+
+                // Build lookup: bigram -> year -> unique_papers_count
+                const lookup = new Map();
+                bigrams.forEach(b => lookup.set(b, new Map()));
+                data.forEach(d => {
+                    if (d.bigram && lookup.has(d.bigram)) {
+                        lookup.get(d.bigram).set(d.year, d.unique_papers_count || 0);
+                    }
+                });
+
+                // Build series with explicit zeros for every year
+                const years = d3.range(1980, 2026);
+                const series = bigrams.map(b => {
+                    const m = lookup.get(b);
+                    return {
+                        bigram: b,
+                        values: years.map(y => ({ year: y, count: m.get(y) || 0 }))
+                    };
+                });
 
                 // Palette
                 const bigramColors = ['#4cc9f0', '#f72585', '#3a0ca3', '#4361ee', '#7209b7'];
@@ -5599,7 +5485,7 @@
                 const rect = container.getBoundingClientRect();
                 const width = rect.width || 800;
                 const height = rect.height || 400;
-                const margin = { top: 20, right: 30, bottom: 40, left: 40 };
+                const margin = { top: 20, right: 30, bottom: 40, left: 55 };
 
                 const svg = d3.select(container).append('svg')
                     .attr('width', '100%')
@@ -5609,8 +5495,8 @@
                     .style('overflow', 'visible');
 
                 const x = d3.scaleLinear().domain([1980, 2025]).range([margin.left, width - margin.right]);
-                const yMax = d3.max(data, d => d.value) || 5;
-                const y = d3.scaleLinear().domain([0, yMax]).range([height - margin.bottom, margin.top]);
+                const yMax = d3.max(series, s => d3.max(s.values, v => v.count)) || 5;
+                const y = d3.scaleLinear().domain([0, yMax]).nice().range([height - margin.bottom, margin.top]);
 
                 // Axes
                 const xAxis = d3.axisBottom(x).tickFormat(d3.format('d')).tickValues(d3.range(1980, 2026, 5));
@@ -5619,34 +5505,31 @@
                 const gx = svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(xAxis);
                 const gy = svg.append('g').attr('transform', `translate(${margin.left},0)`).call(yAxis);
 
-                gx.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
-                gy.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
+                gx.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-size', '10px');
+                gy.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-size', '10px');
                 gx.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.2);
                 gy.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.2);
 
-                // Labels
-                svg.append('text').attr('x', width / 2).attr('y', height).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Year');
-                svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Frequency');
+                // Y-axis label: Papers per year
+                svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers per year');
 
                 const line = d3.line()
                     .x(d => x(d.year))
-                    .y(d => y(d.value))
+                    .y(d => y(d.count))
                     .curve(d3.curveMonotoneX);
 
                 const linesGroup = svg.append('g');
 
                 linesGroup.selectAll('.bg-line')
-                    .data(bigrams)
+                    .data(series)
                     .join('path')
                     .attr('class', 'bg-line')
                     .attr('fill', 'none')
-                    .attr('stroke', d => colorScale(d))
+                    .attr('stroke', d => colorScale(d.bigram))
                     .attr('stroke-width', 2)
                     .attr('opacity', 0.8)
-                    .attr('d', d => line(bigramMap.get(d)))
-                    // Hover interactions
+                    .attr('d', d => line(d.values))
                     .on('mouseover', function (event, d) {
-                        // Fade others
                         linesGroup.selectAll('.bg-line').attr('opacity', 0.15);
                         d3.select(this).attr('opacity', 1).attr('stroke-width', 3).raise();
                     })
@@ -5654,7 +5537,7 @@
                         linesGroup.selectAll('.bg-line').attr('opacity', 0.8).attr('stroke-width', 2);
                     });
 
-                // Interaction Overlay
+                // Interaction Overlay with tooltip — stable bigram order
                 const overlay = svg.append('rect')
                     .attr('width', width - margin.left - margin.right)
                     .attr('height', height - margin.top - margin.bottom)
@@ -5664,35 +5547,22 @@
                     .style('cursor', 'crosshair');
 
                 overlay.on('mousemove', function (event) {
-                    const [mx, my] = d3.pointer(event);
+                    const [mx] = d3.pointer(event);
                     const year = Math.round(x.invert(mx));
                     if (year < 1980 || year > 2025) return;
 
-                    // Find values at this year
                     let tooltipHtml = `<strong>Year: ${year}</strong><br>`;
-                    let found = false;
-
-                    // Sort by value DESC
-                    const snapshot = [];
+                    // Stable bigram order (not sorted by value)
                     bigrams.forEach(b => {
-                        const row = bigramMap.get(b).find(r => r.year === year);
-                        if (row) snapshot.push({ bigram: b, val: row.value, color: colorScale(b) });
-                    });
-                    snapshot.sort((a, b) => b.val - a.val);
-
-                    snapshot.forEach(s => {
-                        if (s.val > 0) found = true;
-                        tooltipHtml += `<span style="color:${s.color}">●</span> ${s.bigram}: ${s.val}<br>`;
+                        const m = lookup.get(b);
+                        const val = m.get(year) || 0;
+                        tooltipHtml += `<span style="color:${colorScale(b)}">●</span> ${b.replace(/_/g, ' ')}: ${val}<br>`;
                     });
 
                     const tt = d3.select('#temporal-tooltip');
-                    if (found) {
-                        tt.style('opacity', 1).html(tooltipHtml)
-                            .style('left', (event.pageX + 15) + 'px')
-                            .style('top', (event.pageY - 20) + 'px');
-                    } else {
-                        tt.style('opacity', 0);
-                    }
+                    tt.style('opacity', 1).html(tooltipHtml)
+                        .style('left', (event.pageX + 15) + 'px')
+                        .style('top', (event.pageY - 20) + 'px');
                 }).on('mouseleave', () => {
                     d3.select('#temporal-tooltip').style('opacity', 0);
                 });
@@ -5703,7 +5573,7 @@
                     bigrams.forEach(b => {
                         const item = document.createElement('span');
                         item.style.cssText = `display:inline-flex; align-items:center; margin:0 8px; color:var(--text-secondary); font-size:11px;`;
-                        item.innerHTML = `<span style="width:8px; height:8px; border-radius:50%; background:${colorScale(b)}; margin-right:4px;"></span> ${b}`;
+                        item.innerHTML = `<span style="width:8px; height:8px; border-radius:50%; background:${colorScale(b)}; margin-right:4px;"></span> ${b.replace(/_/g, ' ')}`;
                         legendContainer.appendChild(item);
                     });
                 }
