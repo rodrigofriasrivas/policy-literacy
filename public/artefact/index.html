@@ -4433,183 +4433,35 @@
             container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Loading...</div>';
 
             try {
-                // Wait for global data load (allData.papers)
-                let attempts = 0;
-                const maxAttempts = 100; // Allow up to 20s
+                // Fetch directly from the view that counts ALL papers in the corpus
+                const rows = await fetchFromSupabase('v_chart1_corpus_growth');
 
-                // Helper to check state
-                const checkReady = () => {
-                    const dataObj = (typeof allData !== 'undefined') ? allData : window.allData;
-                    const hasData = !!dataObj;
-                    const hasArray = hasData && Array.isArray(dataObj.papers);
-                    const length = hasArray ? dataObj.papers.length : 0;
-                    return { ready: hasData && hasArray && length > 0, hasData, hasArray, length, dataObj };
-                };
-
-                while (attempts < maxAttempts) {
-                    const status = checkReady();
-
-                    if (attempts === 0) {
-                        console.log('Corpus Growth wait: starting', {
-                            hasAllData: status.hasData,
-                            hasPapersArray: status.hasArray,
-                            papersLength: status.length
-                        });
-
-                        if (!status.ready) {
-                            container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Waiting for data...</div>';
-                        }
-                    }
-
-                    if (status.ready) break;
-
-                    await new Promise(r => setTimeout(r, 200));
-                    attempts++;
-                }
-
-                const finalStatus = checkReady();
-
-                if (!finalStatus.ready) {
-                    console.warn('Corpus Growth wait: timeout', {
-                        hasAllData: finalStatus.hasData,
-                        hasPapersArray: finalStatus.hasArray,
-                        papersLength: finalStatus.length
-                    });
-                    container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">Data not available.</div>';
+                if (!rows || rows.length === 0) {
+                    container.innerHTML = '<div style="color:var(--text-secondary); font-size:12px;">No corpus data available.</div>';
                     return;
                 }
 
-                console.log(`Corpus Growth wait: ready (${finalStatus.length} papers)`);
-                const papers = finalStatus.dataObj.papers;
+                let fullData = rows.map(r => ({
+                    year: parseInt(r.year),
+                    count: parseInt(r.papers_count) || 0
+                })).sort((a, b) => a.year - b.year);
 
-                // 3. Aggregate (Distinct IDs)
-                const yearCounts = {};
-                const seenIds = new Set();
-                let missingYearCount = 0;
-
-                // Initialize range (1980-2025)
-                const yStart = (typeof minYear !== 'undefined') ? minYear : 1980;
-                const yEnd = (typeof maxYear !== 'undefined') ? maxYear : 2025;
-
-                for (let y = 1980; y <= 2025; y++) {
-                    yearCounts[y] = 0;
+                // Trim trailing zero-count years
+                const lastNonZeroIdx = fullData.map(d => d.count).lastIndexOf(
+                    fullData.slice().reverse().find(d => d.count > 0)?.count
+                );
+                if (lastNonZeroIdx >= 0) {
+                    fullData = fullData.slice(0, lastNonZeroIdx + 1);
                 }
 
-                papers.forEach(p => {
-                    const y = parseInt(p.year);
-                    // Use id or paper_id depending on what's available in the cached object
-                    const pid = p.id || p.paper_id;
-
-                    if (isNaN(y)) {
-                        missingYearCount++;
-                        return;
-                    }
-
-                    // Strict Deduplication by ID
-                    if (pid && !seenIds.has(pid)) {
-                        seenIds.add(pid);
-
-                        // Apply Filters (Timeframe & Journal)
-                        if (y >= 1980 && y <= 2025) {
-                            if (y >= yStart && y <= yEnd) {
-                                // Check Journal Filter
-                                let include = true;
-                                if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0) {
-                                    include = selectedJournals.has(p.journal);
-                                }
-
-                                if (include) {
-                                    yearCounts[y] = (yearCounts[y] || 0) + 1;
-                                }
-                            }
-                        }
-                    }
-                });
-
-                let fullData = Object.keys(yearCounts).sort().map(y => ({
-                    year: parseInt(y),
-                    count: yearCounts[y]
-                }));
-
-                // FIX: Trim trailing years that have no data to prevent chart "drop-off" to zero
-                // Find the last year with data
-                let maxYearInSeries = 0;
-                let minYearInSeries = 2025;
-
-                fullData.forEach(d => {
-                    if (d.count > 0) {
-                        if (d.year > maxYearInSeries) maxYearInSeries = d.year;
-                        if (d.year < minYearInSeries) minYearInSeries = d.year;
-                    }
-                });
-
-                // Filter out years beyond the max year found in data
-                // This ensures we don't plot 2025 as 0 if data ends in 2024
-                if (maxYearInSeries > 0) {
-                    fullData = fullData.filter(d => d.year <= maxYearInSeries);
-                }
-
-                // Verification Logs
-                console.group('Corpus Growth Fix Verification');
-                console.log('minYearInSeries:', minYearInSeries);
-                console.log('maxYearInSeries:', maxYearInSeries);
-                console.log('lastPoint:', fullData[fullData.length - 1]);
+                // Audit log
+                const total = fullData.reduce((s, d) => s + d.count, 0);
+                console.group('Corpus Growth (v_chart1_corpus_growth)');
+                console.log(`Source: v_chart1_corpus_growth (full papers table)`);
+                console.log(`Years: ${fullData[0]?.year}–${fullData[fullData.length - 1]?.year}`);
+                console.log(`Total papers plotted: ${total}`);
+                console.log('Last 5 years:', fullData.slice(-5));
                 console.groupEnd();
-
-                // --- Corpus Growth Integrity Check ---
-                console.group('Corpus Growth Integrity Check');
-                const distinctSourceIds = new Set();
-                const invalidYearIds = [];
-                papers.forEach(p => {
-                    const pid = p.id || p.paper_id;
-                    if (pid) distinctSourceIds.add(pid);
-                    if (isNaN(parseInt(p.year))) invalidYearIds.push(pid);
-                });
-                const X = distinctSourceIds.size;
-                const Y = fullData.reduce((sum, d) => sum + d.count, 0);
-                const Z = X - Y;
-
-                console.log(`Total papers in source (distinct by paper_id if available): ${X}`);
-                console.log(`Sum of yearly counts: ${Y}`);
-                console.log(`Difference (X - Y): ${Z}`);
-
-                if (Z !== 0) {
-                    console.warn('Discrepancy detected:');
-                    console.log(`number of papers with missing/invalid year: ${invalidYearIds.length}`);
-                    if (invalidYearIds.length > 0) {
-                        console.log(`sample of up to 10 paper_id (or id) values with missing year:`, invalidYearIds.slice(0, 10));
-                    }
-                }
-                console.groupEnd();
-                // -------------------------------------
-
-                // 4. Audit Logs (Updated for Cached Data)
-                const totalPlotted = fullData.reduce((sum, d) => sum + d.count, 0);
-                const distinctPaperCount = seenIds.size;
-                const maxYearCount = Math.max(0, ...fullData.map(d => d.count));
-
-                console.group('Corpus Growth Audit (Fixed)');
-                console.log(`1. Source: allData.papers (Cached)`);
-                console.log(`2. Total Cached Rows: ${papers.length}`);
-                console.log(`3. Total Distinct Papers (by ID): ${distinctPaperCount}`);
-                console.log(`4. Sum of Plotted Counts: ${totalPlotted}`);
-                console.log(`5. Rows with Missing Year: ${missingYearCount}`);
-
-                // New: Yearly Counts Preview
-                console.log('6. Yearly Counts Preview (First 10):', fullData.slice(0, 10));
-                console.log('7. Yearly Counts Preview (Last 10):', fullData.slice(-10));
-
-                // New: Validation Checks
-                const isJournalFilterActive = (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0);
-                const isFullTimeframe = (yStart <= 1981 && yEnd >= 2023);
-
-                if (!isJournalFilterActive && isFullTimeframe) {
-                    if (distinctPaperCount < 1000) {
-                        console.error('%cWARNING: Corpus Growth is not reading the full corpus. Check if allData.papers is fully populated.', 'color: red; font-weight: bold; font-size: 14px;');
-                    }
-                }
-                console.groupEnd();
-                // ----------------------------------
 
                 renderCorpusChartD3(container, fullData);
 
