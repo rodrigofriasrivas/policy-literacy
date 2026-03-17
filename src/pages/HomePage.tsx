@@ -46,14 +46,19 @@ export default function HomePage() {
           <p className="hero-subtitle">
             Mapping decades of entrepreneurship and enterprise policy research through advanced network visualization.
           </p>
-
-          <div className="cta-container">
-            <a href="/artefact/index.html" className="cta-button">
-              Explore the Data
-            </a>
-            <Link to="/about" className="cta-secondary">
-              About the project →
-            </Link>
+          <div className="homepage-cta-group">
+            <div className="homepage-cta-item">
+              <Link to="/" className="cta-button homepage-cta-primary" id="hp-cta-start">
+                Start here →
+              </Link>
+              <span className="homepage-cta-sub">Recommended for first-time visitors</span>
+            </div>
+            <div className="homepage-cta-item">
+              <a href="/artefact/index.html" className="cta-secondary homepage-cta-secondary" id="hp-cta-explore">
+                Explore the field
+              </a>
+              <span className="homepage-cta-sub">Go straight to the visualisation</span>
+            </div>
           </div>
 
           {/* Metric cards */}

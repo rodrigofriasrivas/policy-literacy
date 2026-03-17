@@ -1923,9 +1923,12 @@
         console.log('🎨 Enterprise Policy Literacy Network Visualization');
         console.log('📊 Session 1: Macro circular chord diagram');
 
-        // Supabase configuration
-        const SUPABASE_URL = 'https://szyhygctrotfysldfemh.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN6eWh5Z2N0cm90ZnlzbGRmZW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkwMDQ5MjcsImV4cCI6MjA4NDU4MDkyN30.ixuEt2C0b4fCoUES_6LIN_vaQKOzEyOjQulIikV2vmg';
+        // ── STATIC BUILD – no live Supabase calls ───────────────────────────
+        // Stubs kept so any legacy reference doesn't throw a ReferenceError.
+        const SUPABASE_URL = 'LOCAL';
+        const SUPABASE_KEY = 'LOCAL';
+        // Base path for pre-exported JSON data files (relative to this HTML file)
+        const DATA_BASE = 'data/';
 
         // Canvas setup
         const canvas = document.getElementById('canvas');
@@ -2117,44 +2120,13 @@
             return { topics, bigrams, papers, topicPaperLinks };
         }
 
-        // Helper function to fetch from Supabase
+        // Helper function – reads a pre-exported local JSON file
+        // (table name maps directly to data/<table>.json)
         async function fetchFromSupabase(table, limit = null, range = null) {
-            let url = `${SUPABASE_URL}/rest/v1/${table}?select=*`;
-            if (limit) {
-                url += `&limit=${limit}`;
-            }
-
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
-
-            try {
-                const headers = {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=representation'
-                };
-
-                if (range) {
-                    headers['Range'] = range;
-                }
-
-                const response = await fetch(url, {
-                    headers: headers,
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
-                }
-
-                return await response.json();
-            } catch (err) {
-                if (err.name === 'AbortError') throw new Error('Connection timed out.');
-                throw err;
-            }
+            const url = `${DATA_BASE}${table}.json`;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Could not load local data file: ${url}`);
+            return response.json();
         }
 
         // Load data
@@ -2174,68 +2146,21 @@
                     papers = demo.papers;
                     topicPaperLinks = demo.topicPaperLinks;
                 } else {
-                    updateStatus('Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Fetching data...</span>');
-                    topics = await fetchFromSupabase('topics');
+                    // ── STATIC BUILD: load from pre-exported local JSON files ──
+                    updateStatus('Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Loading local data...</span>');
 
-                    bigrams = await fetchFromSupabase('bigrams');
+                    [topics, bigrams, papers, topicPaperLinks] = await Promise.all([
+                        fetch(`${DATA_BASE}topics.json`).then(r => r.json()),
+                        fetch(`${DATA_BASE}bigrams.json`).then(r => r.json()),
+                        fetch(`${DATA_BASE}papers.json`).then(r => r.json()),
+                        fetch(`${DATA_BASE}topic_paper_links.json`).then(r => r.json()),
+                    ]);
 
-                    // Paginate papers to fetch all
-                    papers = [];
-                    let page = 0;
-                    const pageSize = 1000;
-                    let fetching = true;
-
-                    while (fetching) {
-                        const start = page * pageSize;
-                        const end = start + pageSize - 1;
-
-                        const batch = await fetchFromSupabase('papers', null, `${start}-${end}`);
-
-                        // Check if we got data
-                        if (batch.length === 0) {
-                            fetching = false;
-                        } else {
-                            papers = papers.concat(batch);
-                            if (batch.length < pageSize) {
-                                fetching = false;
-                            } else {
-                                page++;
-                            }
-                        }
-                    }
-                    console.log(`✅ Loaded ${papers.length} papers total`);
-
-                    updateStatus('Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Linking research papers to policy topics...</span>');
-
-                    // Paginate topic_paper_links to fetch all
-                    topicPaperLinks = [];
-                    let linkPage = 0;
-                    const linkPageSize = 1000;
-                    let fetchingLinks = true;
-
-                    while (fetchingLinks) {
-                        const start = linkPage * linkPageSize;
-                        const end = start + linkPageSize - 1;
-
-                        const batch = await fetchFromSupabase('topic_paper_links', null, `${start}-${end}`);
-
-                        // Check if we got data
-                        if (batch.length === 0) {
-                            fetchingLinks = false;
-                        } else {
-                            topicPaperLinks = topicPaperLinks.concat(batch);
-                            updateStatus(`Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Linking research papers to policy topics: ${topicPaperLinks.length} of 14,546 connections</span>`);
-                            if (batch.length < linkPageSize) {
-                                fetchingLinks = false;
-                            } else {
-                                linkPage++;
-                            }
-                        }
-                    }
-                    console.log(`✅ Loaded ${topicPaperLinks.length} structural links total`);
+                    console.log(`✅ Loaded ${papers.length} papers from local file`);
+                    console.log(`✅ Loaded ${topicPaperLinks.length} links from local file`);
                     updateStatus(`Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Linking research papers to policy topics: ${topicPaperLinks.length} of 14,546 connections</span>`);
 
-                    // Minor deferral so the UI paints the resolved count before synchronous data processing 
+                    // Minor deferral so the UI paints before synchronous data processing
                     await new Promise(r => setTimeout(r, 100));
                 }
 
@@ -4361,27 +4286,10 @@
             }
 
             try {
-                const viewName = 'v_topic_prevalence_top8_other_by_year_v3';
-                const select = 'year,series_key,series_rank,series_name,papers_count,series_color';
-                const order = 'year.asc';
-
-                const url = `${SUPABASE_URL}/rest/v1/${viewName}?select=${select}&order=${order}`;
-                console.log('Fetching Temporal URL:', url);
-
-                const response = await fetch(url, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=representation'
-                    }
-                });
-
-                if (!response.ok) {
-                    const errText = await response.text();
-                    throw new Error(`HTTP ${response.status}: ${errText}`);
-                }
-
+                // ── STATIC BUILD: Chart 1 – load from local file ──
+                console.log('Loading Chart 1 (Temporal) from local file...');
+                const response = await fetch(`${DATA_BASE}v_chart1_prevalence.json`);
+                if (!response.ok) throw new Error(`Could not load v_chart1_prevalence.json`);
                 const data = await response.json();
                 if (data && data.length > 0) console.log('First Temporal Row:', data[0]);
 
@@ -4566,6 +4474,107 @@
         }
 
         // fetchAndRenderEmergence — removed
+                console.warn('Emergence Error:', e);
+                container.innerHTML = `<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">
+                        Trend data unavailable.<br>
+                        <span style="font-size:10px; opacity:0.7;">${e.message}</span>
+                    </div>`;
+            }
+        }
+
+        function renderEmergenceTables(data) {
+            const container = document.getElementById('emerging-declining-container');
+            if (!container) return;
+
+            // Clear any inline background on the main container to avoid double-boxing
+            container.style.background = 'transparent';
+
+            // Ensure numeric fields are parsed safely
+            data.forEach(d => {
+                d.share_change_pp = parseFloat(d.share_change_pp) || 0;
+                d.first_decade_share = parseFloat(d.first_decade_share) || 0;
+                d.last_decade_share = parseFloat(d.last_decade_share) || 0;
+            });
+
+            // Sort by magnitude of change (descending)
+            data.sort((a, b) => Math.abs(b.share_change_pp) - Math.abs(a.share_change_pp));
+
+            const rising = data.filter(d => d.direction === 'rising').slice(0, 10);
+            const declining = data.filter(d => d.direction === 'declining').slice(0, 10);
+
+            function makeTable(title, rows, isRising) {
+                // Surface styling for contrast
+                // Using var(--chart-panel-bg) gives a solid card look (Light surface in Light, Darker in Dark)
+                // Adding a border for definition
+                const surfaceStyle = `
+                        flex:1; 
+                        min-width:320px; 
+                        padding: 20px; 
+                        background: var(--chart-panel-bg); 
+                        border: 1px solid var(--chart-panel-border); 
+                        border-radius: 12px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+                    `;
+
+                let html = `<div style="${surfaceStyle}">
+                        <div style="font-size:13px; font-weight:800; margin-bottom:6px; color:var(--text-primary); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+                            ${isRising ? '<span style="color:#4ECDC4">▲</span>' : '<span style="color:#FF6B6B">▼</span>'} ${title}
+                        </div>
+                        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:16px; border-bottom:1px solid var(--chart-row-border); padding-bottom:12px; font-weight:500;">
+                            Top 10 by share change (1980s vs 2020s)
+                        </div>
+                        <table style="width:100%; border-collapse:collapse; font-size:13px; background: transparent;">
+                            <thead>
+                                <tr style="color:var(--text-secondary); text-align:left; border-bottom:1px solid var(--chart-row-border);">
+                                    <th style="padding:8px 4px; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; opacity:0.8;">Topic</th>
+                                    <th style="padding:8px 4px; text-align:right; font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:0.05em; width:96px; opacity:0.8;">Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                rows.forEach(r => {
+                    const val = r.share_change_pp > 0 ? '+' + r.share_change_pp.toFixed(1) : r.share_change_pp.toFixed(1);
+                    const col = isRising ? '#4ECDC4' : '#FF6B6B';
+                    const rowColor = r.series_color || '#999';
+
+                    // Naming convention: Topic <id>: <name>
+                    const displayName = `Topic ${r.topic_id}: ${r.topic_name}`;
+
+                    // Escape single quotes (safely)
+                    const safeDisplayName = displayName.replace(/'/g, "&apos;");
+
+                    // Tooltip
+                    const tooltipText = `<strong>${safeDisplayName}</strong><br>1980s share: ${r.first_decade_share.toFixed(1)}%<br>Latest share: ${r.last_decade_share.toFixed(1)}%<br>Change: ${val}pp`;
+
+                    html += `<tr style="border-bottom:1px solid var(--chart-row-border); cursor:default; transition: all 0.2s;" 
+                                     onmouseover="const tt=document.getElementById('temporal-tooltip'); tt.style.opacity=1; tt.innerHTML='${tooltipText}'; tt.style.left=(event.pageX+10)+'px'; tt.style.top=(event.pageY-20)+'px'; this.style.background='var(--chart-row-hover)';" 
+                                     onmouseout="document.getElementById('temporal-tooltip').style.opacity=0; this.style.background='transparent';">
+                            <td style="padding:8px 4px; display:flex; align-items:center; gap:8px;">
+                                <div style="width:6px; height:6px; border-radius:50%; background:${rowColor}; flex-shrink:0;"></div>
+                                <span style="color:var(--text-primary); font-weight:500; font-variant-numeric: tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:220px;">${displayName}</span>
+                            </td>
+                            <td style="padding:8px 4px; text-align:right; color:${col}; font-weight:600; font-variant-numeric: tabular-nums; width:96px;">${val}pp</td>
+                        </tr>`;
+                });
+                html += `</tbody></table></div>`;
+                return html;
+            }
+
+            container.style.display = 'flex';
+            container.style.flexWrap = 'wrap';
+            // Increase gap to accommodate the card look
+            container.style.gap = '24px';
+            container.style.justifyContent = 'space-between';
+            container.style.alignItems = 'flex-start';
+
+            container.innerHTML = '';
+
+            // Rising Panel
+            container.innerHTML += makeTable('Rising', rising, true);
+
+            // Declining Panel
+            container.innerHTML += makeTable('Declining', declining, false);
+        }
 
         function renderTemporalChart(data, containerId = 'topic-prevalence-chart', legendId = 'topic-prevalence-legend', customHeight = null) {
             const container = document.getElementById(containerId);
@@ -4760,36 +4769,12 @@
                 const limit = 1000;
                 let fetchMore = true;
 
-                console.log('Fetching Chart 4 data via pagination...');
-                while (fetchMore) {
-                    const url = `${SUPABASE_URL}/rest/v1/v_chart4_topic_trends?select=year,topic_id,topic_label,papers_count,series_color&order=year.asc,topic_id.asc&limit=${limit}&offset=${offset}`;
-
-                    const response = await fetch(url, {
-                        headers: {
-                            'apikey': SUPABASE_KEY,
-                            'Authorization': `Bearer ${SUPABASE_KEY}`
-                        }
-                    });
-
-                    if (!response.ok) {
-                        const errText = await response.text();
-                        console.error('Chart 4 Fetch Error:', response.status, response.statusText, 'Output:', errText);
-                        throw new Error(`HTTP ${response.status}: ${errText}`);
-                    }
-
-                    const pageData = await response.json();
-
-                    if (!pageData || pageData.length === 0) {
-                        fetchMore = false;
-                    } else {
-                        allRows = allRows.concat(pageData);
-                        if (pageData.length < limit) {
-                            fetchMore = false; // Last page reached
-                        } else {
-                            offset += limit; // Next page
-                        }
-                    }
-                }
+                // ── STATIC BUILD: Chart 4 – load from local file ──
+                console.log('Loading Chart 4 (Topic Trends) from local file...');
+                const _c4resp = await fetch(`${DATA_BASE}v_chart4_topic_trends.json`);
+                if (!_c4resp.ok) throw new Error('Could not load v_chart4_topic_trends.json');
+                allRows = await _c4resp.json();
+                fetchMore = false; // already have all rows
 
                 if (allRows.length === 0) {
                     container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);">No data returned.</div>';
@@ -5426,10 +5411,11 @@
                 if (legendContainer) legendContainer.innerHTML = '';
 
                 try {
-                    // Use corrected paper-based view
-                    const url = `${SUPABASE_URL}/rest/v1/v_chart5_bigram_trends_corrected?topic_id=eq.${topicId}&order=year.asc,bigram.asc&limit=1000`;
-                    const response = await fetch(url, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                    if (!response.ok) throw new Error("Fetch failed");
+                    // ── STATIC BUILD: Chart 5 – filter pre-loaded local JSON ──
+                    const _c5resp = await fetch(`${DATA_BASE}v_chart5_bigram_trends.json`);
+                    if (!_c5resp.ok) throw new Error('Could not load v_chart5_bigram_trends.json');
+                    const _c5all = await _c5resp.json();
+                    const response = { ok: true, json: async () => _c5all.filter(r => String(r.topic_id) === String(topicId)) };
 
                     const data = await response.json();
                     if (!data || data.length === 0) {
@@ -5816,13 +5802,11 @@
             container.innerHTML = 'Loading trends...';
 
             try {
-                // Fetch canonical bigram trends by topic ID
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/v_chart5_bigram_trends_corrected?topic_id=eq.${topicId}&order=year.asc`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
+                // ── STATIC BUILD: Chart 5 corrected – filter pre-loaded local JSON ──
+                const _c5cResp = await fetch(`${DATA_BASE}v_chart5_bigram_trends_corrected.json`);
+                if (!_c5cResp.ok) throw new Error('Could not load v_chart5_bigram_trends_corrected.json');
+                const _c5cAll = await _c5cResp.json();
+                const response = { ok: true, json: async () => _c5cAll.filter(r => String(r.topic_id) === String(topicId)) };
 
                 const data = await response.json();
                 container.innerHTML = '';

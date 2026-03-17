@@ -10,6 +10,9 @@ import PolicyPage from "./pages/PolicyPage";
 import ContactPage from "./pages/ContactPage";
 import TopicExploration from "./pages/TopicExploration";
 import NotFound from "./pages/NotFound";
+import IntroModule1 from "./pages/IntroModule1";
+import IntroModule2 from "./pages/IntroModule2";
+import IntroModule3 from "./pages/IntroModule3";
 
 const queryClient = new QueryClient();
 
@@ -20,8 +23,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Pre-visualisation sequence — comprehension architecture */}
+          <Route path="/" element={<IntroModule1 />} />
+          <Route path="/intro/2" element={<IntroModule2 />} />
+          <Route path="/intro/3" element={<IntroModule3 />} />
+
           {/* Marketing site */}
-          <Route path="/" element={<HomePage />} />
+          <Route path="/legacy-home" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/policy" element={<PolicyPage />} />
           <Route path="/contact" element={<ContactPage />} />
