@@ -1608,7 +1608,8 @@
 @media (max-width: 720px) {
   .m2-page { padding: 36px 20px 60px; }
   .m2-chart-outer { height: 200px; margin-bottom: 28px; }
-  .m2-periods-grid { grid-template-columns: 1fr 1fr; }
+  .m2-periods-grid { flex-wrap: wrap; }
+  .m2-periods-grid .m2-period-card { flex: 0 0 50% !important; }
   .m2-yaxis-label { display: none; }
 }
 
