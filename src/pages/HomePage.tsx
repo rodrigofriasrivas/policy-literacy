@@ -48,7 +48,7 @@ export default function HomePage() {
           </p>
           <div className="homepage-cta-group">
             <div className="homepage-cta-item">
-              <Link to="/" className="cta-button homepage-cta-primary" id="hp-cta-start">
+              <Link to="/intro/1" className="cta-button homepage-cta-primary" id="hp-cta-start">
                 Start here →
               </Link>
               <span className="homepage-cta-sub">Recommended for first-time visitors</span>

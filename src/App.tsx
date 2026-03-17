@@ -24,12 +24,14 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           {/* Pre-visualisation sequence — comprehension architecture */}
-          <Route path="/" element={<IntroModule1 />} />
+          <Route path="/" element={<HomePage />} />
+
+          {/* Pre-visualisation sequence */}
+          <Route path="/intro/1" element={<IntroModule1 />} />
           <Route path="/intro/2" element={<IntroModule2 />} />
           <Route path="/intro/3" element={<IntroModule3 />} />
 
           {/* Marketing site */}
-          <Route path="/legacy-home" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/policy" element={<PolicyPage />} />
           <Route path="/contact" element={<ContactPage />} />
