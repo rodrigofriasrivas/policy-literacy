@@ -1961,3 +1961,50 @@
 @media (max-width: 420px) {
   .m3-grid { grid-template-columns: 1fr; }
 }
+
+/* Modal overlay — Step 3 map transition */
+.m3-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.m3-modal-card {
+  background: hsl(235 30% 12%);
+  color: rgba(255, 255, 255, 0.88);
+  max-width: 640px;
+  width: 100%;
+  padding: 48px 40px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.m3-modal-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 0 20px;
+}
+
+.m3-modal-body {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.52);
+  line-height: 1.75;
+  margin: 0 0 32px;
+}
+
+.m3-modal-body p {
+  margin: 0 0 14px;
+}
+
+@media (max-width: 480px) {
+  .m3-modal-card {
+    padding: 36px 24px;
+  }
+}
