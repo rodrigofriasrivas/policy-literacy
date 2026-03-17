@@ -1481,12 +1481,15 @@
 
 /* Period annotation cards */
 .m2-periods-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  display: flex;
+  gap: 0;
   margin-top: 40px;
   margin-bottom: 40px;
 }
+.m2-period-card:nth-child(1) { flex: 0 0 28%; }
+.m2-period-card:nth-child(2) { flex: 0 0 25%; }
+.m2-period-card:nth-child(3) { flex: 0 0 22%; }
+.m2-period-card:nth-child(4) { flex: 0 0 25%; }
 
 .m2-period-card {
   background: rgba(255,255,255,0.02);
