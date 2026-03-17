@@ -441,14 +441,6 @@
   transform: scaleX(1);
 }
 
-/* Metric prefix line */
-.hero-metric-prefix {
-  font-size: 11px;
-  color: var(--home-muted2);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 2px;
-}
 
 /* Mobile hamburger menu */
 .mobile-menu-toggle {
