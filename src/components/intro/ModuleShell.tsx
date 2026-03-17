@@ -85,9 +85,9 @@ export function ModuleShell({
           )}
           {nextPath &&
             (nextIsExternal ? (
-              <a href={nextPath} className="module-footnav-next" id={`module-cta-step-${step}`}>
+              <button onClick={() => { window.location.href = nextPath!; }} className="module-footnav-next" id={`module-cta-step-${step}`}>
                 {nextLabel} →
-              </a>
+              </button>
             ) : (
               <Link to={nextPath} className="module-footnav-next" id={`module-cta-step-${step}`}>
                 {nextLabel} →

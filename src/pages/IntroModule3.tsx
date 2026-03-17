@@ -266,13 +266,13 @@ export default function IntroModule3() {
               or simply trying to understand what the research actually covers.
             </p>
           </div>
-          <a
-            href="/artefact/index.html"
+          <button
+            onClick={() => { window.location.href = '/artefact/index.html'; }}
             className="m3-cta-button"
             id="m3-cta-explore-network"
           >
             Explore the full field →
-          </a>
+          </button>
           <p className="m3-cta-note">
             Epistemic caution: this map is a computational representation of
             patterns in a sample. It is not a definitive picture of the field.
