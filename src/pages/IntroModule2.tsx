@@ -81,6 +81,16 @@ export default function IntroModule2() {
   const firstYear = data[0]?.year ?? 1979;
   const lastYear = data[data.length - 1]?.year ?? 2025;
 
+  const cumulativeByYear = useMemo(() => {
+    const map = new Map<number, number>();
+    let running = 0;
+    for (const d of data) {
+      running += d.count;
+      map.set(d.year, running);
+    }
+    return map;
+  }, [data]);
+
   function getPeriodForYear(year: number) {
     return PERIOD_ANNOTATIONS.findIndex(
       (p) => year >= p.startYear && year <= p.endYear
