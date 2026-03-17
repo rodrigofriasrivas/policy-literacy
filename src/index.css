@@ -1649,7 +1649,6 @@
   font-size: 15px;
   color: rgba(255,255,255,0.62);
   line-height: 1.75;
-  max-width: 720px;
   margin: 0 0 12px;
 }
 
@@ -1657,7 +1656,6 @@
   font-size: 16px;
   color: rgba(255,255,255,0.72);
   line-height: 1.75;
-  max-width: 720px;
   margin: 0 0 24px;
 }
 
@@ -1665,7 +1663,6 @@
   font-size: 14px;
   color: rgba(255,255,255,0.55);
   line-height: 1.85;
-  max-width: 720px;
   margin-bottom: 24px;
 }
 
@@ -1743,6 +1740,9 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 8px;
   margin-bottom: 48px;
+}
+@media (min-width: 1025px) {
+  .m3-grid { grid-template-columns: repeat(5, 1fr); }
 }
 
 .m3-topic-card {

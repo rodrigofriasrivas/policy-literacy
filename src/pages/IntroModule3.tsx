@@ -132,9 +132,6 @@ export default function IntroModule3() {
               conversation, not a ranking. Some appear frequently across the entire 40-year period;
               others are concentrated in particular decades. None sits above another.
             </p>
-            <p className="m3-epistemic-note">
-              <em>This is a representation of how the field has developed — not a definitive picture of it.</em>
-            </p>
           </div>
           <p className="m3-note">
             These groupings are orientation aids drawn from the paper’s appendix.
@@ -251,19 +248,13 @@ export default function IntroModule3() {
           <div className="m3-cta-body">
             <p>
               The network connects 25 research conversations, 125 key terms, and the papers
-              behind them across four decades — now visible as a single structure.
-              Explore by topic, by term, or by time period.
-            </p>
-            <p>
-              The view is dense. That density reflects the field — a body of research that
-              has expanded in parallel across time, contexts, and conversations that rarely
-              converge. Enterprise policy has never been a single conversation.
-              This map makes that visible.
+              behind them across four decades. The view is dense — that density reflects
+              the field. Enterprise policy has never been a single conversation.
             </p>
             <p>
               Understanding the shape and evolution of this field is a starting point —
-              whether you are designing an enterprise policy, building a programme,
-              or simply trying to understand what the research actually covers.
+              whether you are designing a policy, building a programme, or simply trying
+              to understand what the research actually covers.
             </p>
           </div>
           <button
@@ -273,11 +264,6 @@ export default function IntroModule3() {
           >
             Explore the full field →
           </button>
-          <p className="m3-cta-note">
-            Epistemic caution: this map is a computational representation of
-            patterns in a sample. It is not a definitive picture of the field.
-            Use it to orient — not to validate.
-          </p>
         </div>
       </div>
     </ModuleShell>

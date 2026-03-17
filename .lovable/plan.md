@@ -1,41 +1,29 @@
 
 
-# Step 3 layout, width, and disclaimer cleanup
+# Add Temporary Audit Table Below Corpus Growth Chart
 
-Four fixes across `IntroModule3.tsx` and `src/index.css`.
+## What and where
 
-## Fix 1 — Use full width in Step 3 (index.css)
+Insert a compact HTML table directly after the `corpus-growth-chart` div (line 1484), inside the same `stitch-card`. The table will be populated by the same `fetchAndRenderCorpusGrowth()` function using the same `fullData` array.
 
-Keep `.m3-page` at `max-width: 1040px` (no change). The inner text elements `.m3-subtitle`, `.m3-lead`, and `.m3-body` each have `max-width: 720px` constraining their width. Remove those three `max-width` declarations so text fills the full 1040px container.
+## Changes
 
-- Line 1652: remove `max-width: 720px` from `.m3-subtitle`
-- Line 1660: remove `max-width: 720px` from `.m3-lead`
-- Line 1668: remove `max-width: 720px` from `.m3-body`
+### 1. HTML: Add audit table container (after line 1484)
 
-## Fix 2 — Topic grid: 5 columns on wide screens (index.css)
+Add a `<div id="corpus-growth-audit">` placeholder right after the chart div, before the closing `</div>` of the card (line 1485).
 
-Add after the `.m3-grid` block:
-```css
-@media (min-width: 1025px) {
-  .m3-grid { grid-template-columns: repeat(5, 1fr); }
-}
-```
+### 2. JS: Render audit table from same data (in `fetchAndRenderCorpusGrowth`, after line 4466)
 
-## Fix 3 — Remove redundant epistemic disclaimers (IntroModule3.tsx)
+After `renderCorpusChartD3(container, fullData)`, build and inject a compact HTML table into `#corpus-growth-audit` using the same `fullData` array:
+- Two columns: Year | Papers
+- Final row: **Total** | sum
+- Compact styling: small font, monospace numbers, border-collapse, themed colors via CSS variables
+- Horizontal scroll wrapper if needed
+- Inline styles using existing CSS variables (`--text-primary`, `--text-secondary`, `--input-bg`, `--input-border`)
 
-- Remove the `<p className="m3-epistemic-note">` italic line (~line 135)
-- Remove the `<p className="m3-cta-note">` at bottom of CTA block (~line 276)
-- Keep the orientation aids disclaimer and the ModuleShell footer
+### 3. No other changes
 
-## Fix 4 — Replace CTA block text (IntroModule3.tsx)
-
-Replace CTA body with two paragraphs:
-1. "The network connects 25 research conversations, 125 key terms, and the papers behind them across four decades. The view is dense — that density reflects the field. Enterprise policy has never been a single conversation."
-2. "Understanding the shape and evolution of this field is a starting point — whether you are designing a policy, building a programme, or simply trying to understand what the research actually covers."
-
-Keep heading and button unchanged.
-
-## Files changed
-- `src/pages/IntroModule3.tsx`
-- `src/index.css`
+- Chart rendering untouched
+- No other sections modified
+- Temporary — clearly labeled as "Audit Table"
 
