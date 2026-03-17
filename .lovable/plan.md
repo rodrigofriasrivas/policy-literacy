@@ -1,29 +1,24 @@
 
 
-# Add Temporary Audit Table Below Corpus Growth Chart
+# Fix: Hard navigation for "Explore the full field" buttons
 
-## What and where
+## Current state
 
-Insert a compact HTML table directly after the `corpus-growth-chart` div (line 1484), inside the same `stitch-card`. The table will be populated by the same `fetchAndRenderCorpusGrowth()` function using the same `fullData` array.
+Two "Explore the full field" CTAs exist:
 
-## Changes
+1. **Line 269**: `<a href="/artefact/index.html">` in the CTA block — plain anchor, should work but could be intercepted by React Router
+2. **ModuleShell bottom bar** (line 96 in ModuleShell.tsx): Also uses `<a href>` when `nextIsExternal={true}` — same situation
 
-### 1. HTML: Add audit table container (after line 1484)
+## Fix
 
-Add a `<div id="corpus-growth-audit">` placeholder right after the chart div, before the closing `</div>` of the card (line 1485).
+Change both to use `<button onClick={() => window.location.href = '/artefact/index.html'>` to guarantee hard navigation:
 
-### 2. JS: Render audit table from same data (in `fetchAndRenderCorpusGrowth`, after line 4466)
+1. **IntroModule3.tsx line 269-274**: Replace `<a href>` with a `<button>` using `onClick={() => { window.location.href = '/artefact/index.html'; }}`
+2. **ModuleShell.tsx line 87-90**: Replace the external `<a href>` with a `<button>` using `onClick={() => { window.location.href = nextPath; }}` when `nextIsExternal` is true
 
-After `renderCorpusChartD3(container, fullData)`, build and inject a compact HTML table into `#corpus-growth-audit` using the same `fullData` array:
-- Two columns: Year | Papers
-- Final row: **Total** | sum
-- Compact styling: small font, monospace numbers, border-collapse, themed colors via CSS variables
-- Horizontal scroll wrapper if needed
-- Inline styles using existing CSS variables (`--text-primary`, `--text-secondary`, `--input-bg`, `--input-border`)
+Both keep their existing className and id attributes for styling continuity.
 
-### 3. No other changes
-
-- Chart rendering untouched
-- No other sections modified
-- Temporary — clearly labeled as "Audit Table"
+## Files changed
+- `src/pages/IntroModule3.tsx` — CTA block button
+- `src/components/intro/ModuleShell.tsx` — bottom bar external CTA
 
