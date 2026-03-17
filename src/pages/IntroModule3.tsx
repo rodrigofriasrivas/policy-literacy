@@ -8,58 +8,25 @@ interface Topic {
 }
 
 // 6 macro-themes as orientation aids — drawn from the paper's appendix (Table 3).
-// These are labels, not structural hierarchy. The 25 topics are the navigational unit.
 const MACRO_THEMES: { id: number; label: string; topicIds: number[] }[] = [
-  {
-    id: 1,
-    label: "Entrepreneurial Intentions & Firm Creation",
-    topicIds: [1, 12, 14, 21],
-  },
-  {
-    id: 2,
-    label: "Ecosystems & Startup Support",
-    topicIds: [5, 8, 10, 16],
-  },
-  {
-    id: 3,
-    label: "Policy Design & Evaluation",
-    topicIds: [6, 7, 11, 13, 15, 17],
-  },
-  {
-    id: 4,
-    label: "Inclusion, Gender & Marginalised Contexts",
-    topicIds: [3, 9, 18, 22, 25],
-  },
-  {
-    id: 5,
-    label: "Digital & Technological Transformation",
-    topicIds: [2, 20, 24],
-  },
-  {
-    id: 6,
-    label: "Sustainability & Green Transition",
-    topicIds: [4, 19, 23],
-  },
+  { id: 1, label: "Entrepreneurial Intentions & Firm Creation", topicIds: [1, 12, 14, 21] },
+  { id: 2, label: "Ecosystems & Startup Support", topicIds: [5, 8, 10, 16] },
+  { id: 3, label: "Policy Design & Evaluation", topicIds: [6, 7, 11, 13, 15, 17] },
+  { id: 4, label: "Inclusion, Gender & Marginalised Contexts", topicIds: [3, 9, 18, 22, 25] },
+  { id: 5, label: "Digital & Technological Transformation", topicIds: [2, 20, 24] },
+  { id: 6, label: "Sustainability & Green Transition", topicIds: [4, 19, 23] },
 ];
 
-// Per-topic colours: match the artefact's topicColors array exactly (index = topic_id - 1)
-// Source: topicColors array in /public/artefact/index.html — read-only, not modified.
 const TOPIC_COLORS: Record<number, string> = {
-  1:  '#FF6B6B', 2:  '#4ECDC4', 3:  '#45B7D1', 4:  '#FFA07A', 5:  '#98D8C8',
-  6:  '#F7DC6F', 7:  '#BB8FCE', 8:  '#85C1E2', 9:  '#F8B739', 10: '#52B788',
+  1: '#FF6B6B', 2: '#4ECDC4', 3: '#45B7D1', 4: '#FFA07A', 5: '#98D8C8',
+  6: '#F7DC6F', 7: '#BB8FCE', 8: '#85C1E2', 9: '#F8B739', 10: '#52B788',
   11: '#E76F51', 12: '#2A9D8F', 13: '#E9C46A', 14: '#F4A261', 15: '#264653',
   16: '#D62828', 17: '#003049', 18: '#F77F00', 19: '#06FFA5', 20: '#7209B7',
   21: '#560BAD', 22: '#3A0CA3', 23: '#4361EE', 24: '#4CC9F0', 25: '#FF006E',
 };
 
-// Macro-theme colours derived from a representative topic in each group
 const THEME_COLORS: Record<number, string> = {
-  1: '#FF6B6B',  // Topic 1
-  2: '#98D8C8',  // Topic 5
-  3: '#F7DC6F',  // Topic 6
-  4: '#45B7D1',  // Topic 3
-  5: '#4ECDC4',  // Topic 2
-  6: '#FFA07A',  // Topic 4
+  1: '#FF6B6B', 2: '#98D8C8', 3: '#F7DC6F', 4: '#45B7D1', 5: '#4ECDC4', 6: '#FFA07A',
 };
 
 function getTopicColor(topicId: number): string {
@@ -76,6 +43,7 @@ export default function IntroModule3() {
   const [activeTheme, setActiveTheme] = useState<number | null>(null);
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     fetch("/artefact/data/topics.json")
@@ -83,7 +51,6 @@ export default function IntroModule3() {
       .then((d: Topic[]) => {
         setTopics(d.sort((a, b) => a.topic_id - b.topic_id));
         setLoading(false);
-        // Stagger-in animation
         setTimeout(() => setRevealed(true), 100);
       });
   }, []);
@@ -105,7 +72,7 @@ export default function IntroModule3() {
       nextIsExternal={true}
     >
       <div className="m3-page">
-        {/* Opening narrative — Fix 4 */}
+        {/* Opening narrative */}
         <div className="m3-header">
           <p className="m3-eyebrow">Step 3 of 3 — The structure</p>
           <h1 className="m3-title">
@@ -134,7 +101,7 @@ export default function IntroModule3() {
             </p>
           </div>
           <p className="m3-note">
-            These groupings are orientation aids drawn from the paper’s appendix.
+            These groupings are orientation aids drawn from the paper's appendix.
             They are not the structure of the field — use them to locate yourself,
             then explore the topics directly.
           </p>
@@ -196,10 +163,7 @@ export default function IntroModule3() {
                   aria-expanded={isExpanded}
                 >
                   <div className="m3-topic-top">
-                    <span
-                      className="m3-topic-num"
-                      style={{ color: topicColor }}
-                    >
+                    <span className="m3-topic-num" style={{ color: topicColor }}>
                       {String(topic.topic_id).padStart(2, "0")}
                     </span>
                     <span className="m3-topic-name">{topic.topic_name}</span>
@@ -213,7 +177,6 @@ export default function IntroModule3() {
                   </div>
                   {isExpanded && (
                     <p className="m3-topic-definition">
-                      {/* Trim the academic citation cruft for readability */}
                       {topic.definition
                         .replace(/\s*\((?:extending|building on)[^)]+\)/g, "")
                         .replace(/\s*\[[^\]]+\]/g, "")
@@ -236,36 +199,55 @@ export default function IntroModule3() {
             It is a measure of <em>presence</em>, not importance.
           </p>
           <p>
-            The full interactive map lets you explore each topic’s papers, its
+            The full interactive map lets you explore each topic's papers, its
             representative terms, and how its presence in the literature varies
             over time. No topic is ranked above another.
           </p>
         </div>
 
-        {/* CTA block — Fix 5 */}
+        {/* CTA block */}
         <div className="m3-cta-block">
-          <h2 className="m3-cta-title">The map is ready.</h2>
+          <h2 className="m3-cta-title">You have seen the field.</h2>
           <div className="m3-cta-body">
-            <p>
-              The network connects 25 research conversations, 125 key terms, and the papers
-              behind them across four decades. The view is dense — that density reflects
-              the field. Enterprise policy has never been a single conversation.
-            </p>
-            <p>
-              Understanding the shape and evolution of this field is a starting point —
-              whether you are designing a policy, building a programme, or simply trying
-              to understand what the research actually covers.
-            </p>
+            <p>Now load the map and explore it directly.</p>
           </div>
           <button
-            onClick={() => { window.location.href = '/artefact/index.html'; }}
+            onClick={() => setModalOpen(true)}
             className="m3-cta-button"
-            id="m3-cta-explore-network"
+            id="m3-cta-load-map"
           >
-            Explore the full field →
+            Load the map →
           </button>
         </div>
       </div>
+
+      {/* Modal overlay */}
+      {modalOpen && (
+        <div className="m3-modal-overlay" onClick={() => setModalOpen(false)}>
+          <div className="m3-modal-card" onClick={(e) => e.stopPropagation()}>
+            <h2 className="m3-modal-title">The map is ready.</h2>
+            <div className="m3-modal-body">
+              <p>
+                The network connects 25 research conversations, 125 key terms, and the papers
+                behind them across four decades. The view is dense — that density reflects
+                the field. Enterprise policy has never been a single conversation.
+              </p>
+              <p>
+                Understanding the shape and evolution of this field is a starting point —
+                whether you are designing a policy, building a programme, or simply trying
+                to understand what the research actually covers.
+              </p>
+            </div>
+            <button
+              onClick={() => { window.location.href = '/artefact/index.html'; }}
+              className="m3-cta-button"
+              id="m3-modal-cta-explore"
+            >
+              Explore the full field →
+            </button>
+          </div>
+        </div>
+      )}
     </ModuleShell>
   );
 }

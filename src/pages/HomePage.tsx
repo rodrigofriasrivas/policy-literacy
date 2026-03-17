@@ -13,8 +13,7 @@ const metrics = [
   },
   {
     value: "25",
-    label: "Topics",
-    prefix: "Structured in",
+    label: "Research topics",
   },
   {
     value: "40+",
@@ -50,25 +49,20 @@ export default function HomePage() {
             A navigational map of 40 years of enterprise policy research.
           </p>
           <div className="homepage-cta-group">
-            <div className="homepage-cta-item">
-              <Link to="/intro/1" className="cta-button homepage-cta-primary" id="hp-cta-start">
-                Start here →
-              </Link>
-              <span className="homepage-cta-sub">Recommended for first-time visitors</span>
-            </div>
-            <div className="homepage-cta-item">
-              <a href="/artefact/index.html" className="cta-secondary homepage-cta-secondary" id="hp-cta-explore">
-                Explore the field
-              </a>
-              <span className="homepage-cta-sub">Go straight to the visualisation</span>
-            </div>
+            <Link to="/intro/1" className="cta-button homepage-cta-primary" id="hp-cta-start">
+              <span className="cta-main-label">Start here</span>
+              <span className="cta-sub-label">Recommended for first-time visitors</span>
+            </Link>
+            <a href="/artefact/index.html" className="homepage-cta-secondary" id="hp-cta-explore">
+              <span className="cta-main-label">Explore the field</span>
+              <span className="cta-sub-label">Go straight to the visualisation</span>
+            </a>
           </div>
 
           {/* Metric cards */}
           <div className="hero-metrics">
             {metrics.map((metric) => (
               <div key={metric.label} className="hero-metric">
-                {metric.prefix && <div className="hero-metric-prefix">{metric.prefix}</div>}
                 <div className="hero-metric-value">{metric.value}</div>
                 <div className="hero-metric-label">{metric.label}</div>
               </div>
