@@ -348,29 +348,31 @@
   margin-top: 2.5rem;
 }
 
-.homepage-cta-item {
-  display: flex;
+/* CTA buttons — inline subtext */
+.homepage-cta-primary,
+.homepage-cta-secondary {
+  display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-}
-
-.homepage-cta-sub {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.02em;
   text-align: center;
+  min-width: 260px;
+  text-decoration: none;
 }
 
-/* Secondary CTA override — needs to look like a button in this context */
+.cta-sub-label {
+  font-size: 11px;
+  opacity: 0.5;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+/* Secondary CTA override — outline style */
 .homepage-cta-secondary {
-  display: inline-block;
   padding: 13px 28px;
   border: 1px solid rgba(255, 255, 255, 0.20);
   border-radius: 4px;
   color: rgba(255, 255, 255, 0.65);
   font-size: 15px;
-  font-weight: 400;
   transition: border-color 0.2s, color 0.2s;
 }
 .homepage-cta-secondary:hover {
