@@ -1614,7 +1614,7 @@
 }
 
 @media (max-width: 480px) {
-  .m2-periods-grid { grid-template-columns: 1fr; }
+  .m2-periods-grid .m2-period-card { flex: 0 0 100% !important; }
 }
 
 /* ========================================
