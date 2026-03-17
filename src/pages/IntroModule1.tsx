@@ -1,13 +1,6 @@
 import { useAsciiAnimation } from "@/hooks/useAsciiAnimation";
 import { ModuleShell } from "@/components/intro/ModuleShell";
 
-const FIELD_FACTS = [
-  { value: "5,800+", label: "Academic papers" },
-  { value: "40+", label: "Years of scholarship" },
-  { value: "25", label: "Research conversations" },
-  { value: "125", label: "Key terms across the field" },
-];
-
 export default function IntroModule1() {
   const asciiWords = useAsciiAnimation();
 
@@ -72,16 +65,6 @@ export default function IntroModule1() {
               This artefact orients — it makes the landscape visible and navigable so that
               evaluation, judgement, and contextual knowledge can do their work.
             </p>
-          </div>
-
-          {/* Scale metrics */}
-          <div className="m1-metrics">
-            {FIELD_FACTS.map((f) => (
-              <div key={f.label} className="m1-metric">
-                <span className="m1-metric-value">{f.value}</span>
-                <span className="m1-metric-label">{f.label}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
