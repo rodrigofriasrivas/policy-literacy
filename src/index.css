@@ -578,11 +578,36 @@
     font-size: 24px;
   }
 
+  .ascii-container {
+    height: auto;
+    min-height: 70vh;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
   .home-nav {
-    gap: 16px;
-    font-size: 12px;
-    flex-wrap: wrap;
-    padding: 0 16px;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: rgba(10, 12, 18, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 16px 24px;
+    gap: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .home-nav.mobile-menu-open {
+    display: flex;
+  }
+
+  .home-nav a::after {
+    display: none;
   }
 
   .cta-button {
