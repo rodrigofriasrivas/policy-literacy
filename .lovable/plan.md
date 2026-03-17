@@ -1,21 +1,29 @@
 
 
-# Fix: Remove leftover code causing SyntaxError on line 4482
+# Add Temporary Audit Table Below Corpus Growth Chart
 
-## Root cause
+## What and where
 
-A previous edit intended to remove the "Emerging vs Declining Topics" (Card 3) only removed the function header and `try` block of `fetchAndRenderEmergence`, but left behind the `catch` block residue (lines 4476-4483) and the entire `renderEmergenceTables` function (lines 4485-4577). The orphaned `catch` block creates a **SyntaxError: Unexpected token '}'** at line 4482, which prevents the entire `<script>` from parsing — so `loadData()` is never defined and the network visualization never starts.
+Insert a compact HTML table directly after the `corpus-growth-chart` div (line 1484), inside the same `stitch-card`. The table will be populated by the same `fetchAndRenderCorpusGrowth()` function using the same `fullData` array.
 
-## Fix
+## Changes
 
-Delete lines 4476-4577 in `public/artefact/index.html`. This removes:
-- Line 4476: `// fetchAndRenderEmergence — removed` comment
-- Lines 4477-4483: orphaned `catch` block / closing braces causing the syntax error
-- Lines 4485-4577: the now-unused `renderEmergenceTables()` function
+### 1. HTML: Add audit table container (after line 1484)
 
-No other files are touched. The line immediately before (4474-4475) ends `renderCorpusGrowthChart`, and the line after (4578+) starts `renderTemporalChart` — both remain intact.
+Add a `<div id="corpus-growth-audit">` placeholder right after the chart div, before the closing `</div>` of the card (line 1485).
 
-## Files changed
+### 2. JS: Render audit table from same data (in `fetchAndRenderCorpusGrowth`, after line 4466)
 
-- `public/artefact/index.html` — delete lines 4476-4577
+After `renderCorpusChartD3(container, fullData)`, build and inject a compact HTML table into `#corpus-growth-audit` using the same `fullData` array:
+- Two columns: Year | Papers
+- Final row: **Total** | sum
+- Compact styling: small font, monospace numbers, border-collapse, themed colors via CSS variables
+- Horizontal scroll wrapper if needed
+- Inline styles using existing CSS variables (`--text-primary`, `--text-secondary`, `--input-bg`, `--input-border`)
+
+### 3. No other changes
+
+- Chart rendering untouched
+- No other sections modified
+- Temporary — clearly labeled as "Audit Table"
 
