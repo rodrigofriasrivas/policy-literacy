@@ -201,7 +201,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 260px);
   width: 100vw;
   position: relative;
 }
@@ -338,13 +338,14 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* Homepage dual-CTA layout — Fix 6 */
+/* Homepage dual-CTA layout */
 .homepage-cta-group {
   display: flex;
   align-items: flex-start;
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  margin-top: 2.5rem;
 }
 
 .homepage-cta-item {
@@ -438,6 +439,62 @@
   transform: scaleX(1);
 }
 
+/* Metric prefix line */
+.hero-metric-prefix {
+  font-size: 11px;
+  color: var(--home-muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+/* Mobile hamburger menu */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1001;
+}
+
+.hamburger-icon {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.7);
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.hamburger-icon::before,
+.hamburger-icon::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 22px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease;
+}
+
+.hamburger-icon::before { top: -7px; }
+.hamburger-icon::after { top: 7px; }
+
+.hamburger-icon.hamburger-open {
+  background: transparent;
+}
+
+.hamburger-icon.hamburger-open::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.hamburger-icon.hamburger-open::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
 /* Site-wide dark glass footer */
 .site-footer {
   background: rgba(10, 10, 10, 0.7);
@@ -521,11 +578,36 @@
     font-size: 24px;
   }
 
+  .ascii-container {
+    height: auto;
+    min-height: 70vh;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+
   .home-nav {
-    gap: 16px;
-    font-size: 12px;
-    flex-wrap: wrap;
-    padding: 0 16px;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: rgba(10, 12, 18, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 16px 24px;
+    gap: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .home-nav.mobile-menu-open {
+    display: flex;
+  }
+
+  .home-nav a::after {
+    display: none;
   }
 
   .cta-button {
@@ -564,10 +646,6 @@
     font-size: 11px;
   }
 
-  .home-nav {
-    gap: 12px;
-    font-size: 11px;
-  }
 
   .transparent-header {
     padding: 12px 0;

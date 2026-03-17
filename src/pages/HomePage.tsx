@@ -1,24 +1,27 @@
 import { Link } from "react-router-dom";
 import { HomeLayout } from "@/components/layout/HomeLayout";
 import { useAsciiAnimation } from "@/hooks/useAsciiAnimation";
+
 const metrics = [
   {
     value: "5,800",
-    label: "Academic papers",
+    label: "Papers analysed",
   },
   {
     value: "125",
-    label: "Terms",
+    label: "Key terms mapped",
   },
   {
     value: "25",
     label: "Topics",
+    prefix: "Structured in",
   },
   {
     value: "40+",
-    label: "Years of evolution",
+    label: "Years of research",
   },
 ];
+
 export default function HomePage() {
   const asciiWords = useAsciiAnimation();
   return (
@@ -44,7 +47,7 @@ export default function HomePage() {
             Enterprise Policy Literacy
           </h1>
           <p className="hero-subtitle">
-            Mapping decades of entrepreneurship and enterprise policy research through advanced network visualization.
+            A navigational map of 40 years of enterprise policy research.
           </p>
           <div className="homepage-cta-group">
             <div className="homepage-cta-item">
@@ -65,6 +68,7 @@ export default function HomePage() {
           <div className="hero-metrics">
             {metrics.map((metric) => (
               <div key={metric.label} className="hero-metric">
+                {metric.prefix && <div className="hero-metric-prefix">{metric.prefix}</div>}
                 <div className="hero-metric-value">{metric.value}</div>
                 <div className="hero-metric-label">{metric.label}</div>
               </div>

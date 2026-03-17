@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink as RouterNavLink, Link } from "react-router-dom";
 
 const navItems = [
@@ -12,28 +13,39 @@ interface SiteHeaderProps {
 }
 
 export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const renderNavLink = (item: typeof navItems[0], onClick?: () => void) =>
+    item.external ? (
+      <a key={item.path} href={item.path} onClick={onClick}>
+        {item.label}
+      </a>
+    ) : (
+      <RouterNavLink
+        key={item.path}
+        to={item.path}
+        className={({ isActive }) => (isActive ? "active" : "")}
+        onClick={onClick}
+      >
+        {item.label}
+      </RouterNavLink>
+    );
+
   if (variant === "transparent") {
     return (
       <header className="transparent-header">
         <Link to="/" className="home-brand">
           Enterprise Policy Literacy Tool
         </Link>
-        <nav className="home-nav">
-        {navItems.map((item) =>
-            item.external ? (
-              <a key={item.path} href={item.path}>
-                {item.label}
-              </a>
-            ) : (
-              <RouterNavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) => isActive ? "active" : ""}
-              >
-                {item.label}
-              </RouterNavLink>
-            )
-          )}
+        <button
+          className="mobile-menu-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          <span className={`hamburger-icon ${menuOpen ? "hamburger-open" : ""}`} />
+        </button>
+        <nav className={`home-nav ${menuOpen ? "mobile-menu-open" : ""}`}>
+          {navItems.map((item) => renderNavLink(item, () => setMenuOpen(false)))}
         </nav>
       </header>
     );
@@ -52,7 +64,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
             </p>
           </Link>
           <nav className="flex gap-6">
-          {navItems.map((item) =>
+            {navItems.map((item) =>
               item.external ? (
                 <a
                   key={item.path}
