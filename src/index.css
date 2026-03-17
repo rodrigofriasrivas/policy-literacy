@@ -338,13 +338,14 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* Homepage dual-CTA layout — Fix 6 */
+/* Homepage dual-CTA layout */
 .homepage-cta-group {
   display: flex;
   align-items: flex-start;
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  margin-top: 2.5rem;
 }
 
 .homepage-cta-item {
