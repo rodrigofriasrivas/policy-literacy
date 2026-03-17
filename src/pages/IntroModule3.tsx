@@ -132,9 +132,6 @@ export default function IntroModule3() {
               conversation, not a ranking. Some appear frequently across the entire 40-year period;
               others are concentrated in particular decades. None sits above another.
             </p>
-            <p className="m3-epistemic-note">
-              <em>This is a representation of how the field has developed — not a definitive picture of it.</em>
-            </p>
           </div>
           <p className="m3-note">
             These groupings are orientation aids drawn from the paper’s appendix.
