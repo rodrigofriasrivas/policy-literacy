@@ -174,7 +174,7 @@ export default function IntroModule2() {
                       {/* Tooltip — Fix 3e */}
                       {isHovered && (
                         <div className="m2-bar-tooltip">
-                          {d.year} — {d.count} papers
+                          {d.year} — {d.count} papers that year · {cumulativeByYear.get(d.year)?.toLocaleString()} total to date
                         </div>
                       )}
                       {/* Year label — every 5 years */}
