@@ -126,12 +126,11 @@ export default function IntroModule2() {
             <>
               {/* Period bands (background) */}
               <div className="m2-period-bands">
-                {PERIOD_ANNOTATIONS.map((period, i) => {
-                  const totalYears = lastYear - firstYear + 1;
-                  const left =
-                    ((period.startYear - firstYear) / totalYears) * 100;
-                  const width =
-                    ((period.endYear - period.startYear + 1) / totalYears) * 100;
+              {PERIOD_ANNOTATIONS.map((period, i) => {
+                  const bandLefts = [0, 28, 53, 75];
+                  const bandWidths = [28, 25, 22, 25];
+                  const left = bandLefts[i];
+                  const width = bandWidths[i];
                   return (
                     <div
                       key={i}
