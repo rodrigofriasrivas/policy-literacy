@@ -264,11 +264,6 @@ export default function IntroModule3() {
           >
             Explore the full field →
           </button>
-          <p className="m3-cta-note">
-            Epistemic caution: this map is a computational representation of
-            patterns in a sample. It is not a definitive picture of the field.
-            Use it to orient — not to validate.
-          </p>
         </div>
       </div>
     </ModuleShell>

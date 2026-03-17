@@ -1741,6 +1741,9 @@
   gap: 8px;
   margin-bottom: 48px;
 }
+@media (min-width: 1025px) {
+  .m3-grid { grid-template-columns: repeat(5, 1fr); }
+}
 
 .m3-topic-card {
   background: rgba(255,255,255,0.02);
