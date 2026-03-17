@@ -1,38 +1,29 @@
 
 
-# Update bar chart tooltip to show cumulative totals
+# Add Temporary Audit Table Below Corpus Growth Chart
 
-## Change
+## What and where
 
-In `src/pages/IntroModule2.tsx`, two modifications:
+Insert a compact HTML table directly after the `corpus-growth-chart` div (line 1484), inside the same `stitch-card`. The table will be populated by the same `fetchAndRenderCorpusGrowth()` function using the same `fullData` array.
 
-1. **Pre-compute cumulative totals** after data loads — create a `Map<number, number>` mapping each year to its running total.
+## Changes
 
-2. **Update tooltip text** (around line 141) from `{d.year} — {d.count} papers` to `{d.year} — {d.count} papers that year · {cumulative.toLocaleString()} total to date`.
+### 1. HTML: Add audit table container (after line 1484)
 
-### Implementation detail
+Add a `<div id="corpus-growth-audit">` placeholder right after the chart div, before the closing `</div>` of the card (line 1485).
 
-After `data` is set, derive cumulative map with `useMemo`:
+### 2. JS: Render audit table from same data (in `fetchAndRenderCorpusGrowth`, after line 4466)
 
-```tsx
-const cumulativeByYear = useMemo(() => {
-  const map = new Map<number, number>();
-  let running = 0;
-  for (const d of data) {
-    running += d.count;
-    map.set(d.year, running);
-  }
-  return map;
-}, [data]);
-```
+After `renderCorpusChartD3(container, fullData)`, build and inject a compact HTML table into `#corpus-growth-audit` using the same `fullData` array:
+- Two columns: Year | Papers
+- Final row: **Total** | sum
+- Compact styling: small font, monospace numbers, border-collapse, themed colors via CSS variables
+- Horizontal scroll wrapper if needed
+- Inline styles using existing CSS variables (`--text-primary`, `--text-secondary`, `--input-bg`, `--input-border`)
 
-Then in the tooltip JSX (line ~141):
-```tsx
-<div className="m2-bar-tooltip">
-  {d.year} — {d.count} papers that year · {cumulativeByYear.get(d.year)?.toLocaleString()} total to date
-</div>
-```
+### 3. No other changes
 
-## Files changed
-- `src/pages/IntroModule2.tsx`
+- Chart rendering untouched
+- No other sections modified
+- Temporary — clearly labeled as "Audit Table"
 

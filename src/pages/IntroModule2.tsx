@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { ModuleShell } from "@/components/intro/ModuleShell";
 
 interface PaperByYear {
@@ -80,6 +80,16 @@ export default function IntroModule2() {
   const maxCount = data.length ? Math.max(...data.map((d) => d.count)) : 1;
   const firstYear = data[0]?.year ?? 1979;
   const lastYear = data[data.length - 1]?.year ?? 2025;
+
+  const cumulativeByYear = useMemo(() => {
+    const map = new Map<number, number>();
+    let running = 0;
+    for (const d of data) {
+      running += d.count;
+      map.set(d.year, running);
+    }
+    return map;
+  }, [data]);
 
   function getPeriodForYear(year: number) {
     return PERIOD_ANNOTATIONS.findIndex(
@@ -164,7 +174,7 @@ export default function IntroModule2() {
                       {/* Tooltip — Fix 3e */}
                       {isHovered && (
                         <div className="m2-bar-tooltip">
-                          {d.year} — {d.count} papers
+                          {d.year} — {d.count} papers that year · {cumulativeByYear.get(d.year)?.toLocaleString()} total to date
                         </div>
                       )}
                       {/* Year label — every 5 years */}
