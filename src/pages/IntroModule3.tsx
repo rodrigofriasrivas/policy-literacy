@@ -235,20 +235,23 @@ export default function IntroModule3() {
             <h2 className="m3-modal-title">The map is ready.</h2>
             <div className="m3-modal-body">
               <p>
-                The network connects 25 research conversations, 125 key terms, and the papers
-                behind them across four decades. The view is dense — that density reflects
-                the field. Enterprise policy has never been a single conversation.
+                The visualisation displays 5,800 papers distributed across 25 research topics
+                and 125 key terms, spanning four decades. Topics are arranged by co-occurrence
+                patterns — proximity reflects shared vocabulary, not importance.
               </p>
               <p>
-                Understanding the shape and evolution of this field is a starting point —
-                whether you are designing a policy, building a programme, or simply trying
-                to understand what the research actually covers.
+                Use the panel on the left to filter by topic, time period, or journal.
               </p>
+            </div>
+            <div className="m3-loading-bar-track">
+              <div className={`m3-loading-bar-fill ${modalOpen ? "is-animating" : ""}`} />
             </div>
             <button
               onClick={() => { window.location.href = '/artefact/index.html'; }}
               className="m3-cta-button"
               id="m3-modal-cta-explore"
+              disabled={!buttonEnabled}
+              style={{ opacity: buttonEnabled ? 1 : 0.4, cursor: buttonEnabled ? 'pointer' : 'not-allowed' }}
             >
               Explore the full field →
             </button>
