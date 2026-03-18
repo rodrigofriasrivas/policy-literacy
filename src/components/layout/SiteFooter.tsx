@@ -10,19 +10,12 @@ export function SiteFooter() {
           alt="Durham University"
           className="footer-logo"
         />
-        <p className="footer-content">
-          <em className="footer-disclaimer">
+        <div className="footer-text-stack">
+          <p className="footer-line-1">
             This artefact maps the research landscape; it does not evaluate, rank, or recommend evidence.
-          </em>
-          <span className="footer-sep">·</span>
-          <Link to="/about#data-sources" className="footer-link">Data sources</Link>
-          <span className="footer-sep">·</span>
-          <span>Version: v1.2025</span>
-          <span className="footer-sep">·</span>
-          <span>Last updated: Feb 2026</span>
-          <span className="footer-sep">·</span>
-          <span>
-            ©{" "}
+          </p>
+          <p className="footer-line-2">
+            Artefact researched, designed and developed by{" "}
             <a
               href="https://rodrigofrias.com"
               target="_blank"
@@ -31,8 +24,12 @@ export function SiteFooter() {
             >
               Rodrigo Frías
             </a>
-          </span>
-        </p>
+            <span className="footer-sep">·</span>
+            v1.2026
+            <span className="footer-sep">·</span>
+            March 2026
+          </p>
+        </div>
       </div>
     </footer>
   );
