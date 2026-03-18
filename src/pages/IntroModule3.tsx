@@ -78,9 +78,8 @@ export default function IntroModule3() {
     <ModuleShell
       step={3}
       prevPath="/intro/2"
-      nextPath="/artefact/index.html"
-      nextLabel="Explore the full field"
-      nextIsExternal={true}
+      nextLabel="Load the map"
+      onNextClick={() => setModalOpen(true)}
     >
       <div className="m3-page">
         {/* Opening narrative */}
