@@ -49,7 +49,7 @@ export default function IntroModule1() {
           <p className="m1-eyebrow">Step 1 of 3 — The Problem</p>
 
           <h1 className="m1-title">
-            The field is large and hard to read.
+            Four decades of enterprise policy research remain difficult to navigate as a field.
           </h1>
 
           <p className="m1-lead">

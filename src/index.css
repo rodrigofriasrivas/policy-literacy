@@ -1225,31 +1225,43 @@
   border-top: 1px solid rgba(255,255,255,0.07);
 }
 
-/* Permanent epistemic label — inside the fixed bar */
-.module-epistemic {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  font-size: 11px;
-  color: rgba(255,255,255,0.32);
-  letter-spacing: 0.01em;
-  line-height: 1.5;
-}
-.module-epistemic-icon {
-  font-size: 13px;
-  flex-shrink: 0;
-  color: rgba(255,255,255,0.20);
-}
-
-/* Bottom navigation row */
+/* Single-row footer navigation */
 .module-footnav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 40px;
+  padding: 12px 40px;
   background: transparent;
+  gap: 16px;
+}
+
+.module-footnav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.module-footnav-right {
+  flex-shrink: 0;
+}
+
+/* Epistemic label — inline with nav */
+.module-epistemic {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.32);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  min-width: 0;
+}
+.module-epistemic-icon {
+  font-size: 11px;
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.20);
 }
 
 .module-footnav-back {
