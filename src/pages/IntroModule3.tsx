@@ -205,25 +205,12 @@ export default function IntroModule3() {
             These 25 topics are the product of a computational text analysis of
             {" "}5,800+ paper titles and abstracts. Each topic represents a pattern
             of word co-occurrence — not an editorial judgement about importance.
-            Frequency reflects how often a pattern appears across the corpus.
-            It is a measure of <em>presence</em>, not importance.
-          </p>
-          <p>
-            The full interactive map lets you explore each topic's papers, its
+            Frequency reflects how often a pattern appears across the corpus
+            — it is a measure of <em>presence</em>, not importance. The full
+            interactive map lets you explore each topic's papers, its
             representative terms, and how its presence in the literature varies
             over time. No topic is ranked above another.
           </p>
-        </div>
-
-        {/* Standalone CTA */}
-        <div className="m3-standalone-cta">
-          <button
-            onClick={() => setModalOpen(true)}
-            className="m3-cta-button"
-            id="m3-cta-load-map"
-          >
-            Load the map →
-          </button>
         </div>
       </div>
 

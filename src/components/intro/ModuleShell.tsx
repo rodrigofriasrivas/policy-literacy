@@ -86,13 +86,17 @@ export function ModuleShell({
           ) : (
             <span />
           )}
-          {nextPath &&
-            (nextIsExternal ? (
+          {(nextPath || onNextClick) &&
+            (onNextClick ? (
+              <button onClick={onNextClick} className="module-footnav-next" id={`module-cta-step-${step}`}>
+                {nextLabel} →
+              </button>
+            ) : nextIsExternal ? (
               <button onClick={() => { window.location.href = nextPath!; }} className="module-footnav-next" id={`module-cta-step-${step}`}>
                 {nextLabel} →
               </button>
             ) : (
-              <Link to={nextPath} className="module-footnav-next" id={`module-cta-step-${step}`}>
+              <Link to={nextPath!} className="module-footnav-next" id={`module-cta-step-${step}`}>
                 {nextLabel} →
               </Link>
             ))}
