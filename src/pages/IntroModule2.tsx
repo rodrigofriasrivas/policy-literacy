@@ -131,75 +131,88 @@ export default function IntroModule2() {
 
         {/* Chart area */}
         <div className="m2-chart-outer" ref={chartRef}>
-          {loading ? (
-            <div className="m2-loading">Loading corpus data…</div>
-          ) : (
-            <>
-              {/* Period bands (background) */}
-              <div className="m2-period-bands">
-              {PERIOD_ANNOTATIONS.map((period, i) => {
-                  const bandLefts = [0, 28, 53, 75];
-                  const bandWidths = [28, 25, 22, 25];
-                  const left = bandLefts[i];
-                  const width = bandWidths[i];
-                  return (
-                    <div
-                      key={i}
-                      className={`m2-period-band ${i % 2 === 0 ? "m2-period-band--even" : ""} ${activePeriod === i ? "is-active" : ""}`}
-                      style={{ left: `${left}%`, width: `${width}%` }}
-                      onMouseEnter={() => setActivePeriod(i)}
-                      onMouseLeave={() => setActivePeriod(null)}
-                    >
-                      <span className="m2-period-label">{period.label}</span>
-                    </div>
-                  );
-                })}
+          {!loading && (
+            <div className="m2-yaxis">
+              <span className="m2-yaxis-label">Papers published per year</span>
+              <div className="m2-yaxis-ticks">
+                {yTicks.map((tick) => (
+                  <span
+                    key={tick}
+                    className="m2-yaxis-tick"
+                    style={{ bottom: `${(tick / maxCount) * 100}%` }}
+                  >
+                    {tick}
+                  </span>
+                ))}
               </div>
-
-              {/* Bars — Fix 3e: tooltip on hover */}
-              <div className="m2-bars">
-                {data.map((d) => {
-                  const periodIdx = getPeriodForYear(d.year);
-                  const heightPct = (d.count / maxCount) * 100;
-                  const isHovered = hoveredBar?.year === d.year;
-                  return (
-                    <div
-                      key={d.year}
-                      className={`m2-bar-wrap ${activePeriod !== null && activePeriod !== periodIdx ? "m2-bar-wrap--muted" : ""}`}
-                      onMouseEnter={() => {
-                        setActivePeriod(periodIdx);
-                        setHoveredBar({ year: d.year, count: d.count });
-                      }}
-                      onMouseLeave={() => {
-                        setActivePeriod(null);
-                        setHoveredBar(null);
-                      }}
-                    >
-                      <div
-                        className={`m2-bar m2-bar--p${periodIdx}`}
-                        style={{
-                          height: animatedBars ? `${heightPct}%` : "0%",
-                        }}
-                      />
-                      {/* Tooltip — Fix 3e */}
-                      {isHovered && (
-                        <div className="m2-bar-tooltip">
-                          {d.year} — {d.count} papers that year · {cumulativeByYear.get(d.year)?.toLocaleString()} total to date
-                        </div>
-                      )}
-                      {/* Year label — every 5 years */}
-                      {d.year % 5 === 0 && (
-                        <span className="m2-year-tick">{d.year}</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Y-axis label — Fix 3d */}
-              <div className="m2-yaxis-label">Papers published per year</div>
-            </>
+            </div>
           )}
+          <div className="m2-chart-canvas">
+            {loading ? (
+              <div className="m2-loading">Loading corpus data…</div>
+            ) : (
+              <>
+                {/* Period bands (background) */}
+                <div className="m2-period-bands">
+                  {PERIOD_ANNOTATIONS.map((period, i) => {
+                    const bandLefts = [0, 28, 53, 75];
+                    const bandWidths = [28, 25, 22, 25];
+                    const left = bandLefts[i];
+                    const width = bandWidths[i];
+                    return (
+                      <div
+                        key={i}
+                        className={`m2-period-band ${i % 2 === 0 ? "m2-period-band--even" : ""} ${activePeriod === i ? "is-active" : ""}`}
+                        style={{ left: `${left}%`, width: `${width}%` }}
+                        onMouseEnter={() => setActivePeriod(i)}
+                        onMouseLeave={() => setActivePeriod(null)}
+                      >
+                        <span className="m2-period-label">{period.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Bars */}
+                <div className="m2-bars">
+                  {data.map((d) => {
+                    const periodIdx = getPeriodForYear(d.year);
+                    const heightPct = (d.count / maxCount) * 100;
+                    const isHovered = hoveredBar?.year === d.year;
+                    return (
+                      <div
+                        key={d.year}
+                        className={`m2-bar-wrap ${activePeriod !== null && activePeriod !== periodIdx ? "m2-bar-wrap--muted" : ""}`}
+                        onMouseEnter={() => {
+                          setActivePeriod(periodIdx);
+                          setHoveredBar({ year: d.year, count: d.count });
+                        }}
+                        onMouseLeave={() => {
+                          setActivePeriod(null);
+                          setHoveredBar(null);
+                        }}
+                      >
+                        <div
+                          className={`m2-bar m2-bar--p${periodIdx}`}
+                          style={{
+                            height: animatedBars ? `${heightPct}%` : "0%",
+                          }}
+                        />
+                        {isHovered && (
+                          <div className="m2-bar-tooltip">
+                            {d.year} — {d.count} papers that year · {cumulativeByYear.get(d.year)?.toLocaleString()} total to date
+                          </div>
+                        )}
+                        {d.year % 5 === 0 && (
+                          <span className="m2-year-tick">{d.year}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Period annotation cards — Fix 3c: key terms + ref anchors */}
