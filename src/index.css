@@ -1793,9 +1793,10 @@
 /* Y-axis label — rotated, vertically centred in .m2-yaxis */
 .m2-yaxis-label {
   position: absolute;
-  left: 50%;
+  left: 4px;
   top: 50%;
-  transform: translate(-50%, -50%) rotate(-90deg);
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: center center;
   font-size: 10px;
   color: rgba(255,255,255,0.22);
   letter-spacing: 0.05em;
