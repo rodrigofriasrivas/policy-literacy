@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { NavLink as RouterNavLink, Link } from "react-router-dom";
+import { NavLink as RouterNavLink, Link, useLocation } from "react-router-dom";
 
-const navItems = [
+const homepageNavItems = [
+  { path: "/about", label: "About the project", external: false },
+  { path: "/contact", label: "Contact", external: false },
+];
+
+const interiorNavItems = [
   { path: "/artefact/index.html", label: "Network visualisation", external: true },
   { path: "/about", label: "About the project", external: false },
-  { path: "/policy", label: "Policy engagement", external: false },
   { path: "/contact", label: "Contact", external: false },
 ];
 
@@ -14,6 +18,9 @@ interface SiteHeaderProps {
 
 export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHomepage = location.pathname === "/";
+  const navItems = isHomepage ? homepageNavItems : interiorNavItems;
 
   const renderNavLink = (item: typeof navItems[0], onClick?: () => void) =>
     item.external ? (
@@ -34,9 +41,11 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
   if (variant === "transparent") {
     return (
       <header className="transparent-header">
-        <Link to="/" className="home-brand">
-          Enterprise Policy Literacy Tool
-        </Link>
+        {!isHomepage && (
+          <Link to="/" className="home-brand">
+            Enterprise Policy Literacy Tool
+          </Link>
+        )}
         <button
           className="mobile-menu-toggle"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -57,7 +66,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
         <div className="flex items-center justify-between">
           <Link to="/" className="block">
             <h1 className="text-xl font-normal tracking-tight text-foreground">
-              Enterprise Policy Literacy
+              Enterprise Policy Literacy Tool
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               A research artefact for navigating entrepreneurship policy scholarship
