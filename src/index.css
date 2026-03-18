@@ -1546,7 +1546,7 @@
 /* Y-axis column */
 .m2-yaxis {
   position: relative;
-  width: 48px;
+  width: 72px;
   flex-shrink: 0;
 }
 
