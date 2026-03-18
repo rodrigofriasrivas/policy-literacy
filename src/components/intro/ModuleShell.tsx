@@ -9,6 +9,8 @@ interface ModuleShellProps {
   nextLabel?: string;
   /** If true, the next CTA is a hard navigation (external static file) */
   nextIsExternal?: boolean;
+  /** Custom click handler for the next button (overrides navigation) */
+  onNextClick?: () => void;
 }
 
 const STEPS = [
