@@ -1536,11 +1536,44 @@
 
 /* Chart container */
 .m2-chart-outer {
-  position: relative;
+  display: flex;
+  align-items: stretch;
   height: 280px;
   margin-bottom: 36px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
   max-width: 900px;
+}
+
+/* Y-axis column */
+.m2-yaxis {
+  position: relative;
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.m2-yaxis-ticks {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+}
+
+.m2-yaxis-tick {
+  position: absolute;
+  right: 8px;
+  font-size: 9px;
+  color: rgba(255,255,255,0.30);
+  transform: translateY(50%);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* Chart canvas (bars + bands) */
+.m2-chart-canvas {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .m2-loading {
@@ -1642,19 +1675,7 @@
   pointer-events: none;
 }
 
-/* Y-axis label */
-.m2-yaxis-label {
-  position: absolute;
-  left: -48px;
-  top: 50%;
-  transform: rotate(-90deg) translateX(50%);
-  font-size: 10px;
-  color: rgba(255,255,255,0.20);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  transform-origin: left center;
-}
+/* Y-axis label (inside .m2-yaxis column) */
 
 /* Period annotation cards */
 .m2-periods-grid {
@@ -1767,18 +1788,18 @@
   backdrop-filter: blur(8px);
 }
 
-/* Fix 3d — Y-axis label positioning */
+/* Y-axis label — rotated, vertically centred in .m2-yaxis */
 .m2-yaxis-label {
   position: absolute;
-  left: -8px;
+  left: 50%;
   top: 50%;
-  transform: translateX(-100%) rotate(-90deg);
-  transform-origin: right center;
+  transform: translate(-50%, -50%) rotate(-90deg);
   font-size: 10px;
   color: rgba(255,255,255,0.22);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 @media (max-width: 720px) {
@@ -1786,7 +1807,7 @@
   .m2-chart-outer { height: 200px; margin-bottom: 28px; }
   .m2-periods-grid { flex-wrap: wrap; }
   .m2-periods-grid .m2-period-card { flex: 0 0 50% !important; }
-  .m2-yaxis-label { display: none; }
+  .m2-yaxis { display: none; }
 }
 
 @media (max-width: 480px) {
