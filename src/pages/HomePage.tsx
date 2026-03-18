@@ -43,7 +43,7 @@ export default function HomePage() {
         {/* Hero Overlay with soft vignette */}
         <div className="hero-overlay">
           <h1 className="hero-title font-serif whitespace-nowrap" style={{ fontSize: "clamp(2rem, 5.5vw, 6rem)" }}>
-            Enterprise Policy Literacy
+            Enterprise Policy Literacy Tool
           </h1>
           <p className="hero-subtitle">
             A navigational map of 40 years of enterprise policy research.

@@ -41,9 +41,11 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
   if (variant === "transparent") {
     return (
       <header className="transparent-header">
-        <Link to="/" className="home-brand">
-          Enterprise Policy Literacy Tool
-        </Link>
+        {!isHomepage && (
+          <Link to="/" className="home-brand">
+            Enterprise Policy Literacy Tool
+          </Link>
+        )}
         <button
           className="mobile-menu-toggle"
           onClick={() => setMenuOpen(!menuOpen)}
