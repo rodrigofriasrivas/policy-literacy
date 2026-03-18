@@ -69,37 +69,39 @@ export function ModuleShell({
         {children}
       </main>
 
-      {/* Fixed bottom bar: epistemic label + navigation */}
+      {/* Fixed bottom bar: single-row layout */}
       <div className="module-footnav-bar">
-        <div className="module-epistemic">
-          <span className="module-epistemic-icon">⊗</span>
-          This map reflects patterns in a sample of academic literature. It does not indicate hierarchy or recommendation.
-        </div>
         <nav className="module-footnav">
-          {prevPath ? (
-            <button
-              className="module-footnav-back"
-              onClick={() => navigate(prevPath)}
-            >
-              ← Back
-            </button>
-          ) : (
-            <span />
-          )}
-          {(nextPath || onNextClick) &&
-            (onNextClick ? (
-              <button onClick={onNextClick} className="module-footnav-next" id={`module-cta-step-${step}`}>
-                {nextLabel} →
+          <div className="module-footnav-left">
+            {prevPath && (
+              <button
+                className="module-footnav-back"
+                onClick={() => navigate(prevPath)}
+              >
+                ← Back
               </button>
-            ) : nextIsExternal ? (
-              <button onClick={() => { window.location.href = nextPath!; }} className="module-footnav-next" id={`module-cta-step-${step}`}>
-                {nextLabel} →
-              </button>
-            ) : (
-              <Link to={nextPath!} className="module-footnav-next" id={`module-cta-step-${step}`}>
-                {nextLabel} →
-              </Link>
-            ))}
+            )}
+            <div className="module-epistemic">
+              <span className="module-epistemic-icon">⊗</span>
+              This map reflects patterns in a sample of academic literature. It does not indicate hierarchy or recommendation.
+            </div>
+          </div>
+          <div className="module-footnav-right">
+            {(nextPath || onNextClick) &&
+              (onNextClick ? (
+                <button onClick={onNextClick} className="module-footnav-next" id={`module-cta-step-${step}`}>
+                  {nextLabel} →
+                </button>
+              ) : nextIsExternal ? (
+                <button onClick={() => { window.location.href = nextPath!; }} className="module-footnav-next" id={`module-cta-step-${step}`}>
+                  {nextLabel} →
+                </button>
+              ) : (
+                <Link to={nextPath!} className="module-footnav-next" id={`module-cta-step-${step}`}>
+                  {nextLabel} →
+                </Link>
+              ))}
+          </div>
         </nav>
       </div>
     </div>
