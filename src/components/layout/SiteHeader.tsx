@@ -66,7 +66,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
         <div className="flex items-center justify-between">
           <Link to="/" className="block">
             <h1 className="text-xl font-normal tracking-tight text-foreground">
-              Enterprise Policy Literacy
+              Enterprise Policy Literacy Tool
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               A research artefact for navigating entrepreneurship policy scholarship
