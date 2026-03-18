@@ -1305,8 +1305,8 @@
   .module-sequencer { gap: 0; padding: 10px 12px; }
   .module-step-label { display: none; }
   .module-step { padding: 6px 10px; }
-  .module-footnav { padding: 12px 16px; }
-  .module-epistemic { padding: 6px 16px; }
+  .module-footnav { padding: 10px 16px; gap: 10px; }
+  .module-epistemic { font-size: 0.6rem; }
 }
 
 /* ========================================
