@@ -1788,18 +1788,18 @@
   backdrop-filter: blur(8px);
 }
 
-/* Fix 3d — Y-axis label positioning */
+/* Y-axis label — rotated, vertically centred in .m2-yaxis */
 .m2-yaxis-label {
   position: absolute;
-  left: -8px;
+  left: 50%;
   top: 50%;
-  transform: translateX(-100%) rotate(-90deg);
-  transform-origin: right center;
+  transform: translate(-50%, -50%) rotate(-90deg);
   font-size: 10px;
   color: rgba(255,255,255,0.22);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 @media (max-width: 720px) {
