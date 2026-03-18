@@ -44,6 +44,17 @@ export default function IntroModule3() {
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [buttonEnabled, setButtonEnabled] = useState(false);
+
+  useEffect(() => {
+    if (modalOpen) {
+      setButtonEnabled(false);
+      const timer = setTimeout(() => setButtonEnabled(true), 2500);
+      return () => clearTimeout(timer);
+    } else {
+      setButtonEnabled(false);
+    }
+  }, [modalOpen]);
 
   useEffect(() => {
     fetch("/artefact/data/topics.json")
