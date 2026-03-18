@@ -1536,11 +1536,44 @@
 
 /* Chart container */
 .m2-chart-outer {
-  position: relative;
+  display: flex;
+  align-items: stretch;
   height: 280px;
   margin-bottom: 36px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
   max-width: 900px;
+}
+
+/* Y-axis column */
+.m2-yaxis {
+  position: relative;
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.m2-yaxis-ticks {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+}
+
+.m2-yaxis-tick {
+  position: absolute;
+  right: 8px;
+  font-size: 9px;
+  color: rgba(255,255,255,0.30);
+  transform: translateY(50%);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* Chart canvas (bars + bands) */
+.m2-chart-canvas {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .m2-loading {
