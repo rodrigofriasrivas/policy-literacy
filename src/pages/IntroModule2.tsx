@@ -81,6 +81,17 @@ export default function IntroModule2() {
   const firstYear = data[0]?.year ?? 1979;
   const lastYear = data[data.length - 1]?.year ?? 2025;
 
+  const yTicks = useMemo(() => {
+    if (maxCount <= 1) return [0];
+    const rawInterval = maxCount / 5;
+    const interval = rawInterval > 100 ? Math.ceil(rawInterval / 100) * 100
+      : rawInterval > 50 ? Math.ceil(rawInterval / 50) * 50
+      : Math.ceil(rawInterval / 25) * 25;
+    const ticks: number[] = [];
+    for (let v = 0; v <= maxCount; v += interval) ticks.push(v);
+    return ticks;
+  }, [maxCount]);
+
   const cumulativeByYear = useMemo(() => {
     const map = new Map<number, number>();
     let running = 0;
