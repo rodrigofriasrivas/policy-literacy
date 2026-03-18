@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import durhamLogo from "@/assets/durham_logo_white_720_300_rodrigo_frias.png";
 
 export function SiteFooter() {

@@ -221,9 +221,7 @@ export default function IntroModule3() {
             <h2 className="m3-modal-title">The map is ready.</h2>
             <div className="m3-modal-body">
               <p>
-                The visualisation displays 5,800 papers distributed across 25 research topics
-                and 125 key terms, spanning four decades. Topics are arranged by co-occurrence
-                patterns — proximity reflects shared vocabulary, not importance.
+                The visualisation maps 3,683 papers with explicit network connections, drawn from a corpus of 5,800 analysed to identify the 25 research topics. Topics are arranged by co-occurrence patterns — proximity reflects shared vocabulary, not importance.
               </p>
               <p>
                 Use the panel on the left to filter by topic, time period, or journal.

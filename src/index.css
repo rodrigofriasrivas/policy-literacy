@@ -508,21 +508,31 @@
 }
 
 .footer-logo {
-  width: 130px;
+  width: 156px;
   height: auto;
   opacity: 0.85;
   flex-shrink: 0;
 }
 
-.footer-content {
+.footer-text-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.footer-line-1 {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.6;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
   margin: 0;
 }
 
-.footer-disclaimer {
-  font-style: italic;
+.footer-line-2 {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+  margin: 0;
 }
 
 .footer-sep {
