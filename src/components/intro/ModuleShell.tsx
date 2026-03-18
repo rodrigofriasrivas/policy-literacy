@@ -26,6 +26,7 @@ export function ModuleShell({
   prevPath,
   nextLabel = "Continue",
   nextIsExternal = false,
+  onNextClick,
 }: ModuleShellProps) {
   const navigate = useNavigate();
 
