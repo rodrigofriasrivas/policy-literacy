@@ -1,74 +1,29 @@
 
 
-# Step 3: Closing block removal and modal refinement
+# Add Temporary Audit Table Below Corpus Growth Chart
 
-Two fixes in `IntroModule3.tsx` and `index.css`.
+## What and where
 
-## Fix 1 — Remove closing banner, keep standalone CTA button
+Insert a compact HTML table directly after the `corpus-growth-chart` div (line 1484), inside the same `stitch-card`. The table will be populated by the same `fetchAndRenderCorpusGrowth()` function using the same `fullData` array.
 
-**IntroModule3.tsx** (lines 208–221): Remove the `.m3-cta-block` wrapper, heading, and body text. Replace with just the button, wrapped in a simple div for spacing:
+## Changes
 
-```tsx
-<div className="m3-standalone-cta">
-  <button onClick={() => setModalOpen(true)} className="m3-cta-button" id="m3-cta-load-map">
-    Load the map →
-  </button>
-</div>
-```
+### 1. HTML: Add audit table container (after line 1484)
 
-**index.css**: Add `.m3-standalone-cta` with `margin-top: 3rem; text-align: center; padding-bottom: 40px;`. The existing `.m3-cta-block` styles can remain (harmless) or be removed.
+Add a `<div id="corpus-growth-audit">` placeholder right after the chart div, before the closing `</div>` of the card (line 1485).
 
-## Fix 2 — Modal content and loading bar
+### 2. JS: Render audit table from same data (in `fetchAndRenderCorpusGrowth`, after line 4466)
 
-### 2a — Replace modal body text (IntroModule3.tsx)
+After `renderCorpusChartD3(container, fullData)`, build and inject a compact HTML table into `#corpus-growth-audit` using the same `fullData` array:
+- Two columns: Year | Papers
+- Final row: **Total** | sum
+- Compact styling: small font, monospace numbers, border-collapse, themed colors via CSS variables
+- Horizontal scroll wrapper if needed
+- Inline styles using existing CSS variables (`--text-primary`, `--text-secondary`, `--input-bg`, `--input-border`)
 
-Update the modal body paragraphs:
-- P1: "The visualisation displays 5,800 papers distributed across 25 research topics and 125 key terms, spanning four decades. Topics are arranged by co-occurrence patterns — proximity reflects shared vocabulary, not importance."
-- P2: "Use the panel on the left to filter by topic, time period, or journal."
+### 3. No other changes
 
-### 2b–2c — Loading bar with timed button enable (IntroModule3.tsx + index.css)
-
-**State**: Add `const [buttonEnabled, setButtonEnabled] = useState(false);`. Reset both `buttonEnabled` to false when modal opens. Use `useEffect` watching `modalOpen` — when true, set a 2500ms timeout to enable the button; clear on unmount.
-
-**JSX** (inside modal, between body and button): Add a loading bar div:
-```tsx
-<div className="m3-loading-bar-track">
-  <div className={`m3-loading-bar-fill ${modalOpen ? "is-animating" : ""}`} />
-</div>
-```
-
-Button gets `disabled={!buttonEnabled}` and conditional styling:
-```tsx
-<button
-  onClick={() => { window.location.href = '/artefact/index.html'; }}
-  className="m3-cta-button"
-  disabled={!buttonEnabled}
-  style={{ opacity: buttonEnabled ? 1 : 0.4, cursor: buttonEnabled ? 'pointer' : 'not-allowed' }}
->
-```
-
-**index.css**: Add loading bar styles:
-```css
-.m3-loading-bar-track {
-  width: 100%; height: 4px; border-radius: 2px;
-  background: rgba(255,255,255,0.1);
-  margin: 24px 0;
-  overflow: hidden;
-}
-.m3-loading-bar-fill {
-  height: 100%; width: 0; border-radius: 2px;
-  background: hsl(185 70% 45%);
-}
-.m3-loading-bar-fill.is-animating {
-  animation: m3-bar-fill 2.5s ease-in-out forwards;
-}
-@keyframes m3-bar-fill {
-  from { width: 0; }
-  to { width: 100%; }
-}
-```
-
-## Files changed
-- `src/pages/IntroModule3.tsx`
-- `src/index.css`
+- Chart rendering untouched
+- No other sections modified
+- Temporary — clearly labeled as "Audit Table"
 
