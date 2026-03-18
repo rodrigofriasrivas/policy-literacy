@@ -1,10 +1,14 @@
 import { useState } from "react";
-import { NavLink as RouterNavLink, Link } from "react-router-dom";
+import { NavLink as RouterNavLink, Link, useLocation } from "react-router-dom";
 
-const navItems = [
+const homepageNavItems = [
+  { path: "/about", label: "About the project", external: false },
+  { path: "/contact", label: "Contact", external: false },
+];
+
+const interiorNavItems = [
   { path: "/artefact/index.html", label: "Network visualisation", external: true },
   { path: "/about", label: "About the project", external: false },
-  { path: "/policy", label: "Policy engagement", external: false },
   { path: "/contact", label: "Contact", external: false },
 ];
 
