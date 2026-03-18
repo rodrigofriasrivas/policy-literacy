@@ -9,6 +9,8 @@ interface ModuleShellProps {
   nextLabel?: string;
   /** If true, the next CTA is a hard navigation (external static file) */
   nextIsExternal?: boolean;
+  /** Custom click handler for the next button (overrides navigation) */
+  onNextClick?: () => void;
 }
 
 const STEPS = [
@@ -24,6 +26,7 @@ export function ModuleShell({
   prevPath,
   nextLabel = "Continue",
   nextIsExternal = false,
+  onNextClick,
 }: ModuleShellProps) {
   const navigate = useNavigate();
 
@@ -83,13 +86,17 @@ export function ModuleShell({
           ) : (
             <span />
           )}
-          {nextPath &&
-            (nextIsExternal ? (
+          {(nextPath || onNextClick) &&
+            (onNextClick ? (
+              <button onClick={onNextClick} className="module-footnav-next" id={`module-cta-step-${step}`}>
+                {nextLabel} →
+              </button>
+            ) : nextIsExternal ? (
               <button onClick={() => { window.location.href = nextPath!; }} className="module-footnav-next" id={`module-cta-step-${step}`}>
                 {nextLabel} →
               </button>
             ) : (
-              <Link to={nextPath} className="module-footnav-next" id={`module-cta-step-${step}`}>
+              <Link to={nextPath!} className="module-footnav-next" id={`module-cta-step-${step}`}>
                 {nextLabel} →
               </Link>
             ))}
