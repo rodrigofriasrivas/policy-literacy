@@ -1,29 +1,60 @@
 
 
-# Add Temporary Audit Table Below Corpus Growth Chart
-
-## What and where
-
-Insert a compact HTML table directly after the `corpus-growth-chart` div (line 1484), inside the same `stitch-card`. The table will be populated by the same `fetchAndRenderCorpusGrowth()` function using the same `fullData` array.
+# Y-axis ticks and label fix for IntroModule2
 
 ## Changes
 
-### 1. HTML: Add audit table container (after line 1484)
+### IntroModule2.tsx
 
-Add a `<div id="corpus-growth-audit">` placeholder right after the chart div, before the closing `</div>` of the card (line 1485).
+1. **Compute Y-axis ticks** — derive ~5 evenly spaced tick values from 0 to `maxCount` (rounded to nearest 50 or 100).
 
-### 2. JS: Render audit table from same data (in `fetchAndRenderCorpusGrowth`, after line 4466)
+2. **Restructure chart layout** — wrap the chart area in a flex container with two children:
+   - Left: a `.m2-yaxis` column containing the rotated label and tick marks
+   - Right: the existing chart content (period bands + bars)
 
-After `renderCorpusChartD3(container, fullData)`, build and inject a compact HTML table into `#corpus-growth-audit` using the same `fullData` array:
-- Two columns: Year | Papers
-- Final row: **Total** | sum
-- Compact styling: small font, monospace numbers, border-collapse, themed colors via CSS variables
-- Horizontal scroll wrapper if needed
-- Inline styles using existing CSS variables (`--text-primary`, `--text-secondary`, `--input-bg`, `--input-border`)
+3. **JSX structure:**
+```tsx
+<div className="m2-chart-outer" ref={chartRef}>
+  {!loading && (
+    <div className="m2-yaxis">
+      <span className="m2-yaxis-label">Papers published per year</span>
+      <div className="m2-yaxis-ticks">
+        {yTicks.map(tick => (
+          <span key={tick} className="m2-yaxis-tick"
+            style={{ bottom: `${(tick / maxCount) * 100}%` }}>
+            {tick}
+          </span>
+        ))}
+      </div>
+    </div>
+  )}
+  <div className="m2-chart-canvas">
+    {/* existing period bands, bars, loading state */}
+  </div>
+</div>
+```
 
-### 3. No other changes
+4. **Tick computation** (using `useMemo`): calculate a nice interval (e.g. round `maxCount / 5` up to nearest 50), generate array `[0, interval, 2*interval, ...]` up to maxCount.
 
-- Chart rendering untouched
-- No other sections modified
-- Temporary — clearly labeled as "Audit Table"
+### index.css
+
+1. **`.m2-chart-outer`** — change to `display: flex; align-items: stretch` with the existing height.
+
+2. **`.m2-yaxis`** — fixed width (~48px), `position: relative`, holds both label and ticks.
+
+3. **`.m2-yaxis-label`** — `position: absolute`, rotated 90° counter-clockwise, vertically centred within the axis column using `top: 50%; transform: rotate(-90deg) translateY(-50%)`, `transform-origin: center center`.
+
+4. **`.m2-yaxis-ticks`** — `position: relative; height: 100%` container for absolute-positioned tick values.
+
+5. **`.m2-yaxis-tick`** — `position: absolute; right: 0; font-size: 9px; color: rgba(255,255,255,0.3); transform: translateY(50%)` to align baseline with gridline.
+
+6. **`.m2-chart-canvas`** — `flex: 1; position: relative; height: 100%` (takes over the role previously held by `.m2-chart-outer` for positioning bands/bars).
+
+7. Update `.m2-bars`, `.m2-period-bands` parent references if needed (they use `position: absolute` relative to their container — now `.m2-chart-canvas`).
+
+8. Remove duplicate `.m2-yaxis-label` declarations. On mobile, hide the Y-axis column entirely.
+
+## Files touched
+- `src/pages/IntroModule2.tsx`
+- `src/index.css`
 
