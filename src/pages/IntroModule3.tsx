@@ -216,12 +216,8 @@ export default function IntroModule3() {
           </p>
         </div>
 
-        {/* CTA block */}
-        <div className="m3-cta-block">
-          <h2 className="m3-cta-title">You have seen the field.</h2>
-          <div className="m3-cta-body">
-            <p>Now load the map and explore it directly.</p>
-          </div>
+        {/* Standalone CTA */}
+        <div className="m3-standalone-cta">
           <button
             onClick={() => setModalOpen(true)}
             className="m3-cta-button"
