@@ -18,6 +18,9 @@ interface SiteHeaderProps {
 
 export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHomepage = location.pathname === "/";
+  const navItems = isHomepage ? homepageNavItems : interiorNavItems;
 
   const renderNavLink = (item: typeof navItems[0], onClick?: () => void) =>
     item.external ? (
