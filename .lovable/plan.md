@@ -1,29 +1,33 @@
 
+I checked it from external probes, and your domain is currently reachable from outside your local network.
 
-# Add Temporary Audit Table Below Corpus Growth Chart
+## What I verified just now
+1. `https://policyliteracy.enterprises` loads successfully.
+2. `https://www.policyliteracy.enterprises` also loads successfully.
+3. DNS (Google DoH) returns:
+   - `policyliteracy.enterprises -> A 185.158.133.1`
+   - `www.policyliteracy.enterprises -> A 185.158.133.1`
+4. No conflicting `CNAME` for `www` was returned in DNS lookup.
 
-## What and where
+## Why you still can’t see it
+Most likely this is a **local/ISP DNS propagation or network-path issue** on your side (not an app/build issue), which matches your Chrome error `ERR_CONNECTION_TIMED_OUT`.
 
-Insert a compact HTML table directly after the `corpus-growth-chart` div (line 1484), inside the same `stitch-card`. The table will be populated by the same `fetchAndRenderCorpusGrowth()` function using the same `fullData` array.
+## Action plan to fix it
+1. Test both URLs on a different network (phone hotspot) and in private/incognito mode.
+2. Flush your local DNS cache (Mac):
+   - `sudo dscacheutil -flushcache`
+   - `sudo killall -HUP mDNSResponder`
+3. Temporarily switch DNS resolver to `1.1.1.1` / `8.8.8.8` and retry.
+4. In Namecheap, confirm there are no extra conflicting records for `@` or `www` (no leftover forwarding/URL records).
+5. In Lovable Domains, keep both apex and `www` added, with one marked Primary.
+6. Wait up to propagation window (can be several hours; worst-case up to 72h).
 
-## Changes
+## If it still fails after these checks
+I’ll run a targeted diagnosis plan with you:
+- compare `nslookup`/`dig` results from your machine vs public resolvers,
+- verify route reachability to `185.158.133.1`,
+- isolate whether only apex or both apex+www fail from your ISP.
 
-### 1. HTML: Add audit table container (after line 1484)
-
-Add a `<div id="corpus-growth-audit">` placeholder right after the chart div, before the closing `</div>` of the card (line 1485).
-
-### 2. JS: Render audit table from same data (in `fetchAndRenderCorpusGrowth`, after line 4466)
-
-After `renderCorpusChartD3(container, fullData)`, build and inject a compact HTML table into `#corpus-growth-audit` using the same `fullData` array:
-- Two columns: Year | Papers
-- Final row: **Total** | sum
-- Compact styling: small font, monospace numbers, border-collapse, themed colors via CSS variables
-- Horizontal scroll wrapper if needed
-- Inline styles using existing CSS variables (`--text-primary`, `--text-secondary`, `--input-bg`, `--input-border`)
-
-### 3. No other changes
-
-- Chart rendering untouched
-- No other sections modified
-- Temporary — clearly labeled as "Audit Table"
-
+## Technical details
+- A timeout means TCP connection couldn’t be established in time (different from DNS NXDOMAIN or SSL cert mismatch).
+- Since external checks return valid DNS + successful page fetch, this points to resolver cache, ISP routing, VPN/proxy, or local firewall interference on your side.
