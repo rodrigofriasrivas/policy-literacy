@@ -1,55 +1,43 @@
 
-Goal: isolate why `policyliteracy.enterprises` and `www.policyliteracy.enterprises` timeout on your device even though both domains resolve and load externally.
+Root cause identified: your Mac is not resolving the domain to Lovable’s IP. It is being intercepted and rewritten to `securityblock.durham.ac.uk -> 10.0.0.57`, then timing out. This is a DNS/security-policy block on your device/network path, not a Lovable deployment issue.
 
-What I confirmed from outside your network:
-- `https://policyliteracy.enterprises` loads successfully.
-- `https://www.policyliteracy.enterprises` loads successfully.
-- Public DNS currently returns:
-  - `policyliteracy.enterprises -> 185.158.133.1`
-  - `www.policyliteracy.enterprises -> 185.158.133.1`
-- No AAAA records (IPv6), only A records.
+Implementation plan (no code changes):
 
-Diagnosis plan (device/network focused, no code changes):
+1) Confirm interception source on your Mac
+- Run:
+  - `scutil --dns | grep -E "nameserver|resolver"`
+  - `networksetup -getdnsservers "Wi-Fi"`
+  - `networksetup -getdnsservers "USB 10/100/1000 LAN"` (if applicable)
+- Goal: identify which resolver/profile is forcing the block.
 
-1) Run a strict DNS + connectivity check on your Mac
-- In Terminal, run exactly:
+2) Remove policy/agent DNS control
+- Disable any active VPN/security DNS agents (commonly Cisco Secure Client/Umbrella, Zscaler, Cloudflare Zero Trust/WARP, NextDNS profiles).
+- macOS: System Settings → Privacy & Security → Profiles (remove org DNS/security profile if present and allowed).
+- Browser: disable Secure DNS override temporarily in Chrome and retry.
+
+3) Reset local network state
+- Set DNS manually to `1.1.1.1` and `8.8.8.8` on active adapter (if profile allows).
+- Flush caches:
+  - `sudo dscacheutil -flushcache`
+  - `sudo killall -HUP mDNSResponder`
+- Re-test:
   - `dig policyliteracy.enterprises A +short`
   - `dig www.policyliteracy.enterprises A +short`
-  - `dig @1.1.1.1 policyliteracy.enterprises A +short`
-  - `dig @8.8.8.8 policyliteracy.enterprises A +short`
   - `curl -Iv --connect-timeout 10 https://policyliteracy.enterprises`
-  - `curl -Iv --connect-timeout 10 https://www.policyliteracy.enterprises`
 
-2) Branch by result
-- If `dig @1.1.1.1` / `@8.8.8.8` returns `185.158.133.1` but plain `dig` does not:
-  - Your local resolver is stale/misconfigured.
-  - Fix by setting DNS manually to `1.1.1.1` + `8.8.8.8`, then flush:
-    - `sudo dscacheutil -flushcache`
-    - `sudo killall -HUP mDNSResponder`
-- If all `dig` commands return correct IP but `curl` times out:
-  - DNS is fine; connection path is being blocked on your device.
-  - Disable VPN/proxy, security web shields, adblock DNS clients (NextDNS/AdGuard), and test in Safari too.
+4) Branch by outcome
+- If it now resolves to `185.158.133.1`: issue fixed.
+- If it still resolves to `10.0.0.57` or Cloudflare/Google DNS remain unreachable: enforcement is upstream (managed policy/firewall), not local cache.
 
-3) Check device-level overrides (common root cause when Wi‑Fi and hotspot both fail)
-- Inspect `/etc/hosts` for accidental entries:
-  - `grep -n "policyliteracy\\.enterprises\\|185\\.158\\.133\\.1" /etc/hosts`
-- In Chrome:
-  - Turn Secure DNS OFF temporarily (or force Cloudflare provider).
-  - Open `chrome://net-internals/#dns` and clear host cache.
-- Fully quit/reopen Chrome after clearing cache.
-
-4) Verify it is not browser-specific
-- Test same URL in Safari.
-- If Safari works but Chrome fails, reset Chrome networking state (extensions off, secure DNS provider changed, clear DNS cache).
-
-5) Final registrar/Lovable consistency check (only if above still fails)
-- Keep exactly:
-  - `@ A 185.158.133.1`
-  - `www A 185.158.133.1`
-  - `_lovable TXT lovable_verify=...` (for apex)
-  - `_lovable.www TXT lovable_verify=...` (for www, if Lovable requested separately)
-- Remove conflicting forwarding/URL/CNAME records for `@` and `www`.
+5) Escalate with exact evidence
+- Send this to Durham IT/security admin:
+  - Domain(s): `policyliteracy.enterprises`, `www.policyliteracy.enterprises`
+  - Expected A record: `185.158.133.1`
+  - Current forced resolution: `securityblock.durham.ac.uk / 10.0.0.57`
+  - Request: remove block / allowlist both hostnames.
+- This is the definitive fix if policy is centrally enforced.
 
 Technical details:
-- Your symptom (timeout, not NXDOMAIN) means the browser cannot complete TCP/TLS to the target, not necessarily that DNS is missing.
-- Because both Wi‑Fi and hotspot fail for you while public checks succeed, the highest-probability cause is device-level resolver/network interception (custom DNS client, security software, proxy, hosts override, or Chrome DNS state), not Lovable deployment.
+- `dig @1.1.1.1` and `dig @8.8.8.8` timing out indicates outbound DNS is blocked/redirected.
+- `curl` resolving to `10.0.0.57` confirms DNS sinkholing before TLS.
+- `/etc/hosts` is clean, so override is not from hosts file.
