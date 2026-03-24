@@ -1705,34 +1705,6 @@
                             </div>
                         </div>
 
-                        <!-- Card 5: Bigram Trends (Chart 5) -->
-                        <div class="stitch-card">
-                            <div class="stitch-card-title">Bigram trends over time (selected topic)</div>
-                            <div
-                                style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px;">
-                                <div class="stitch-card-subtitle" style="margin-bottom:0; flex:1;">
-                                    1980–2025 (top 5 bigrams)
-                                </div>
-                                <div id="chart5-topic-selector"
-                                    style="position:relative; min-width:200px; flex-shrink:0;">
-                                    <!-- JS injects dropdown here -->
-                                    <div style="font-size:11px; color:var(--text-secondary);">Loading topics...
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Chart Wrapper -->
-                            <div id="bigram-trends-chart" style="height: 400px; width: 100%; position: relative;">
-                                <div
-                                    style="height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); opacity:0.7;">
-                                    Select a topic to view trends...
-                                </div>
-                            </div>
-                            <div id="bigram-trends-legend"
-                                style="margin-top:16px; min-height:20px; font-size:12px; color:var(--text-primary); text-align:center;">
-                                &nbsp;
-                            </div>
-                        </div>
                     </div>
                 </div> <!-- End #view-temporal -->
 
@@ -1904,25 +1876,38 @@
 
                     <!-- Papers Table -->
                     <div class="stitch-card">
-                        <div class="stitch-card-title" id="topic-papers-title">Papers informing this topic</div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 32px;">
+                            <div>
+                                <div class="stitch-card-title" id="topic-papers-title" style="margin-bottom: 4px;">Papers informing this topic</div>
+                                <div style="font-size: 13px; color: var(--text-secondary); opacity: 0.8; max-width: 500px; line-height: 1.5;">
+                                    Papers in this corpus whose content the model associated most strongly with this topic.
+                                </div>
+                            </div>
+                            <div style="flex: 1; display: flex; justify-content: flex-end;">
+                                <input type="text" id="topic-papers-search" class="stitch-input" 
+                                    placeholder="Search title, author, or journal..." 
+                                    style="width: 100%; max-width: 320px; font-size: 13px;"
+                                    oninput="topicPapersSearchQuery = this.value; topicPapersPage = 1; renderTopicPapersTable();">
+                            </div>
+                        </div>
+
                         <div style="overflow-x: auto;">
-                            <table id="topic-papers-table"
-                                style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+                            <table id="topic-papers-table" style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--chart-panel-border);">
-                                        <th
-                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                            Year</th>
-                                        <th
-                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px; width: 40%;">
-                                            Title</th>
-                                        <th
-                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                            Author(s)</th>
-                                        <th
-                                            style="text-align: left; padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                                            Journal</th>
-                                        <th style="width: 40px;"></th>
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-primary); font-size: 11px; width: 60px;" onclick="sortTopicPapers('year')">
+                                            Year <span id="topic-sort-year" style="font-size:10px;">▼</span>
+                                        </th>
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 11px; width: 45%;" onclick="sortTopicPapers('title')">
+                                            Title <span id="topic-sort-title" style="font-size:10px;">▲▼</span>
+                                        </th>
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 11px; width: 22%;" onclick="sortTopicPapers('authors')">
+                                            Author(s) <span id="topic-sort-authors" style="font-size:10px;">▲▼</span>
+                                        </th>
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 11px; width: 22%;" onclick="sortTopicPapers('journal')">
+                                            Journal <span id="topic-sort-journal" style="font-size:10px;">▲▼</span>
+                                        </th>
+                                        <th style="width: 40px; padding: 12px;"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="topic-papers-tbody"></tbody>
@@ -4482,11 +4467,10 @@
 
                 window.temporalData = data; // Store globally for modal
                 renderTemporalChart(data);
-                fetchAndRenderCorpusGrowth(); // Uses v_corpus_growth_by_year_v1
+                fetchAndRenderCorpusGrowth(); // Uses v_chart1_corpus_growth
                 fetchAndRenderTopicDistribution(); // New Chart: distribution across corpus
                 // fetchAndRenderEmergence(); // Removed
                 fetchAndRenderTopicTrends();  // Uses v_chart4_topic_trends
-                fetchAndRenderBigramTrends(); // Uses v_chart5_bigram_trends_corrected
                 temporalDataLoaded = true;
 
                 // Init Tooltip if missing
@@ -4506,7 +4490,6 @@
 
             // Load other charts independently
             fetchAndRenderCorpusGrowth(); // Now uses papers table directly
-            fetchAndRenderBigramTrends(); // Uses v_chart5_bigram_trends_corrected
             temporalDataLoaded = true;
         }
 
@@ -5554,274 +5537,6 @@
             }
         }
 
-        // Chart 5: Bigram Trends (Single Selected Topic) — paper-based
-        async function fetchAndRenderBigramTrends() {
-            const container = document.getElementById('bigram-trends-chart');
-            const selectorContainer = document.getElementById('chart5-topic-selector');
-            const legendContainer = document.getElementById('bigram-trends-legend');
-
-            if (!container || !selectorContainer) return;
-
-            // 1. Fetch topics using correct schema
-            let topics = [];
-            try {
-                const tUrl = `${SUPABASE_URL}/rest/v1/topics?select=topic_id,topic_name&order=topic_id.asc`;
-                const tRes = await fetch(tUrl, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-                if (tRes.ok) topics = await tRes.json();
-            } catch (e) { console.warn("Failed to load topics for Chart 5", e); }
-
-            // State: no topic selected initially
-            let currentTopicId = null;
-
-            function renderDropdown() {
-                if (!topics.length) {
-                    selectorContainer.innerHTML = '<span style="font-size:11px;color:var(--text-secondary);">No topics found.</span>';
-                    return;
-                }
-
-                const currentTopic = currentTopicId != null ? topics.find(t => t.topic_id === currentTopicId) : null;
-                const displayLabel = currentTopic
-                    ? `Topic ${currentTopic.topic_id}: ${currentTopic.topic_name}`
-                    : 'Select a topic…';
-
-                selectorContainer.innerHTML = `
-                    <div id="c5-dropdown-trigger" style="
-                        border: 1px solid var(--border-color, #ccc); 
-                        border-radius: 6px; 
-                        padding: 6px 12px; 
-                        background: var(--bg-card, #fff); 
-                        cursor: pointer; 
-                        font-size: 13px;
-                        color: var(--text-primary, #333);
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                    ">
-                        <span id="c5-dropdown-label" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px;">${displayLabel}</span>
-                        <span style="font-size:10px; color:var(--text-secondary);">▼</span>
-                    </div>
-                    <div id="c5-dropdown-menu" style="
-                        display: none;
-                        position: absolute;
-                        top: 100%;
-                        right: 0;
-                        width: 280px; 
-                        max-height: 300px;
-                        overflow-y: auto;
-                        background: var(--bg-card, #fff);
-                        border: 1px solid var(--border-color, #ccc);
-                        border-radius: 6px;
-                        z-index: 1000;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
-                        margin-top: 4px;
-                    ">
-                         <div id="c5-options-list"></div>
-                    </div>
-                `;
-
-                const trigger = document.getElementById('c5-dropdown-trigger');
-                const menu = document.getElementById('c5-dropdown-menu');
-                const list = document.getElementById('c5-options-list');
-
-                trigger.onclick = (e) => {
-                    e.stopPropagation();
-                    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-                };
-                document.addEventListener('click', (e) => {
-                    if (selectorContainer && !selectorContainer.contains(e.target)) menu.style.display = 'none';
-                });
-                menu.onclick = (e) => e.stopPropagation();
-
-                topics.forEach(t => {
-                    const opt = document.createElement('div');
-                    opt.textContent = `Topic ${t.topic_id}: ${t.topic_name}`;
-                    opt.style.cssText = `
-                        padding: 8px 12px;
-                        font-size: 12px;
-                        color: var(--text-secondary);
-                        cursor: pointer;
-                        border-bottom: 1px solid var(--border-color, #eee);
-                        transition: background 0.1s;
-                    `;
-                    if (t.topic_id === currentTopicId) {
-                        opt.style.color = 'var(--accent-color)';
-                        opt.style.fontWeight = 'bold';
-                    }
-                    opt.onmouseover = () => { opt.style.background = 'var(--bg-hover, #f5f5f5)'; };
-                    opt.onmouseout = () => { opt.style.background = 'transparent'; };
-                    opt.onclick = () => {
-                        currentTopicId = t.topic_id;
-                        menu.style.display = 'none';
-                        renderDropdown();
-                        loadChartData(currentTopicId);
-                    };
-                    list.appendChild(opt);
-                });
-            }
-
-            renderDropdown();
-            // Show placeholder — no auto-load
-            container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);font-size:13px;padding:40px;text-align:center;">Choose a topic to see how its five main bigrams evolve over time.</div>';
-
-            async function loadChartData(topicId) {
-                container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);">Loading bigrams...</div>';
-                if (legendContainer) legendContainer.innerHTML = '';
-
-                try {
-                    // ── STATIC BUILD: Chart 5 – filter pre-loaded local JSON ──
-                    const _c5resp = await fetch(`${DATA_BASE}v_chart5_bigram_trends_corrected.json`);
-                    if (!_c5resp.ok) throw new Error('Could not load v_chart5_bigram_trends_corrected.json');
-                    const _c5all = await _c5resp.json();
-                    const response = { ok: true, json: async () => _c5all.filter(r => String(r.topic_id) === String(topicId)) };
-
-                    const data = await response.json();
-                    if (!data || data.length === 0) {
-                        container.innerHTML = '<div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);">No bigram data for this topic.</div>';
-                        return;
-                    }
-
-                    renderChart(data);
-                } catch (e) {
-                    console.error("Chart 5 Error:", e);
-                    container.innerHTML = '<div style="color:var(--text-secondary); font-style:italic; padding:20px; text-align:center;">Error loading bigram trends.</div>';
-                }
-            }
-
-            function renderChart(data) {
-                container.innerHTML = '';
-
-                // Get unique bigrams in stable order (first appearance)
-                const bigramOrder = [];
-                const seen = new Set();
-                data.forEach(d => {
-                    if (d.bigram && !seen.has(d.bigram)) {
-                        seen.add(d.bigram);
-                        bigramOrder.push(d.bigram);
-                    }
-                });
-                const bigrams = bigramOrder.slice(0, 5);
-
-                // Build lookup: bigram -> year -> unique_papers_count
-                const lookup = new Map();
-                bigrams.forEach(b => lookup.set(b, new Map()));
-                data.forEach(d => {
-                    if (d.bigram && lookup.has(d.bigram)) {
-                        lookup.get(d.bigram).set(d.year, d.unique_papers_count || 0);
-                    }
-                });
-
-                // Build series with explicit zeros for every year
-                const years = d3.range(1980, 2026);
-                const series = bigrams.map(b => {
-                    const m = lookup.get(b);
-                    return {
-                        bigram: b,
-                        values: years.map(y => ({ year: y, count: m.get(y) || 0 }))
-                    };
-                });
-
-                // Palette
-                const bigramColors = ['#4cc9f0', '#f72585', '#3a0ca3', '#4361ee', '#7209b7'];
-                const colorScale = d3.scaleOrdinal().domain(bigrams).range(bigramColors);
-
-                // D3 Setup
-                const rect = container.getBoundingClientRect();
-                const width = rect.width || 800;
-                const height = rect.height || 400;
-                const margin = { top: 20, right: 30, bottom: 40, left: 55 };
-
-                const svg = d3.select(container).append('svg')
-                    .attr('width', '100%')
-                    .attr('height', '100%')
-                    .attr('viewBox', `0 0 ${width} ${height}`)
-                    .attr('preserveAspectRatio', 'xMinYMin meet')
-                    .style('overflow', 'visible');
-
-                const x = d3.scaleLinear().domain([1980, 2025]).range([margin.left, width - margin.right]);
-                const yMax = d3.max(series, s => d3.max(s.values, v => v.count)) || 5;
-                const y = d3.scaleLinear().domain([0, yMax]).nice().range([height - margin.bottom, margin.top]);
-
-                // Axes
-                const xAxis = d3.axisBottom(x).tickFormat(d3.format('d')).tickValues(d3.range(1980, 2026, 5));
-                const yAxis = d3.axisLeft(y).ticks(5);
-
-                const gx = svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(xAxis);
-                const gy = svg.append('g').attr('transform', `translate(${margin.left},0)`).call(yAxis);
-
-                gx.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-size', '10px');
-                gy.selectAll('text').attr('fill', 'var(--text-secondary)').style('font-size', '10px');
-                gx.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.2);
-                gy.selectAll('.domain, line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.2);
-
-                // Y-axis label: Papers per year
-                svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers per year');
-
-                const line = d3.line()
-                    .x(d => x(d.year))
-                    .y(d => y(d.count))
-                    .curve(d3.curveMonotoneX);
-
-                const linesGroup = svg.append('g');
-
-                linesGroup.selectAll('.bg-line')
-                    .data(series)
-                    .join('path')
-                    .attr('class', 'bg-line')
-                    .attr('fill', 'none')
-                    .attr('stroke', d => colorScale(d.bigram))
-                    .attr('stroke-width', 2)
-                    .attr('opacity', 0.8)
-                    .attr('d', d => line(d.values))
-                    .on('mouseover', function (event, d) {
-                        linesGroup.selectAll('.bg-line').attr('opacity', 0.15);
-                        d3.select(this).attr('opacity', 1).attr('stroke-width', 3).raise();
-                    })
-                    .on('mouseout', function () {
-                        linesGroup.selectAll('.bg-line').attr('opacity', 0.8).attr('stroke-width', 2);
-                    });
-
-                // Interaction Overlay with tooltip — stable bigram order
-                const overlay = svg.append('rect')
-                    .attr('width', width - margin.left - margin.right)
-                    .attr('height', height - margin.top - margin.bottom)
-                    .attr('x', margin.left)
-                    .attr('y', margin.top)
-                    .attr('fill', 'transparent')
-                    .style('cursor', 'crosshair');
-
-                overlay.on('mousemove', function (event) {
-                    const [mx] = d3.pointer(event);
-                    const year = Math.round(x.invert(mx));
-                    if (year < 1980 || year > 2025) return;
-
-                    let tooltipHtml = `<strong>Year: ${year}</strong><br>`;
-                    // Stable bigram order (not sorted by value)
-                    bigrams.forEach(b => {
-                        const m = lookup.get(b);
-                        const val = m.get(year) || 0;
-                        tooltipHtml += `<span style="color:${colorScale(b)}">●</span> ${b.replace(/_/g, ' ')}: ${val}<br>`;
-                    });
-
-                    const tt = d3.select('#temporal-tooltip');
-                    tt.style('opacity', 1).html(tooltipHtml)
-                        .style('left', (event.pageX + 15) + 'px')
-                        .style('top', (event.pageY - 20) + 'px');
-                }).on('mouseleave', () => {
-                    d3.select('#temporal-tooltip').style('opacity', 0);
-                });
-
-                // Legend
-                if (legendContainer) {
-                    legendContainer.innerHTML = '';
-                    bigrams.forEach(b => {
-                        const item = document.createElement('span');
-                        item.style.cssText = `display:inline-flex; align-items:center; margin:0 8px; color:var(--text-secondary); font-size:11px;`;
-                        item.innerHTML = `<span style="width:8px; height:8px; border-radius:50%; background:${colorScale(b)}; margin-right:4px;"></span> ${b.replace(/_/g, ' ')}`;
-                        legendContainer.appendChild(item);
-                    });
-                }
-            }
-        }
 
 
 
@@ -5830,6 +5545,9 @@
         // -------------------------------------------------------------------------
         let topicPapers = [];
         let topicPapersPage = 1;
+        let topicPapersSearchQuery = '';
+        let topicPapersSortCol = 'year';
+        let topicPapersSortDir = 'desc';
 
         async function initIndividualTopicDashboard() {
             const topicId = urlState.topicId;
@@ -5933,8 +5651,11 @@
             renderTopicTrendsChart(topicId, sortedBigrams);
 
             // Papers Table
-            topicPapers = allData.papers.sort((a, b) => (b.year || 0) - (a.year || 0));
+            topicPapers = allData.papers;
             topicPapersPage = 1;
+            topicPapersSearchQuery = '';
+            topicPapersSortCol = 'year';
+            topicPapersSortDir = 'desc';
             renderTopicPapersTable();
 
             // Navigation
@@ -5976,79 +5697,118 @@
             }
         }
 
+        function sortTopicPapers(col) {
+            if (topicPapersSortCol === col) {
+                topicPapersSortDir = topicPapersSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                topicPapersSortCol = col;
+                topicPapersSortDir = col === 'year' ? 'desc' : 'asc';
+            }
+            topicPapersPage = 1;
+            renderTopicPapersTable();
+        }
+
         function renderTopicPapersTable() {
             const tbody = document.getElementById('topic-papers-tbody');
-            const headers = document.getElementById('topic-papers-table'); // Actually we need to change #topic-papers-title
             const titleHeader = document.getElementById('topic-papers-title');
-
             const info = document.getElementById('papers-page-info');
             const prev = document.getElementById('papers-prev-btn');
             const next = document.getElementById('papers-next-btn');
 
-            if (titleHeader) {
-                titleHeader.textContent = `Papers informing this topic (${topicPapers.length} papers)`;
+            if (!tbody) return;
+
+            // 1. Filter
+            let filtered = topicPapers;
+            if (topicPapersSearchQuery) {
+                const q = topicPapersSearchQuery.toLowerCase().trim();
+                filtered = filtered.filter(p => 
+                    (p.title && p.title.toLowerCase().includes(q)) ||
+                    (p.authors && p.authors.toLowerCase().includes(q)) ||
+                    (p.journal && p.journal.toLowerCase().includes(q))
+                );
             }
 
-            if (!tbody) return;
-            tbody.innerHTML = '';
+            // 2. Sort
+            filtered.sort((a, b) => {
+                let valA = a[topicPapersSortCol] || '';
+                let valB = b[topicPapersSortCol] || '';
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+                
+                if (valA < valB) return topicPapersSortDir === 'asc' ? -1 : 1;
+                if (valA > valB) return topicPapersSortDir === 'asc' ? 1 : -1;
+                return 0;
+            });
 
+            // Update UI Icons
+            ['year', 'title', 'authors', 'journal'].forEach(col => {
+                const icon = document.getElementById(`topic-sort-${col}`);
+                if (!icon) return;
+                if (topicPapersSortCol === col) {
+                    icon.style.color = 'var(--text-primary)';
+                    icon.textContent = topicPapersSortDir === 'asc' ? '▲' : '▼';
+                } else {
+                    icon.style.color = 'var(--text-secondary)';
+                    icon.textContent = '▲▼';
+                }
+            });
+
+            if (titleHeader) {
+                titleHeader.textContent = `Papers informing this topic (${filtered.length} papers)`;
+            }
+
+            tbody.innerHTML = '';
             const size = 50;
-            const total = Math.ceil(topicPapers.length / size) || 1;
+            const total = Math.ceil(filtered.length / size) || 1;
             if (topicPapersPage < 1) topicPapersPage = 1;
             if (topicPapersPage > total) topicPapersPage = total;
 
-            const chunk = topicPapers.slice((topicPapersPage - 1) * size, topicPapersPage * size);
+            const chunk = filtered.slice((topicPapersPage - 1) * size, topicPapersPage * size);
 
-            chunk.forEach(p => {
-                const row = document.createElement('tr');
-                row.style.borderBottom = '1px solid var(--chart-row-border)';
+            if (chunk.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding:40px; text-align:center; color:var(--text-secondary);">No papers match your search.</td></tr>';
+            } else {
+                chunk.forEach(p => {
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid var(--chart-row-border)';
+                    const title = p.title || 'Untitled';
+                    row.innerHTML = `
+                            <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.year || ''}</td>
+                            <td style="padding:12px;color:var(--text-primary);font-size:13px;font-weight:500;word-break:break-word;vertical-align:top;line-height:1.5;">${title}</td>
+                            <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.authors || 'Unknown'}</td>
+                            <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;font-style:italic;">${p.journal || ''}</td>
+                            <td style="padding:12px;vertical-align:top;text-align:right;">
+                                <button class="btn expand-btn" style="width:24px;height:24px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;">▼</button>
+                            </td>`;
 
-                const title = p.title || 'Untitled';
+                    const absRow = document.createElement('tr');
+                    absRow.style.display = 'none';
+                    absRow.innerHTML = `
+                            <td colspan="5" style="padding:0 12px 24px 12px;border-bottom:1px solid var(--chart-row-border);">
+                                <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:8px;color:var(--text-secondary);font-size:13px;line-height:1.6;">
+                                    <strong style="color:var(--text-primary);display:block;margin-bottom:8px;">Abstract</strong>
+                                    ${p.abstract || 'No abstract available.'}
+                                </div>
+                            </td>`;
 
-                row.innerHTML = `
-                        <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.year || ''}</td>
-                        <td style="padding:12px;color:var(--text-primary);font-size:13px;font-weight:500;word-break:break-word;vertical-align:top;line-height:1.5;">${title}</td>
-                        <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.authors || 'Unknown'}</td>
-                        <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;font-style:italic;">${p.journal || ''}</td>
-                        <td style="padding:12px;vertical-align:top;text-align:right;">
-                            <button class="btn expand-btn" style="width:24px;height:24px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;">▼</button>
-                        </td>
-                    `;
-
-                const absRow = document.createElement('tr');
-                absRow.style.display = 'none';
-                absRow.innerHTML = `
-                        <td colspan="5" style="padding:0 12px 24px 12px;border-bottom:1px solid var(--chart-row-border);">
-                            <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:8px;color:var(--text-secondary);font-size:13px;line-height:1.6;">
-                                <strong style="color:var(--text-primary);display:block;margin-bottom:8px;">Abstract</strong>
-                                ${p.abstract || 'No abstract available.'}
-                            </div>
-                        </td>
-                    `;
-
-                row.querySelector('.expand-btn').onclick = function () {
-                    const isHidden = absRow.style.display === 'none';
-                    absRow.style.display = isHidden ? 'table-row' : 'none';
-                    this.textContent = isHidden ? '▲' : '▼';
-                };
-
-                tbody.appendChild(row);
-                tbody.appendChild(absRow);
-            });
+                    row.querySelector('.expand-btn').onclick = function () {
+                        const isHidden = absRow.style.display === 'none';
+                        absRow.style.display = isHidden ? 'table-row' : 'none';
+                        this.textContent = isHidden ? '▲' : '▼';
+                    };
+                    tbody.appendChild(row);
+                    tbody.appendChild(absRow);
+                });
+            }
 
             if (info) info.textContent = `Page ${topicPapersPage} / ${total}`;
-
             if (prev) {
                 prev.disabled = topicPapersPage <= 1;
-                prev.onclick = () => {
-                    if (topicPapersPage > 1) { topicPapersPage--; renderTopicPapersTable(); }
-                };
+                prev.onclick = () => { if (topicPapersPage > 1) { topicPapersPage--; renderTopicPapersTable(); } };
             }
             if (next) {
                 next.disabled = topicPapersPage >= total;
-                next.onclick = () => {
-                    if (topicPapersPage < total) { topicPapersPage++; renderTopicPapersTable(); }
-                };
+                next.onclick = () => { if (topicPapersPage < total) { topicPapersPage++; renderTopicPapersTable(); } };
             }
         }
 
