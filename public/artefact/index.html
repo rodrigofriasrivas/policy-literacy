@@ -2502,8 +2502,10 @@
                     if (!topicExists) {
                         console.error(`❌ Topic ${tId} found in URL but not in data. Fallback to Macro.`);
                     } else {
-                        // Save all topics for navigation before filtering
+                        // Save full data for navigation and specific views before filtering
                         window.globalAllTopics = [...allData.topics];
+                        window.globalAllPapers = [...allData.papers];
+                        window.globalAllLinks = [...allData.links];
                         allData.topics = allData.topics.filter(t => t.id === tId);
 
                         // 2. Filter Bigrams (Keep only belonging to topic)
@@ -6424,6 +6426,7 @@
             searchQuery: '',
             filteredPapers: [],
             expandedPaperId: null,
+            topicFilter: null,
 
             toggleAbstract: function (paperId) {
                 const prevId = this.expandedPaperId;
@@ -6456,8 +6459,13 @@
 
                 if (rawPapers.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:32px; color:var(--text-secondary);">No papers available or data failed to load. (allData.papers empty)</td></tr>';
-                    if (totalLabel) totalLabel.textContent = '0 papers';
+                    if (totalLabel) totalLabel.textContent = '0';
                     return;
+                }
+
+                // If currently in Topic Mode, initialize the library's topic focus
+                if (typeof urlState !== 'undefined' && urlState.mode === 'topic' && urlState.topicId) {
+                    this.topicFilter = Number(urlState.topicId);
                 }
 
                 // Set default sorting state
@@ -6473,11 +6481,14 @@
             },
 
             applyFilters: function () {
-                const rawPapers = allData.papers || [];
+                // Return all network-connected papers by default unless topicFilter is set
+                const rawPapers = (window.globalAllPapers || allData.papers) || [];
 
-                // 1. Only show papers that have at least one topic_paper_link (network connections)
-                const linkedPaperIds = new Set(allData.links.map(l => l.paper_id));
-                const libraryPapers = rawPapers.filter(p => linkedPaperIds.has(p.paper_id));
+                // 1. Initial Topic filter if set
+                let libraryPapers = rawPapers;
+                if (this.topicFilter) {
+                    libraryPapers = rawPapers.filter(p => Number(p.topicId) === Number(this.topicFilter));
+                }
 
                 // 2. Filter logic (Search + Timeframe + Journals)
                 const q = (this.searchQuery || '').toLowerCase();
@@ -6562,6 +6573,11 @@
             },
 
             resetSort: function () {
+                this.topicFilter = null; // Clear any active topic focus
+                this.searchQuery = ''; // Clear search internal state
+                const searchBox = document.getElementById('library-search');
+                if (searchBox) searchBox.value = ''; // Clear search UI box
+
                 this.sortKey = 'year';
                 this.sortAsc = false;
                 this.updateIcons();
