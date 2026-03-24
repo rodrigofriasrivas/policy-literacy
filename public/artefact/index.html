@@ -4521,7 +4521,7 @@
 
                 let fullData = rows.map(r => ({
                     year: parseInt(r.year),
-                    count: parseInt(r.papers_count) || 0
+                    count: parseInt(r.count) || 0
                 })).sort((a, b) => a.year - b.year);
 
                 // Trim trailing zero-count years
