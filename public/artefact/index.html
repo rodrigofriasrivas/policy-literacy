@@ -4705,7 +4705,7 @@
             container.innerHTML = '';
             const width = container.clientWidth;
             const height = 520;
-            const margin = { top: 10, right: 60, bottom: 40, left: 180 };
+            const margin = { top: 30, right: 30, bottom: 160, left: 60 };
             const innerWidth = width - margin.left - margin.right;
             const innerHeight = height - margin.top - margin.bottom;
 
@@ -4716,42 +4716,50 @@
             const g = svg.append('g')
                 .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-            const x = d3.scaleLinear()
-                .domain([0, d3.max(data, d => d.count) * 1.05]) // slight padding
-                .range([0, innerWidth]);
-
-            const y = d3.scaleBand()
+            const x = d3.scaleBand()
                 .domain(data.map(d => d.id))
-                .range([0, innerHeight])
+                .range([0, innerWidth])
                 .padding(0.35);
 
-            // Axes
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.count) * 1.1])
+                .range([innerHeight, 0]);
+
+            // X-Axis (Topics)
             g.append('g')
                 .attr('transform', `translate(0, ${innerHeight})`)
-                .call(d3.axisBottom(x).ticks(5).tickSize(-innerHeight))
-                .call(g => g.select('.domain').remove())
-                .call(g => g.selectAll('.tick line').attr('stroke', 'var(--input-border)').attr('opacity', 0.15))
-                .call(g => g.selectAll('.tick text').attr('fill', 'var(--text-secondary)').attr('font-size', '10px').attr('dy', '1em'));
-
-            g.append('g')
-                .call(d3.axisLeft(y).tickFormat(id => {
+                .call(d3.axisBottom(x).tickFormat(id => {
                     const t = data.find(item => item.id === id);
                     if (!t) return id;
-                    const label = t.name.replace(/^topic \d+:\s*/i, '').replace(/Topic \d+:\s*/i, '');
+                    const cleanName = t.name.replace(/^Topic \d+:\s*/i, '').replace(/topic \d+:\s*/i, '');
+                    const label = `Topic ${t.id}: ${cleanName}`;
                     return label.length > 25 ? label.slice(0, 22) + '...' : label;
                 }))
-                .call(g => g.select('.domain').remove())
-                .call(g => g.selectAll('.tick text').attr('fill', 'var(--text-primary)').attr('font-size', '11px').attr('font-weight', '500'));
+                .selectAll('text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end')
+                .attr('dx', '-.8em')
+                .attr('dy', '.15em')
+                .attr('fill', 'var(--text-primary)')
+                .attr('font-size', '10px')
+                .attr('font-weight', '500');
 
-            // Bars with value labels on hover/active
+            // Y-Axis (Counts)
+            g.append('g')
+                .call(d3.axisLeft(y).ticks(5).tickSize(-innerWidth))
+                .call(g => g.select('.domain').remove())
+                .call(g => g.selectAll('.tick line').attr('stroke', 'var(--input-border)').attr('opacity', 0.15))
+                .call(g => g.selectAll('.tick text').attr('fill', 'var(--text-secondary)').attr('font-size', '10px'));
+
+            // Bars
             const bars = g.selectAll('.bar')
                 .data(data)
                 .enter().append('rect')
                 .attr('class', 'distribution-bar')
-                .attr('y', d => y(d.id))
-                .attr('height', y.bandwidth())
-                .attr('x', 0)
-                .attr('width', d => x(d.count))
+                .attr('x', d => x(d.id))
+                .attr('width', x.bandwidth())
+                .attr('y', d => y(d.count))
+                .attr('height', d => innerHeight - y(d.count))
                 .attr('fill', d => d.color)
                 .attr('rx', 3);
 
@@ -4760,9 +4768,9 @@
                 .data(data)
                 .enter().append('text')
                 .attr('class', 'distribution-value-label')
-                .attr('y', d => y(d.id) + y.bandwidth() / 2)
-                .attr('x', d => x(d.count) + 8)
-                .attr('dy', '0.35em')
+                .attr('x', d => x(d.id) + x.bandwidth() / 2)
+                .attr('y', d => y(d.count) - 8)
+                .attr('text-anchor', 'middle')
                 .attr('fill', 'var(--text-secondary)')
                 .attr('font-size', '10px')
                 .attr('font-family', 'Inter, sans-serif')
@@ -4770,9 +4778,9 @@
 
             // Overlay frequency curve
             const curveLine = d3.line()
-                .x(d => x(d.count))
-                .y(d => y(d.id) + y.bandwidth() / 2)
-                .curve(d3.curveMonotoneY);
+                .x(d => x(d.id) + x.bandwidth() / 2)
+                .y(d => y(d.count))
+                .curve(d3.curveMonotoneX);
 
             g.append('path')
                 .datum(data)
@@ -4780,7 +4788,7 @@
                 .attr('fill', 'none')
                 .attr('stroke', 'var(--text-primary)') 
                 .attr('stroke-width', 2.5)
-                .attr('opacity', 0.6)
+                .attr('opacity', 0.4)
                 .attr('d', curveLine);
 
             // Tooltip implementation
@@ -4804,7 +4812,7 @@
                 d3.select(this).attr('opacity', 0.8);
                 tooltipEl.style('visibility', 'visible')
                     .html(`
-                        <div style="font-weight:700; border-bottom:1px solid var(--l-border); margin-bottom:6px; padding-bottom:4px; color:${d.color}">${d.name}</div>
+                        <div style="font-weight:700; border-bottom:1px solid var(--l-border); margin-bottom:6px; padding-bottom:4px; color:${d.color}">Topic ${d.id}: ${d.name.replace(/^Topic \d+:\s*/i, '')}</div>
                         <div style="display:flex; justify-content:space-between; gap:20px;">
                             <span>Papers:</span>
                             <span style="font-weight:600;">${d.count.toLocaleString()}</span>
