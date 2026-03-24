@@ -4647,20 +4647,31 @@
             if (!container) return;
 
             try {
-                console.log('📊 Initializing Topic Distribution Chart...');
+                console.log('📊 Topic Distribution Initialization', {
+                    allDataTopics: allData.topics?.length,
+                    allLinks: allData.links?.length,
+                    globalTopics: window.globalAllTopics?.length,
+                    globalLinks: window.globalAllLinks?.length
+                });
+
                 // Ensure base data is available (topics and links) - checking length specifically
                 let waitAttempts = 0;
-                while ((!allData.topics || allData.topics.length === 0 || !allData.links || allData.links.length === 0) && waitAttempts < 60) {
+                while ((!allData.topics || allData.topics.length === 0 || !allData.links || allData.links.length === 0) && waitAttempts < 40) {
                     await new Promise(r => setTimeout(r, 100));
                     waitAttempts++;
                 }
 
-                // Use global full datasets if available to preserve long-tail distribution and full counts
-                const rawTopics = window.globalAllTopics || allData.topics;
-                const rawLinks = window.globalAllLinks || allData.links;
+                // Data mapping - correctly assigning to expected variables
+                const topics = window.globalAllTopics || allData.topics;
+                const links = window.globalAllLinks || allData.links;
 
-                if (!rawTopics || rawTopics.length === 0 || !rawLinks || rawLinks.length === 0) {
-                    throw new Error("Data not ready after waiting. (Topics: " + (rawTopics ? rawTopics.length : 0) + ", Links: " + (rawLinks ? rawLinks.length : 0) + ")");
+                console.log('📈 Rendering Distribution with:', {
+                    processTopics: topics?.length,
+                    processLinks: links?.length
+                });
+
+                if (!topics || topics.length === 0 || !links || links.length === 0) {
+                    throw new Error(`Data incomplete (Topics: ${topics?.length}, Links: ${links?.length})`);
                 }
 
                 // Calculate unique papers per topic
@@ -4733,7 +4744,7 @@
                 .call(g => g.select('.domain').remove())
                 .call(g => g.selectAll('.tick text').attr('fill', 'var(--text-primary)').attr('font-size', '11px').attr('font-weight', '500'));
 
-            // Bars
+            // Bars with value labels on hover/active
             const bars = g.selectAll('.bar')
                 .data(data)
                 .enter().append('rect')
@@ -4745,17 +4756,17 @@
                 .attr('fill', d => d.color)
                 .attr('rx', 3);
 
-            // Value Labels (Paper counts on bars)
+            // Value Labels (always visible)
             g.selectAll('.distribution-value-label')
                 .data(data)
                 .enter().append('text')
                 .attr('class', 'distribution-value-label')
                 .attr('y', d => y(d.id) + y.bandwidth() / 2)
-                .attr('x', d => x(d.count) + 6)
+                .attr('x', d => x(d.count) + 8)
                 .attr('dy', '0.35em')
                 .attr('fill', 'var(--text-secondary)')
                 .attr('font-size', '10px')
-                .style('font-weight', '500')
+                .attr('font-family', 'Inter, sans-serif')
                 .text(d => d.count.toLocaleString());
 
             // Overlay frequency curve
