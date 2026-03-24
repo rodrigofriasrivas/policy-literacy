@@ -5166,16 +5166,17 @@
                     // Create basic structure with Theme Variables
                     selectorContainer.innerHTML = `
                             <div id="c4-dropdown-trigger" style="
-                                border: 1px solid var(--border-color, #ccc); 
+                                border: 1px solid var(--input-border); 
                                 border-radius: 6px; 
                                 padding: 6px 12px; 
-                                background: var(--bg-card, #fff); 
+                                background: var(--input-bg); 
                                 cursor: pointer; 
                                 font-size: 13px;
-                                color: var(--text-primary, #333);
+                                color: var(--text-primary);
                                 display: flex;
                                 align-items: center;
                                 justify-content: space-between;
+                                transition: border-color 0.2s;
                             ">
                                 <span id="c4-dropdown-label" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 8px;">Select topics...</span>
                                 <span style="font-size:10px; color:var(--text-secondary);">▼</span>
@@ -5186,25 +5187,26 @@
                                 position: absolute;
                                 top: 100%;
                                 right: 0;
-                                width: 280px; /* Wider for labels */
+                                width: 280px; 
                                 max-height: 300px;
                                 overflow-y: auto;
-                                background: var(--bg-card, #fff);
-                                border: 1px solid var(--border-color, #ccc);
+                                background: var(--l-sidebar-bg);
+                                border: 1px solid var(--l-border);
                                 border-radius: 6px;
                                 z-index: 1000;
-                                box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Subtler shadow */
+                                box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
                                 margin-top: 4px;
                             ">
                                 <div id="c4-clear-btn" style="
-                                    padding: 8px 12px;
+                                    padding: 10px 12px;
                                     font-size: 11px;
                                     color: #ff6b6b;
                                     cursor: pointer;
-                                    border-bottom: 1px solid var(--border-color, #eee);
+                                    border-bottom: 1px solid var(--l-border);
                                     font-weight: 600;
-                                    background: rgba(255, 107, 107, 0.05);
+                                    background: rgba(255, 107, 107, 0.08);
                                     text-align: right;
+                                    transition: background 0.2s;
                                 ">Clear Selection (×)</div>
                                 <div id="c4-options-list"></div>
                             </div>
@@ -5259,12 +5261,12 @@
                                 font-size: 12px;
                                 color: var(--text-secondary);
                                 cursor: pointer;
-                                border-bottom: 1px solid var(--border-color, #eee);
+                                border-bottom: 1px solid var(--l-border);
                                 transition: background 0.1s;
                             `;
                         opt.dataset.tid = t.id;
 
-                        opt.onmouseover = () => { opt.style.background = 'var(--bg-hover, #f5f5f5)'; };
+                        opt.onmouseover = () => { opt.style.background = 'rgba(255, 255, 255, 0.08)'; };
                         opt.onmouseout = () => { opt.style.background = 'transparent'; };
 
                         opt.onclick = (e) => {
