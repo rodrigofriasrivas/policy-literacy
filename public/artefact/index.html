@@ -4646,6 +4646,17 @@
 
             const xAxis = d3.axisBottom(x).tickFormat(d3.format('d')).tickValues(d3.range(1980, 2026, 5));
             const yAxis = d3.axisLeft(y).ticks(5);
+
+            svg.append('g').attr('transform', `translate(0, ${height - margin.bottom})`).call(xAxis)
+                .selectAll('text').attr('fill', 'var(--text-secondary)').style('font-size', '10px');
+            svg.append('g').attr('transform', `translate(${margin.left}, 0)`).call(yAxis)
+                .selectAll('text').attr('fill', 'var(--text-secondary)').style('font-size', '10px');
+            
+            // Axes Labels
+            svg.append('text').attr('x', width / 2).attr('y', height - 5).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Year');
+            svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers');
+        }
+
         // --- Topic Distribution (Long Tail) Logic ---
         async function fetchAndRenderTopicDistribution() {
             const container = document.getElementById('topic-distribution-chart');
@@ -4812,15 +4823,6 @@
                 d3.select(this).attr('opacity', 1);
                 tooltipEl.style('visibility', 'hidden');
             });
-        }
-
-            svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(xAxis).selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
-            svg.append('g').attr('transform', `translate(${margin.left},0)`).call(yAxis).selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
-            svg.selectAll('.domain, .tick line').attr('stroke', 'var(--text-secondary)').attr('opacity', 0.2);
-
-            // Labels
-            svg.append('text').attr('x', width / 2).attr('y', height).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Year');
-            svg.append('text').attr('transform', 'rotate(-90)').attr('x', -height / 2).attr('y', 15).attr('fill', 'var(--text-secondary)').style('font-size', '10px').style('text-anchor', 'middle').text('Papers');
         }
 
 
