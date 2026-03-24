@@ -1160,6 +1160,27 @@
             border-radius: 50%;
         }
 
+        .topic-card .topic-expand-icon {
+            position: absolute;
+            top: 10px;
+            right: 28px;
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            opacity: 0.5;
+            line-height: 1;
+        }
+
+        .topic-card .section-label-muted {
+            font-size: 9px;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+
         .topic-card .topic-details {
             display: none;
             margin-top: 16px;
@@ -6786,10 +6807,12 @@
                          style="border-top-color: ${color};" 
                          onclick="window.toggleTopicCard(${topic.id}, event)">
                         <div class="topic-dot" style="background: ${color};"></div>
+                        <div class="topic-expand-icon">${isExpanded ? '−' : '+'}</div>
                         <div class="topic-num">${numStr}</div>
                         <div class="topic-name">${cleanName}</div>
                         <div class="topic-details">
                             <div class="topic-def">${topic.definition || 'Research definition for this topic layer.'}</div>
+                            <div class="section-label-muted">Frequent terms</div>
                             <div class="bigram-pills">
                                 ${top5Bigrams.map(b => `<span class="bigram-pill">${b.bigram}</span>`).join('')}
                             </div>
