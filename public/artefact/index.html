@@ -4647,22 +4647,20 @@
             if (!container) return;
 
             try {
-                // Ensure base data is available (topics and links)
-                if (!allData || !allData.topics || !allData.links) {
-                    let waitAttempts = 0;
-                    while ((!allData || !allData.topics || !allData.links) && waitAttempts < 40) {
-                        await new Promise(r => setTimeout(r, 150));
-                        waitAttempts++;
-                    }
+                console.log('📊 Initializing Topic Distribution Chart...');
+                // Ensure base data is available (topics and links) - checking length specifically
+                let waitAttempts = 0;
+                while ((!allData.topics || allData.topics.length === 0 || !allData.links || allData.links.length === 0) && waitAttempts < 60) {
+                    await new Promise(r => setTimeout(r, 100));
+                    waitAttempts++;
                 }
-                if (!allData || !allData.topics || !allData.links) throw new Error("Missing topics or links data.");
 
                 // Use global full datasets if available to preserve long-tail distribution and full counts
-                const topics = window.globalAllTopics || allData.topics;
-                const links = window.globalAllLinks || allData.links;
+                const rawTopics = window.globalAllTopics || allData.topics;
+                const rawLinks = window.globalAllLinks || allData.links;
 
-                if (!topics || !links || topics.length === 0) {
-                   throw new Error("No topics or links available for distribution.");
+                if (!rawTopics || rawTopics.length === 0 || !rawLinks || rawLinks.length === 0) {
+                    throw new Error("Data not ready after waiting. (Topics: " + (rawTopics ? rawTopics.length : 0) + ", Links: " + (rawLinks ? rawLinks.length : 0) + ")");
                 }
 
                 // Calculate unique papers per topic
@@ -4729,12 +4727,11 @@
                 .call(d3.axisLeft(y).tickFormat(id => {
                     const t = data.find(item => item.id === id);
                     if (!t) return id;
-                    // Clean "Topic X: " prefix for cleaner labels if needed
-                    const label = t.name.replace(/^topic \d+:\s*/i, '');
+                    const label = t.name.replace(/^topic \d+:\s*/i, '').replace(/Topic \d+:\s*/i, '');
                     return label.length > 25 ? label.slice(0, 22) + '...' : label;
                 }))
                 .call(g => g.select('.domain').remove())
-                .call(g => g.selectAll('.tick text').attr('fill', 'var(--text-primary)').attr('font-size', '11px'));
+                .call(g => g.selectAll('.tick text').attr('fill', 'var(--text-primary)').attr('font-size', '11px').attr('font-weight', '500'));
 
             // Bars
             const bars = g.selectAll('.bar')
