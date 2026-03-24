@@ -357,6 +357,7 @@
         input[type="range"] {
             width: 100%;
             -webkit-appearance: none;
+            appearance: none;
             background: rgba(255, 255, 255, 0.1);
             height: 4px;
             border-radius: 2px;
@@ -366,6 +367,7 @@
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
+            appearance: none;
             width: 14px;
             height: 14px;
             background: #fff;
@@ -391,6 +393,7 @@
             width: 100%;
             pointer-events: none;
             -webkit-appearance: none;
+            appearance: none;
             background: transparent;
             z-index: 2;
         }
@@ -1055,9 +1058,6 @@
             display: none !important;
         }
 
-        body.embed-mode #loading {
-            /* keep spinner but transparent bg */
-        }
 
         /* Disabled Sidebar State */
         .dashboard-sidebar-col.is-disabled {
@@ -1089,6 +1089,139 @@
         .dashboard-sidebar-col.is-disabled #controls {
             pointer-events: none;
             /* Disable all interactions */
+        }
+
+        /* Topics Grid Styles */
+        #view-field-structure {
+            padding-bottom: 40px;
+        }
+
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .topic-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topic-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .topic-card {
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-top: 3px solid transparent;
+            border-radius: 4px;
+            padding: 16px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topic-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .topic-card .topic-num {
+            font-size: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 4px;
+            opacity: 0.6;
+        }
+
+        .topic-card .topic-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.3;
+            padding-right: 12px;
+        }
+
+        .topic-card .topic-dot {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .topic-card .topic-details {
+            display: none;
+            margin-top: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .topic-card.expanded .topic-details {
+            display: block;
+        }
+
+        .topic-card .topic-def {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .topic-card .bigram-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .topic-card .bigram-pill {
+            font-size: 9px;
+            background: rgba(78, 205, 196, 0.1);
+            color: var(--accent-color);
+            padding: 3px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(78, 205, 196, 0.2);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .topic-card .open-network-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--accent-color);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-align: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .topic-card .open-network-btn:hover {
+            background: rgba(78, 205, 196, 0.1);
+            border-color: var(--accent-color);
+            transform: translateX(2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -1646,6 +1779,11 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Field Structure / Topics Grid View -->
+                <div id="view-field-structure" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                    <!-- Grid will be injected here -->
                 </div>
 
                 <!-- Individual Topic Dashboard -->
@@ -2409,6 +2547,11 @@
                 } else {
                     initMacroView();
                     animate();
+                }
+
+                // Render the 25 topics grid
+                if (typeof renderTopicGrid === 'function') {
+                    renderTopicGrid();
                 }
 
             } catch (error) {
@@ -6089,6 +6232,7 @@
             const canvasEl = document.getElementById('canvas');
             const tView = document.getElementById('view-temporal');
             const libView = document.getElementById('view-library');
+            const fieldView = document.getElementById('view-field-structure');
             const topicView = document.getElementById('view-topic');
             const clusteredContainer = document.getElementById('clusteredViewContainer');
 
@@ -6096,6 +6240,7 @@
             if (canvasEl) canvasEl.style.display = 'none';
             if (tView) tView.style.display = 'none';
             if (libView) libView.style.display = 'none';
+            if (fieldView) fieldView.style.display = 'none';
             if (topicView) topicView.style.display = 'none';
             if (clusteredContainer) clusteredContainer.style.display = 'none';
         };
@@ -6130,6 +6275,7 @@
             const contentCol = document.querySelector('.dashboard-content-col');
             const tView = document.getElementById('view-temporal');
             const libView = document.getElementById('view-library');
+            const fieldView = document.getElementById('view-field-structure');
             const topicView = document.getElementById('view-topic');
 
             // Handle sidebar disabled state
@@ -6167,6 +6313,13 @@
                 }
                 // Preserving existing logic
                 if (typeof LibraryManager !== 'undefined') LibraryManager.init();
+            } else if (view === 'field-structure') {
+                if (fieldView) {
+                    fieldView.style.display = 'block';
+                    fieldView.style.visibility = 'visible';
+                    fieldView.style.pointerEvents = 'auto';
+                }
+                if (typeof renderTopicGrid === 'function') renderTopicGrid();
             } else if (view === 'network') {
                 if (containerEl) containerEl.style.display = 'block';
                 // Ensure canvas is back in main container (preserving existing logic)
@@ -6595,8 +6748,82 @@
                 loading.innerHTML = `<div style="color:red; text-align:center; padding:50px;">Error loading data: ${e.message}</div>`;
             }
         });
-    </script>
 
+        // --- TOPICS GRID LOGIC ---
+        let openTopicIds = new Set();
+
+        window.renderTopicGrid = function () {
+            const container = document.getElementById('view-field-structure');
+            if (!container) return;
+
+            // Get the full list of topics (prioritize non-filtered if in topic mode)
+            const topics = (window.globalAllTopics || allData.topics).sort((a, b) => a.id - b.id);
+
+            let html = `
+                <div style="max-width: 1200px; margin: 0 auto; padding: 40px 32px;">
+                    <h1 style="font-family: 'Times New Roman', serif; font-size: 32px; font-weight: 400; margin-bottom: 8px; color: var(--text-primary);">25 research conversations</h1>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 40px; max-width: 650px; line-height: 1.5;">
+                        Each topic represents a recurring pattern of co-occurring terms across the corpus. Click any card to expand its description and key terms.
+                    </p>
+                    <div class="topic-grid">
+            `;
+
+            topics.forEach((topic) => {
+                const isExpanded = openTopicIds.has(topic.id);
+                const color = topicColors[(topic.id - 1) % topicColors.length];
+                const numStr = topic.id < 10 ? `0${topic.id}` : topic.id;
+
+                const rawName = topic.topic_name || topic.name || 'Unnamed Topic';
+                const cleanName = rawName.replace(/^Topic \d+:\s*/, '').replace(/^Topic undefined:\s*/, '');
+
+                const top5Bigrams = (allData.bigrams || [])
+                    .filter(b => b.topic_id === topic.id)
+                    .sort((a, b) => (b.normalized_frequency || 0) - (a.normalized_frequency || 0))
+                    .slice(0, 5);
+
+                html += `
+                    <div class="topic-card ${isExpanded ? 'expanded' : ''}" 
+                         style="border-top-color: ${color};" 
+                         onclick="window.toggleTopicCard(${topic.id}, event)">
+                        <div class="topic-dot" style="background: ${color};"></div>
+                        <div class="topic-num">${numStr}</div>
+                        <div class="topic-name">${cleanName}</div>
+                        <div class="topic-details">
+                            <div class="topic-def">${topic.definition || 'Research definition for this topic layer.'}</div>
+                            <div class="bigram-pills">
+                                ${top5Bigrams.map(b => `<span class="bigram-pill">${b.bigram}</span>`).join('')}
+                            </div>
+                            <button class="open-network-btn" onclick="window.openInNetwork(${topic.id}, event)">
+                                Open in network →
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div></div>`;
+            container.innerHTML = html;
+        };
+
+        window.toggleTopicCard = function (id, event) {
+            if (openTopicIds.has(id)) {
+                openTopicIds.delete(id);
+            } else {
+                openTopicIds.add(id);
+            }
+            window.renderTopicGrid();
+        };
+
+        window.openInNetwork = function (topicId, event) {
+            event.stopPropagation(); // Don't toggle the card
+            const select = document.getElementById('topicSelect');
+            if (select) {
+                select.value = topicId;
+                select.dispatchEvent(new Event('change'));
+            }
+            window.switchView('network');
+        };
+    </script>
 </body>
 
 </html>
