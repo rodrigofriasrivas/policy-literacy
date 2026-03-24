@@ -1746,6 +1746,9 @@
                                     style="width: 100%; border-collapse: collapse; margin-top: 16px;">
                                     <thead>
                                         <tr style="border-bottom: 1px solid var(--chart-panel-border);">
+                                            <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 80px; transition: color 0.2s;"
+                                                onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('id')">
+                                                Paper ID <span id="sort-icon-id" style="font-size:10px;">▲▼</span></th>
                                             <th style="cursor:pointer; text-align: left; padding: 10px 12px; color: var(--text-primary); font-size: 11px; width: 60px; transition: color 0.2s;"
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('year')">
                                                 Year <span id="sort-icon-year" style="font-size:10px;">▼</span></th>
@@ -1895,6 +1898,9 @@
                             <table id="topic-papers-table" style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="border-bottom: 1px solid var(--chart-panel-border);">
+                                        <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-secondary); font-size: 11px; width: 80px;" onclick="sortTopicPapers('id')">
+                                            Paper ID <span id="topic-sort-id" style="font-size:10px;">▲▼</span>
+                                        </th>
                                         <th style="cursor:pointer; text-align: left; padding: 12px; color: var(--text-primary); font-size: 11px; width: 60px;" onclick="sortTopicPapers('year')">
                                             Year <span id="topic-sort-year" style="font-size:10px;">▼</span>
                                         </th>
@@ -5651,7 +5657,10 @@
             renderTopicTrendsChart(topicId, sortedBigrams);
 
             // Papers Table
-            topicPapers = allData.papers;
+            const topicBigramIds = new Set(topicBigrams.map(b => b.id));
+            topicPapers = allData.papers.filter(p => 
+                p.topicId === topic.id || (p.bigramIds && p.bigramIds.some(bid => topicBigramIds.has(bid)))
+            );
             topicPapersPage = 1;
             topicPapersSearchQuery = '';
             topicPapersSortCol = 'year';
@@ -5730,10 +5739,17 @@
 
             // 2. Sort
             filtered.sort((a, b) => {
-                let valA = a[topicPapersSortCol] || '';
-                let valB = b[topicPapersSortCol] || '';
-                if (typeof valA === 'string') valA = valA.toLowerCase();
-                if (typeof valB === 'string') valB = valB.toLowerCase();
+                let valA = a[topicPapersSortCol];
+                let valB = b[topicPapersSortCol];
+
+                // Handle numeric
+                if (topicPapersSortCol === 'year' || topicPapersSortCol === 'id' || topicPapersSortCol === 'paper_id') {
+                    valA = Number(valA) || 0;
+                    valB = Number(valB) || 0;
+                } else {
+                    valA = (valA || '').toString().toLowerCase();
+                    valB = (valB || '').toString().toLowerCase();
+                }
                 
                 if (valA < valB) return topicPapersSortDir === 'asc' ? -1 : 1;
                 if (valA > valB) return topicPapersSortDir === 'asc' ? 1 : -1;
@@ -5741,7 +5757,7 @@
             });
 
             // Update UI Icons
-            ['year', 'title', 'authors', 'journal'].forEach(col => {
+            ['id', 'year', 'title', 'authors', 'journal'].forEach(col => {
                 const icon = document.getElementById(`topic-sort-${col}`);
                 if (!icon) return;
                 if (topicPapersSortCol === col) {
@@ -5769,10 +5785,15 @@
                 tbody.innerHTML = '<tr><td colspan="5" style="padding:40px; text-align:center; color:var(--text-secondary);">No papers match your search.</td></tr>';
             } else {
                 chunk.forEach(p => {
-                    const row = document.createElement('tr');
-                    row.style.borderBottom = '1px solid var(--chart-row-border)';
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid var(--chart-row-border)';
                     const title = p.title || 'Untitled';
-                    row.innerHTML = `
+                    
+                    // Paper ID
+                    const displayId = p.id || p.paper_id || '';
+
+                    tr.innerHTML = `
+                            <td style="padding:12px; color:var(--text-secondary); font-family:monospace; font-size:12px; opacity:0.7; vertical-align:top;">${displayId}</td>
                             <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.year || ''}</td>
                             <td style="padding:12px;color:var(--text-primary);font-size:13px;font-weight:500;word-break:break-word;vertical-align:top;line-height:1.5;">${title}</td>
                             <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.authors || 'Unknown'}</td>
@@ -5783,20 +5804,63 @@
 
                     const absRow = document.createElement('tr');
                     absRow.style.display = 'none';
+
+                    // Bigrams logic (Change 2)
+                    let pBigrams = [];
+                    if (p.bigramIds && allData.bigrams) {
+                        pBigrams = p.bigramIds.map(bid => {
+                            const b = allData.bigrams.find(bb => bb.id === bid);
+                            return b ? b.bigram : null;
+                        }).filter(Boolean);
+                    }
+
+                    let bigramsHTML = '';
+                    if (pBigrams.length > 0) {
+                        const first = pBigrams[0];
+                        const others = pBigrams.slice(1);
+                        const tagStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; background:rgba(255,255,255,0.08); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); margin-right:4px; margin-bottom:4px;";
+                        
+                        bigramsHTML = `
+                            <div style="margin-top:16px;">
+                                <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; font-weight:600;">Key Terms</div>
+                                <div class="bigram-tags-container">
+                                    <span style="${tagStyle}">${first}</span>
+                                    ${others.length > 0 ? `
+                                        <button class="btn more-bigrams-btn" style="width:auto; height:18px; padding:0 8px; font-size:10px; border-radius:10px; opacity:0.8;">+${others.length} more</button>
+                                        <div class="all-bigrams" style="display:none; margin-top:8px;">
+                                            ${pBigrams.map(b => `<span style="${tagStyle}">${b}</span>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     absRow.innerHTML = `
-                            <td colspan="5" style="padding:0 12px 24px 12px;border-bottom:1px solid var(--chart-row-border);">
+                            <td colspan="6" style="padding:0 12px 24px 12px;border-bottom:1px solid var(--chart-row-border);">
                                 <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:8px;color:var(--text-secondary);font-size:13px;line-height:1.6;">
                                     <strong style="color:var(--text-primary);display:block;margin-bottom:8px;">Abstract</strong>
                                     ${p.abstract || 'No abstract available.'}
+                                    ${bigramsHTML}
                                 </div>
                             </td>`;
 
-                    row.querySelector('.expand-btn').onclick = function () {
+                    const expBtn = tr.querySelector('.expand-btn');
+                    expBtn.onclick = function () {
                         const isHidden = absRow.style.display === 'none';
                         absRow.style.display = isHidden ? 'table-row' : 'none';
                         this.textContent = isHidden ? '▲' : '▼';
                     };
-                    tbody.appendChild(row);
+
+                    const moreBtn = absRow.querySelector('.more-bigrams-btn');
+                    if (moreBtn) {
+                        moreBtn.onclick = () => {
+                            moreBtn.style.display = 'none';
+                            absRow.querySelector('.all-bigrams').style.display = 'block';
+                        };
+                    }
+
+                    tbody.appendChild(tr);
                     tbody.appendChild(absRow);
                 });
             }
@@ -6538,7 +6602,7 @@
             },
 
             updateIcons: function () {
-                ['year', 'title', 'authors', 'journal'].forEach(k => {
+                ['id', 'year', 'title', 'authors', 'journal'].forEach(k => {
                     const icon = document.getElementById(`sort-icon-${k}`);
                     if (icon) {
                         if (k === this.sortKey) {
@@ -6617,17 +6681,9 @@
 
                     let isMissingAuthor = isMissing(p.authors, 'missing_author');
                     let isMissingJournal = isMissing(p.journal);
-
                     let displayAuthors = Array.isArray(p.authors) ? p.authors.join(', ') : p.authors;
-
-                    let authorsHTML = isMissingAuthor
-                        ? `<span style="${badgeStyle}">Missing authors</span>`
-                        : displayAuthors;
-
-                    let journalHTML = isMissingJournal
-                        ? `<span style="${badgeStyle}">Missing journal</span>`
-                        : p.journal;
-
+                    let authorsHTML = isMissingAuthor ? `<span style="${badgeStyle}">Missing authors</span>` : displayAuthors;
+                    let journalHTML = isMissingJournal ? `<span style="${badgeStyle}">Missing journal</span>` : p.journal;
                     let titleHTML = isMissing(p.title) ? 'Untitled paper' : p.title;
 
                     // Ensure safe escaping for tooltips
@@ -6639,6 +6695,7 @@
                     const chevronHTML = `<div class="js-accordion-toggle" data-paper-id="${paperId}" style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:rgba(255,255,255,0.05); cursor:pointer; transition:transform 0.2s; font-size:10px; color:var(--text-secondary); ${chevronTransform}">▼</div>`;
 
                     tr.innerHTML = `
+                        <td style="padding:12px; color:var(--text-secondary); font-family:monospace; font-size:12px; opacity:0.7; vertical-align:top;">${paperId}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-family:monospace; font-size:12px; vertical-align:top;">${p.year || ''}</td>
                         <td style="padding:8px 12px; color:var(--text-primary); font-weight:600; font-size:13px; line-height:1.4; white-space:normal; overflow-wrap:anywhere; vertical-align:top;">${titleHTML}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top;" ${!isMissingAuthor ? `title="${safeAuthorsAttr}"` : ''}>${authorsHTML}</td>
@@ -6648,7 +6705,6 @@
                     tbody.appendChild(tr);
 
                     if (isExpanded) {
-                        console.log("ACC INSERT row for " + paperId);
                         const abstractTr = document.createElement('tr');
                         abstractTr.className = 'paper-abstract-row';
 
@@ -6656,14 +6712,44 @@
                         const isMissingAbstract = isMissing(rawAbs);
                         const abstractText = isMissingAbstract ? '<span style="color:var(--text-secondary); font-style:italic;">Abstract not available in this dataset.</span>' : rawAbs;
 
-                        // Compact metadata line using same fallback values cleanly
                         const metaYear = p.year || 'Unknown Year';
                         const metaJournal = isMissingJournal ? 'Unknown Journal' : p.journal;
                         const metaAuthors = isMissingAuthor ? 'Unknown Author(s)' : displayAuthors;
                         const metadataLine = `${metaYear} &bull; <span style="font-style:italic;">${metaJournal}</span> &bull; ${metaAuthors}`;
 
+                        // Bigrams logic (Change 2)
+                        let pBigrams = [];
+                        if (p.bigramIds && allData.bigrams) {
+                            pBigrams = p.bigramIds.map(bid => {
+                                const b = allData.bigrams.find(bb => bb.id === bid);
+                                return b ? b.bigram : null;
+                            }).filter(Boolean);
+                        }
+
+                        let bigramsHTML = '';
+                        if (pBigrams.length > 0) {
+                            const first = pBigrams[0];
+                            const others = pBigrams.slice(1);
+                            const tagStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; background:rgba(255,255,255,0.08); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); margin-right:4px; margin-bottom:4px;";
+                            
+                            bigramsHTML = `
+                                <div style="margin-top:16px;">
+                                    <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; font-weight:600;">Key Terms</div>
+                                    <div class="bigram-tags-container">
+                                        <span style="${tagStyle}">${first}</span>
+                                        ${others.length > 0 ? `
+                                            <button class="btn more-bigrams-btn" style="width:auto; height:18px; padding:0 8px; font-size:10px; border-radius:10px; opacity:0.8;">+${others.length} more</button>
+                                            <div class="all-bigrams" style="display:none; margin-top:8px;">
+                                                ${pBigrams.map(b => `<span style="${tagStyle}">${b}</span>`).join('')}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }
+
                         abstractTr.innerHTML = `
-                            <td colspan="5" style="padding:16px 24px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--chart-row-border);">
+                            <td colspan="6" style="padding:16px 24px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--chart-row-border);">
                                 <div style="font-size:11px; color:var(--text-secondary); margin-bottom:12px; line-height:1.4;">
                                     ${metadataLine}
                                 </div>
@@ -6671,8 +6757,19 @@
                                 <div style="font-size:13px; color:var(--text-primary); line-height:1.6; opacity:0.85; white-space:normal;">
                                     ${abstractText}
                                 </div>
+                                ${bigramsHTML}
                             </td>
                         `;
+                        
+                        // Handle more bigrams button
+                        const moreBtn = abstractTr.querySelector('.more-bigrams-btn');
+                        if (moreBtn) {
+                            moreBtn.onclick = () => {
+                                moreBtn.style.display = 'none';
+                                abstractTr.querySelector('.all-bigrams').style.display = 'block';
+                            };
+                        }
+
                         tbody.appendChild(abstractTr);
                     }
                 });
