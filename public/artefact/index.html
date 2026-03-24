@@ -4657,16 +4657,24 @@
                 }
                 if (!allData || !allData.topics || !allData.links) throw new Error("Missing topics or links data.");
 
+                // Use global full datasets if available to preserve long-tail distribution and full counts
+                const topics = window.globalAllTopics || allData.topics;
+                const links = window.globalAllLinks || allData.links;
+
+                if (!topics || !links || topics.length === 0) {
+                   throw new Error("No topics or links available for distribution.");
+                }
+
                 // Calculate unique papers per topic
                 const countsMap = {};
-                const totalPapersInNetwork = new Set(allData.links.map(l => l.paper_id)).size;
-
-                allData.links.forEach(l => {
+                links.forEach(l => {
                     if (!countsMap[l.topic_id]) countsMap[l.topic_id] = new Set();
                     countsMap[l.topic_id].add(l.paper_id);
                 });
 
-                const distributionData = allData.topics.map(t => {
+                const totalPapersInNetwork = new Set(links.map(l => l.paper_id)).size || 1; // avoid div by 0
+
+                const distributionData = topics.map(t => {
                     const count = countsMap[t.id] ? countsMap[t.id].size : 0;
                     return {
                         id: t.id,
@@ -4739,6 +4747,19 @@
                 .attr('width', d => x(d.count))
                 .attr('fill', d => d.color)
                 .attr('rx', 3);
+
+            // Value Labels (Paper counts on bars)
+            g.selectAll('.distribution-value-label')
+                .data(data)
+                .enter().append('text')
+                .attr('class', 'distribution-value-label')
+                .attr('y', d => y(d.id) + y.bandwidth() / 2)
+                .attr('x', d => x(d.count) + 6)
+                .attr('dy', '0.35em')
+                .attr('fill', 'var(--text-secondary)')
+                .attr('font-size', '10px')
+                .style('font-weight', '500')
+                .text(d => d.count.toLocaleString());
 
             // Overlay frequency curve
             const curveLine = d3.line()
