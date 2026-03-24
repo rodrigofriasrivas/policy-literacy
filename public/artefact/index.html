@@ -5808,10 +5808,10 @@
                     // Bigrams logic (Change 2)
                     let pBigrams = [];
                     if (p.bigramIds && allData.bigrams) {
-                        pBigrams = p.bigramIds.map(bid => {
+                        pBigrams = [...new Set(p.bigramIds.map(bid => {
                             const b = allData.bigrams.find(bb => bb.id === bid);
                             return b ? b.bigram : null;
-                        }).filter(Boolean);
+                        }).filter(Boolean))];
                     }
 
                     let bigramsHTML = '';
@@ -6720,10 +6720,10 @@
                         // Bigrams logic (Change 2)
                         let pBigrams = [];
                         if (p.bigramIds && allData.bigrams) {
-                            pBigrams = p.bigramIds.map(bid => {
+                            pBigrams = [...new Set(p.bigramIds.map(bid => {
                                 const b = allData.bigrams.find(bb => bb.id === bid);
                                 return b ? b.bigram : null;
-                            }).filter(Boolean);
+                            }).filter(Boolean))];
                         }
 
                         let bigramsHTML = '';
