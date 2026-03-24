@@ -1,0 +1,175 @@
+--- Topic 1: New Venture Creation ---
+1. start_up
+2. business_model
+3. new_business
+4. entrepreneurial_firms
+5. model_innovation
+
+--- Topic 2: Academic Spin-offs ---
+1. spin_off
+2. digital_innovation
+3. academic_spin
+4. management_innovation
+5. university_spin
+
+--- Topic 3: Gender in Entrepreneurship ---
+1. women_entrepreneurs
+2. innovation_policy
+3. new_technologies
+4. institutional_entrepreneurship
+5. women_entrepreneurial
+
+--- Topic 4: Sustainable Innovation ---
+1. sustainable_development
+2. climate_policy
+3. green_innovation
+4. green_finance
+5. corporate_green
+
+--- Topic 5: High-Growth Technology Ventures ---
+1. high_growth
+2. entrepreneurial_action
+3. regional_innovation
+4. high_technology
+5. innovation_capability
+
+--- Topic 6: Economic Policy Design ---
+1. economic_growth
+2. policy_modeling
+3. stock_market
+4. tax_credit
+5. joint_ventures
+
+--- Topic 7: Policy Innovation ---
+1. policy_learning
+2. evidence_based
+3. business_innovation
+4. innovation_research
+5. policy_innovation
+
+--- Topic 8: Entrepreneurship Education ---
+1. entrepreneurship_education
+2. higher_education
+3. entrepreneurial_action
+4. academic_entrepreneurship
+5. students_entrepreneurial
+
+--- Topic 9: Marginalized Contexts ---
+1. policy_uncertainty
+2. climate_change
+3. rural_areas
+4. informal_economy
+5. mental_health
+
+--- Topic 10: Startup Financing ---
+1. start_up
+2. venture_capital
+3. social_capital
+4. innovation_performance
+5. business_angels
+
+--- Topic 11: Global Entrepreneurship Policy ---
+1. developing_countries
+2. nascent_entrepreneurs
+3. developed_countries
+4. policy_impact
+5. firm_creation
+
+--- Topic 12: Social Entrepreneurship ---
+1. entrepreneurial_activities
+2. entrepreneurial_intentions
+3. social_enterprise
+4. entrepreneurship_innovation
+5. social_innovation
+
+--- Topic 13: SMEs Socio-economic Development ---
+1. small_firms
+2. economic_growth
+3. economic_development
+4. policy_implementation
+5. environmental_policy
+
+--- Topic 14: Family Business ---
+1. family_firms
+2. self_employment
+3. decision_making
+4. entrepreneurial_orientation
+5. non_family
+
+--- Topic 15: Policy Diffusion ---
+1. decision_making
+2. policy_transfer
+3. policy_process
+4. policy_entrepreneurs
+5. organizational_learning
+
+--- Topic 16: Entrepreneurial Ecosystems ---
+1. entrepreneurial_ecosystems
+2. entrepreneurial_activity
+3. social_entrepreneurship
+4. social_entrepreneurs
+5. social_entrepreneurial
+
+--- Topic 17: Entrepreneurial Finance Policy ---
+1. policy_evaluation
+2. market_policies
+3. life_cycle
+4. cash_flow
+5. ex_ante
+
+--- Topic 18: Inclusive Entrepreneurship ---
+1. policy_responses
+2. income_inequality
+3. third_sector
+4. non_profit
+5. refugee_entrepreneurs
+
+--- Topic 19: Climate Technology Policy ---
+1. technological_innovation
+2. climate_policy
+3. digital_innovation
+4. rural_entrepreneurship
+5. green_technological
+
+--- Topic 20: Digital Business Models ---
+1. business_model
+2. entrepreneurial_learning
+3. digital_technologies
+4. digital_entrepreneurship
+5. digital_platforms
+
+--- Topic 21: Entrepreneurial Cognition ---
+1. self_efficacy
+2. entrepreneurial_intentions
+3. business_owners
+4. female_entrepreneurs
+5. emerging_economies
+
+--- Topic 22: Diaspora Entrepreneurship ---
+1. policy_practice
+2. immigrant_entrepreneurship
+3. capacity_building
+4. home_country
+5. immigrant_entrepreneurs
+
+--- Topic 23: Low-Carbon Transition ---
+1. developing_countries
+2. economic_performance
+3. access_finance
+4. low_carbon
+5. carbon_emissions
+
+--- Topic 24: Digital Economy ---
+1. digital_transformation
+2. informal_entrepreneurship
+3. digital_economy
+4. big_data
+5. technological_progress
+
+--- Topic 25: Gender Equity in Workplaces ---
+1. policy_making
+2. women_entrepreneurs
+3. parental_leave
+4. gender_equality
+5. work_family
+
