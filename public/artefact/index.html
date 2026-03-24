@@ -1731,13 +1731,13 @@
                         <div class="stitch-card">
                             <div class="stitch-card-title"
                                 style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-                                <span>Paper Library &mdash; <span id="library-total-count">0 papers</span></span>
+                                <span>Paper Library &mdash; <span id="library-total-count">0</span> papers with network connections</span>
                             </div>
 
                             <!-- Instructions -->
                             <div
                                 style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; opacity: 0.85;">
-                                <div>You are viewing the full Paper Library (1980–2024).</div>
+                                <div>These papers appear in the network visualisation. They are drawn from a corpus of 5,800 papers analysed to identify the 25 research topics.</div>
                                 <ul style="margin: 8px 0 0 0; padding-left: 20px;">
                                     <li>Search: type a keyword (title, author, or journal).</li>
                                     <li>Sort: click a column header to toggle ▲/▼.</li>
@@ -6475,12 +6475,16 @@
             applyFilters: function () {
                 const rawPapers = allData.papers || [];
 
-                // 1. Filter logic (Search + Timeframe + Journals)
+                // 1. Only show papers that have at least one topic_paper_link (network connections)
+                const linkedPaperIds = new Set(allData.links.map(l => l.paper_id));
+                const libraryPapers = rawPapers.filter(p => linkedPaperIds.has(p.paper_id));
+
+                // 2. Filter logic (Search + Timeframe + Journals)
                 const q = (this.searchQuery || '').toLowerCase();
                 const startYear = typeof minYear !== 'undefined' ? minYear : 1980;
                 const endYear = typeof maxYear !== 'undefined' ? maxYear : 2024;
 
-                this.filteredPapers = rawPapers.filter(p => {
+                this.filteredPapers = libraryPapers.filter(p => {
                     const pYear = Number(p.year) || 0;
 
                     // Time filter
@@ -6549,7 +6553,7 @@
                 // Update total count
                 const totalLabel = document.getElementById('library-total-count');
                 if (totalLabel) {
-                    totalLabel.textContent = `${this.filteredPapers.length} papers`;
+                    totalLabel.textContent = this.filteredPapers.length;
                 }
 
                 // Make sure pagination restarts to first page when filtering
