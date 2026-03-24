@@ -2583,9 +2583,14 @@
                     animate();
                 }
 
-                // Render the 25 topics grid
                 if (typeof renderTopicGrid === 'function') {
                     renderTopicGrid();
+                }
+
+                // Trigger Topic Distribution after data is fully ready
+                console.log('Topic Distribution: data ready, topics=', allData.topics?.length, 'links=', allData.links?.length);
+                if (typeof fetchAndRenderTopicDistribution === 'function') {
+                    fetchAndRenderTopicDistribution();
                 }
 
             } catch (error) {
@@ -4647,31 +4652,14 @@
             if (!container) return;
 
             try {
-                console.log('📊 Topic Distribution Initialization', {
-                    allDataTopics: allData.topics?.length,
-                    allLinks: allData.links?.length,
-                    globalTopics: window.globalAllTopics?.length,
-                    globalLinks: window.globalAllLinks?.length
-                });
-
-                // Ensure base data is available (topics and links) - checking length specifically
-                let waitAttempts = 0;
-                while ((!allData.topics || allData.topics.length === 0 || !allData.links || allData.links.length === 0) && waitAttempts < 40) {
-                    await new Promise(r => setTimeout(r, 100));
-                    waitAttempts++;
-                }
-
-                // Data mapping - correctly assigning to expected variables
+                // Remove polling loop — this function is now triggered event-driven on data ready or tab switch
                 const topics = window.globalAllTopics || allData.topics;
                 const links = window.globalAllLinks || allData.links;
 
-                console.log('📈 Rendering Distribution with:', {
-                    processTopics: topics?.length,
-                    processLinks: links?.length
-                });
-
                 if (!topics || topics.length === 0 || !links || links.length === 0) {
-                    throw new Error(`Data incomplete (Topics: ${topics?.length}, Links: ${links?.length})`);
+                    // It's expected to fail if called before data is ready; the finish of loadData() will trigger it
+                    console.warn(`Topic Distribution skipped: Data not ready. (Topics: ${topics?.length}, Links: ${links?.length})`);
+                    return;
                 }
 
                 // Calculate unique papers per topic
