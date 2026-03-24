@@ -1639,7 +1639,18 @@
                             <div id="corpus-growth-audit"></div>
                         </div>
 
-                        <!-- Card 2: Topic Prevalence -->
+                        <!-- Card 2: Topic Distribution (Long Tail) -->
+                        <div class="stitch-card">
+                            <div class="stitch-card-title">Topic distribution across the corpus</div>
+                            <div class="stitch-card-subtitle">Topics ordered by total paper count. Frequency reflects presence in the corpus, not importance.</div>
+                            <div id="topic-distribution-chart" style="height: 520px; width: 100%; position: relative; margin-top:24px;">
+                                <div style="display:flex;height:100%;align-items:center;justify-content:center;color:var(--text-secondary);opacity:0.7;">
+                                    Loading distribution...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Topic Prevalence -->
                         <div class="stitch-card">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div class="stitch-card-title">Topic Prevalence Over Time</div>
@@ -4467,6 +4478,7 @@
                 window.temporalData = data; // Store globally for modal
                 renderTemporalChart(data);
                 fetchAndRenderCorpusGrowth(); // Uses v_corpus_growth_by_year_v1
+                fetchAndRenderTopicDistribution(); // New Chart: distribution across corpus
                 // fetchAndRenderEmergence(); // Removed
                 fetchAndRenderTopicTrends();  // Uses v_chart4_topic_trends
                 fetchAndRenderBigramTrends(); // Uses v_chart5_bigram_trends_corrected
@@ -4629,6 +4641,161 @@
 
             const xAxis = d3.axisBottom(x).tickFormat(d3.format('d')).tickValues(d3.range(1980, 2026, 5));
             const yAxis = d3.axisLeft(y).ticks(5);
+        // --- Topic Distribution (Long Tail) Logic ---
+        async function fetchAndRenderTopicDistribution() {
+            const container = document.getElementById('topic-distribution-chart');
+            if (!container) return;
+
+            try {
+                // Ensure base data is available (topics and links)
+                if (!allData || !allData.topics || !allData.links) {
+                    let waitAttempts = 0;
+                    while ((!allData || !allData.topics || !allData.links) && waitAttempts < 40) {
+                        await new Promise(r => setTimeout(r, 150));
+                        waitAttempts++;
+                    }
+                }
+                if (!allData || !allData.topics || !allData.links) throw new Error("Missing topics or links data.");
+
+                // Calculate unique papers per topic
+                const countsMap = {};
+                const totalPapersInNetwork = new Set(allData.links.map(l => l.paper_id)).size;
+
+                allData.links.forEach(l => {
+                    if (!countsMap[l.topic_id]) countsMap[l.topic_id] = new Set();
+                    countsMap[l.topic_id].add(l.paper_id);
+                });
+
+                const distributionData = allData.topics.map(t => {
+                    const count = countsMap[t.id] ? countsMap[t.id].size : 0;
+                    return {
+                        id: t.id,
+                        name: t.topic_name,
+                        count: count,
+                        color: t.color || topicColors[(t.id - 1) % topicColors.length],
+                        percentage: (count / totalPapersInNetwork) * 100
+                    };
+                }).sort((a, b) => b.count - a.count);
+
+                renderDistributionChart(container, distributionData, totalPapersInNetwork);
+
+            } catch (e) {
+                console.error("Topic Distribution Chart Error:", e);
+                container.innerHTML = `<div style="color:red; font-size:12px; padding:20px; text-align:center;">Failed to load distribution: ${e.message}</div>`;
+            }
+        }
+
+        function renderDistributionChart(container, data, totalPapers) {
+            container.innerHTML = '';
+            const width = container.clientWidth;
+            const height = 520;
+            const margin = { top: 10, right: 60, bottom: 40, left: 180 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            const svg = d3.select(container).append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+            const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.count) * 1.05]) // slight padding
+                .range([0, innerWidth]);
+
+            const y = d3.scaleBand()
+                .domain(data.map(d => d.id))
+                .range([0, innerHeight])
+                .padding(0.35);
+
+            // Axes
+            g.append('g')
+                .attr('transform', `translate(0, ${innerHeight})`)
+                .call(d3.axisBottom(x).ticks(5).tickSize(-innerHeight))
+                .call(g => g.select('.domain').remove())
+                .call(g => g.selectAll('.tick line').attr('stroke', 'var(--input-border)').attr('opacity', 0.15))
+                .call(g => g.selectAll('.tick text').attr('fill', 'var(--text-secondary)').attr('font-size', '10px').attr('dy', '1em'));
+
+            g.append('g')
+                .call(d3.axisLeft(y).tickFormat(id => {
+                    const t = data.find(item => item.id === id);
+                    if (!t) return id;
+                    // Clean "Topic X: " prefix for cleaner labels if needed
+                    const label = t.name.replace(/^topic \d+:\s*/i, '');
+                    return label.length > 25 ? label.slice(0, 22) + '...' : label;
+                }))
+                .call(g => g.select('.domain').remove())
+                .call(g => g.selectAll('.tick text').attr('fill', 'var(--text-primary)').attr('font-size', '11px'));
+
+            // Bars
+            const bars = g.selectAll('.bar')
+                .data(data)
+                .enter().append('rect')
+                .attr('class', 'distribution-bar')
+                .attr('y', d => y(d.id))
+                .attr('height', y.bandwidth())
+                .attr('x', 0)
+                .attr('width', d => x(d.count))
+                .attr('fill', d => d.color)
+                .attr('rx', 3);
+
+            // Overlay frequency curve
+            const curveLine = d3.line()
+                .x(d => x(d.count))
+                .y(d => y(d.id) + y.bandwidth() / 2)
+                .curve(d3.curveMonotoneY);
+
+            g.append('path')
+                .datum(data)
+                .attr('class', 'distribution-curve')
+                .attr('fill', 'none')
+                .attr('stroke', 'var(--text-primary)') 
+                .attr('stroke-width', 2.5)
+                .attr('opacity', 0.6)
+                .attr('d', curveLine);
+
+            // Tooltip implementation
+            const tooltip = d3.select('body').selectAll('#distribution-tooltip').data([0]);
+            const tooltipEl = tooltip.enter().append('div')
+                .attr('id', 'distribution-tooltip')
+                .style('position', 'absolute')
+                .style('visibility', 'hidden')
+                .style('background', 'var(--bg-card)')
+                .style('color', 'var(--text-primary)')
+                .style('border', '1px solid var(--border-color)')
+                .style('padding', '8px 12px')
+                .style('border-radius', '4px')
+                .style('font-size', '12px')
+                .style('pointer-events', 'none')
+                .style('z-index', 2000)
+                .style('box-shadow', '0 4px 12px rgba(0,0,0,0.15)')
+                .merge(tooltip);
+
+            bars.on('mouseover', function(event, d) {
+                d3.select(this).attr('opacity', 0.8);
+                tooltipEl.style('visibility', 'visible')
+                    .html(`
+                        <div style="font-weight:700; border-bottom:1px solid var(--l-border); margin-bottom:6px; padding-bottom:4px; color:${d.color}">${d.name}</div>
+                        <div style="display:flex; justify-content:space-between; gap:20px;">
+                            <span>Papers:</span>
+                            <span style="font-weight:600;">${d.count.toLocaleString()}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; gap:20px; margin-top:2px;">
+                            <span>Network Share:</span>
+                            <span style="font-weight:600;">${d.percentage.toFixed(1)}%</span>
+                        </div>
+                    `);
+            })
+            .on('mousemove', function(event) {
+                tooltipEl.style('top', (event.pageY - 10) + 'px')
+                    .style('left', (event.pageX + 20) + 'px');
+            })
+            .on('mouseout', function() {
+                d3.select(this).attr('opacity', 1);
+                tooltipEl.style('visibility', 'hidden');
+            });
+        }
 
             svg.append('g').attr('transform', `translate(0,${height - margin.bottom})`).call(xAxis).selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
             svg.append('g').attr('transform', `translate(${margin.left},0)`).call(yAxis).selectAll('text').attr('fill', 'var(--text-secondary)').style('font-family', 'Inter').style('font-size', '10px');
@@ -5039,16 +5206,13 @@
                     menu.onclick = (e) => e.stopPropagation();
 
 
-                    // Populate Options & Build Lookup Map
+                    // Populate Options from global topics (all 25) to ensure dropdown is never empty
                     const topicLookup = {};
-                    // Sort distinct topics by ID for the list
-                    const uniqueTopics = Array.from(new Set(data.map(d => JSON.stringify({
-                        id: d.topic_id,
-                        label: d.topic_label,
-                        color: d.series_color || topicColors[(d.topic_id - 1) % topicColors.length]
-                    }))))
-                        .map(s => JSON.parse(s))
-                        .sort((a, b) => a.id - b.id);
+                    const uniqueTopics = (window.globalAllTopics || allData.topics).map(t => ({
+                        id: t.id,
+                        label: t.topic_name,
+                        color: t.color || topicColors[(t.id - 1) % topicColors.length]
+                    })).sort((a, b) => a.id - b.id);
 
                     uniqueTopics.forEach(t => topicLookup[t.id] = t);
 
@@ -5476,8 +5640,8 @@
 
                 try {
                     // ── STATIC BUILD: Chart 5 – filter pre-loaded local JSON ──
-                    const _c5resp = await fetch(`${DATA_BASE}v_chart5_bigram_trends.json`);
-                    if (!_c5resp.ok) throw new Error('Could not load v_chart5_bigram_trends.json');
+                    const _c5resp = await fetch(`${DATA_BASE}v_chart5_bigram_trends_corrected.json`);
+                    if (!_c5resp.ok) throw new Error('Could not load v_chart5_bigram_trends_corrected.json');
                     const _c5all = await _c5resp.json();
                     const response = { ok: true, json: async () => _c5all.filter(r => String(r.topic_id) === String(topicId)) };
 
