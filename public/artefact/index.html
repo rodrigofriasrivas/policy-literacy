@@ -1713,7 +1713,7 @@
                             <!-- Instructions -->
                             <div
                                 style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; opacity: 0.85;">
-                                <div>The full corpus contains 5,800 papers. This library shows 3,683 &mdash; those with direct connections to the 25 research topics. The remaining 2,117 have no direct topic connections in the network.</div>
+                                <div>The full corpus contains 5,799 papers. This library shows 3,682 &mdash; those with direct connections to the 25 research topics. The remaining 2,117 have no direct topic connections in the network.</div>
                                 <ul style="margin: 8px 0 0 0; padding-left: 20px;">
                                     <li>Search: type a keyword (title, author, or journal).</li>
                                     <li>Sort: click a column header to toggle ▲/▼.</li>
@@ -2415,7 +2415,7 @@
 
                     console.log(`✅ Loaded ${papers.length} papers from local file`);
                     console.log(`✅ Loaded ${topicPaperLinks.length} links from local file`);
-                    updateStatus(`Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Linking research papers to policy topics: ${topicPaperLinks.length} of 14,546 connections</span>`);
+                    updateStatus(`Building the enterprise policy research map<br><span style="font-size:12px; opacity:0.7">Linking research papers to policy topics: ${topicPaperLinks.length} of 14,543 connections</span>`);
 
                     // Minor deferral so the UI paints before synchronous data processing
                     await new Promise(r => setTimeout(r, 100));
@@ -6851,7 +6851,7 @@
                 if (info) info.textContent = `Page ${this.currentPage} of ${totalPages}`;
                 if (prev) prev.disabled = (this.currentPage <= 1);
                 if (next) next.disabled = (this.currentPage >= totalPages);
-                if (totalLabel) totalLabel.textContent = `${totalCount} papers`;
+                if (totalLabel) totalLabel.textContent = `${totalCount}`;
 
                 // Log Audit
                 console.groupCollapsed('PAPER LIBRARY PAGINATION AUDIT');
