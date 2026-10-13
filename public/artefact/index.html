@@ -1975,20 +1975,79 @@
     </div>
 
     <div id="zoomControls">
-        <button id="zoomIn" class="zoom-btn">+</button>
-        <button id="zoomOut" class="zoom-btn">−</button>
+        <button id="zoomIn" class="zoom-btn" aria-label="Zoom in" title="Zoom in">+</button>
+        <button id="zoomOut" class="zoom-btn" aria-label="Zoom out" title="Zoom out">−</button>
     </div>
 
 
     <style>
+        :root {
+            --network-widget-edge: 24px;
+            --network-zoom-left: 344px;
+            --network-widget-bottom: max(var(--network-widget-edge), env(safe-area-inset-bottom, 0px));
+            --network-widget-right: max(var(--network-widget-edge), env(safe-area-inset-right, 0px));
+        }
+
         #zoomControls {
-            position: absolute;
-            bottom: 24px;
-            right: 24px;
+            position: fixed;
+            bottom: var(--network-widget-bottom);
+            left: var(--network-zoom-left);
+            right: auto;
             display: flex;
             flex-direction: column;
             gap: 8px;
             z-index: 10;
+        }
+
+        #simon-labs-launcher {
+            top: auto !important;
+            left: auto !important;
+            right: var(--network-widget-right) !important;
+            bottom: var(--network-widget-bottom) !important;
+        }
+
+        #network-chat-panel {
+            top: auto !important;
+            left: auto !important;
+            right: var(--network-widget-right) !important;
+            bottom: calc(var(--network-widget-bottom) + 72px) !important;
+            width: min(400px, calc(100vw - var(--network-widget-right) - max(var(--network-widget-edge), env(safe-area-inset-left, 0px)))) !important;
+            height: min(640px, calc(100dvh - var(--network-widget-bottom) - 72px - max(var(--network-widget-edge), env(safe-area-inset-top, 0px)))) !important;
+        }
+
+        body.network-widgets-compact #zoomControls {
+            left: auto;
+            right: var(--network-widget-right);
+            bottom: calc(var(--network-widget-bottom) + 72px);
+        }
+
+        body.network-widgets-compact:has(#simon-labs-launcher[aria-expanded="true"]) #zoomControls {
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        @media (max-width: 600px) {
+            :root { --network-widget-edge: 12px; }
+        }
+
+        @media (max-width: 479px) {
+            #simon-labs-launcher[aria-expanded="true"] {
+                display: flex !important;
+                z-index: 2147483002 !important;
+                top: max(12px, env(safe-area-inset-top, 0px)) !important;
+                bottom: auto !important;
+                width: 40px !important;
+                height: 40px !important;
+                padding: 8px !important;
+            }
+
+            #network-chat-panel {
+                inset: 0 !important;
+                width: 100% !important;
+                height: 100dvh !important;
+                padding-top: env(safe-area-inset-top, 0px);
+                padding-bottom: env(safe-area-inset-bottom, 0px);
+            }
         }
 
         .zoom-btn {
@@ -6882,6 +6941,34 @@
             }
             window.switchView('network');
         };
+    </script>
+    <script>
+        // Keep controls over the map, with separate space for the async chat widget.
+        (() => {
+            const sidebar = document.querySelector('.dashboard-sidebar-col');
+            const updateWidgetPositions = () => {
+                const edge = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--network-widget-edge')) || 24;
+                const sidebarRight = document.body.classList.contains('embed-mode') ? 0 : sidebar?.getBoundingClientRect().right || 0;
+                const left = Math.max(edge, sidebarRight + edge);
+                document.documentElement.style.setProperty('--network-zoom-left', `${left}px`);
+                document.body.classList.toggle('network-widgets-compact', window.innerWidth - left < 160);
+            };
+            const tagChatPanel = () => {
+                const launcher = document.getElementById('simon-labs-launcher');
+                const panel = launcher?.previousElementSibling;
+                if (panel instanceof HTMLDivElement && panel.hasAttribute('aria-hidden') && panel.style.position === 'fixed') {
+                    panel.id = 'network-chat-panel';
+                    chatObserver.disconnect();
+                }
+            };
+            const chatObserver = new MutationObserver(tagChatPanel);
+            chatObserver.observe(document.body, { childList: true });
+            tagChatPanel();
+            if (sidebar) new ResizeObserver(updateWidgetPositions).observe(sidebar);
+            window.addEventListener('resize', updateWidgetPositions);
+            window.visualViewport?.addEventListener('resize', updateWidgetPositions);
+            updateWidgetPositions();
+        })();
     </script>
     <script src="https://labs.simonthinks.ai/embed.js" data-agent="bca381e4ec0f4df9baa147f9bd3453b0" async></script>
 </body>
