@@ -171,6 +171,36 @@ export type Database = {
         }
         Relationships: []
       }
+      papers_backup_2026_10_13: {
+        Row: {
+          abstract: string | null
+          authors: string | null
+          embedding: string | null
+          journal: string | null
+          paper_id: number | null
+          title: string | null
+          year: number | null
+        }
+        Insert: {
+          abstract?: string | null
+          authors?: string | null
+          embedding?: string | null
+          journal?: string | null
+          paper_id?: number | null
+          title?: string | null
+          year?: number | null
+        }
+        Update: {
+          abstract?: string | null
+          authors?: string | null
+          embedding?: string | null
+          journal?: string | null
+          paper_id?: number | null
+          title?: string | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       topic_paper_links: {
         Row: {
           bigram: string | null
