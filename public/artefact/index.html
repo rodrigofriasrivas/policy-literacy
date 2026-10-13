@@ -1974,16 +1974,27 @@
             galaxy...</div>
     </div>
 
-    <div id="zoomControls">
-        <button id="zoomIn" class="zoom-btn" aria-label="Zoom in" title="Zoom in">+</button>
+    <div id="zoomControls" role="group" aria-label="Network zoom controls">
+        <button id="zoomReset" class="zoom-btn" aria-label="Reset zoom" title="Reset zoom">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/><path d="M8 8h8v8H8z"/></svg>
+        </button>
+        <span class="zoom-divider" aria-hidden="true"></span>
         <button id="zoomOut" class="zoom-btn" aria-label="Zoom out" title="Zoom out">−</button>
+        <output id="floatingZoomPercentage" aria-label="Current zoom">100%</output>
+        <button id="zoomIn" class="zoom-btn" aria-label="Zoom in" title="Zoom in">+</button>
     </div>
 
 
     <style>
         :root {
             --network-widget-edge: 24px;
-            --network-zoom-left: 344px;
+            --network-zoom-center: 50vw;
+            --zoom-toolbar-bg: #ffffff;
+            --zoom-toolbar-text: #111111;
+            --zoom-toolbar-muted: #808080;
+            --zoom-toolbar-border: #dedede;
+            --zoom-toolbar-hover: #f0f0f0;
+            --zoom-toolbar-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
             --network-widget-bottom: max(var(--network-widget-edge), env(safe-area-inset-bottom, 0px));
             --network-widget-right: max(var(--network-widget-edge), env(safe-area-inset-right, 0px));
         }
@@ -1991,13 +2002,37 @@
         #zoomControls {
             position: fixed;
             bottom: var(--network-widget-bottom);
-            left: var(--network-zoom-left);
+            left: var(--network-zoom-center);
             right: auto;
+            transform: translateX(-50%);
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            z-index: 10;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px;
+            height: 56px;
+            border-radius: 999px;
+            background: var(--zoom-toolbar-bg);
+            color: var(--zoom-toolbar-text);
+            box-shadow: var(--zoom-toolbar-shadow);
+            z-index: 30;
         }
+
+        #zoomControls .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--zoom-toolbar-text);
+            font-size: 26px;
+            font-weight: 400;
+            backdrop-filter: none;
+        }
+
+        #zoomControls .zoom-btn:hover { background: var(--zoom-toolbar-hover); transform: none; }
+        #zoomControls .zoom-btn:focus-visible { outline: 2px solid var(--zoom-toolbar-text); outline-offset: 1px; }
+        #zoomControls .zoom-divider { height: 24px; width: 1px; background: var(--zoom-toolbar-border); margin: 0 4px; }
+        #floatingZoomPercentage { width: 64px; text-align: center; font-size: 18px; font-variant-numeric: tabular-nums; color: var(--zoom-toolbar-muted); }
 
         #simon-labs-launcher {
             top: auto !important;
@@ -2016,8 +2051,6 @@
         }
 
         body.network-widgets-compact #zoomControls {
-            left: auto;
-            right: var(--network-widget-right);
             bottom: calc(var(--network-widget-bottom) + 72px);
         }
 
@@ -2226,6 +2259,8 @@
                 const percent = Math.round(transform.k * 100);
                 const indicator = document.getElementById('zoomPercentage');
                 if (indicator) indicator.textContent = `${percent}%`;
+                const floatingIndicator = document.getElementById('floatingZoomPercentage');
+                if (floatingIndicator) floatingIndicator.textContent = `${percent}%`;
 
                 // No need to explicitly call draw, animation loop handles it
             });
@@ -3617,6 +3652,9 @@
         });
 
         // Zoom Controls (Main)
+        document.getElementById('zoomReset').addEventListener('click', () => {
+            d3.select(canvas).transition().call(zoom.transform, d3.zoomIdentity);
+        });
         document.getElementById('zoomIn').addEventListener('click', () => {
             d3.select(canvas).transition().call(zoom.scaleBy, 1.3);
         });
@@ -6949,9 +6987,11 @@
             const updateWidgetPositions = () => {
                 const edge = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--network-widget-edge')) || 24;
                 const sidebarRight = document.body.classList.contains('embed-mode') ? 0 : sidebar?.getBoundingClientRect().right || 0;
-                const left = Math.max(edge, sidebarRight + edge);
-                document.documentElement.style.setProperty('--network-zoom-left', `${left}px`);
-                document.body.classList.toggle('network-widgets-compact', window.innerWidth - left < 160);
+                const available = window.innerWidth - sidebarRight;
+                const compact = available < 360;
+                const center = compact ? window.innerWidth / 2 : sidebarRight + available / 2;
+                document.documentElement.style.setProperty('--network-zoom-center', `${center}px`);
+                document.body.classList.toggle('network-widgets-compact', compact);
             };
             const tagChatPanel = () => {
                 const launcher = document.getElementById('simon-labs-launcher');
