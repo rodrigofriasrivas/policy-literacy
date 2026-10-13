@@ -1566,13 +1566,6 @@
                     <!-- Sticky Footer (Moved outside scroll area) -->
                     <div class="utilities-sticky-footer">
                         <div class="utilities-footer" style="padding-top:0; border:none; margin-top:0;">
-                            <div class="row-align-center">
-                                <button id="sidebarZoomIn" class="btn" style="flex: 1;">+ Zoom In</button>
-                                <div id="zoomPercentage"
-                                    style="font-family: monospace; font-size: 12px; color: var(--text-secondary); width: 45px; text-align: center;">
-                                    100%</div>
-                                <button id="sidebarZoomOut" class="btn" style="flex: 1;">- Zoom Out</button>
-                            </div>
 
                             <button id="resetBtn" class="btn">
                                 <span>↺</span> Reset View
@@ -1989,12 +1982,12 @@
         :root {
             --network-widget-edge: 24px;
             --network-zoom-center: 50vw;
-            --zoom-toolbar-bg: #ffffff;
-            --zoom-toolbar-text: #111111;
-            --zoom-toolbar-muted: #808080;
-            --zoom-toolbar-border: #dedede;
-            --zoom-toolbar-hover: #f0f0f0;
-            --zoom-toolbar-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+            --zoom-toolbar-bg: rgba(20, 20, 22, 0.88);
+            --zoom-toolbar-text: #ffffff;
+            --zoom-toolbar-muted: rgba(255, 255, 255, 0.85);
+            --zoom-toolbar-border: rgba(255, 255, 255, 0.16);
+            --zoom-toolbar-hover: rgba(255, 255, 255, 0.12);
+            --zoom-toolbar-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
             --network-widget-bottom: max(var(--network-widget-edge), env(safe-area-inset-bottom, 0px));
             --network-widget-right: max(var(--network-widget-edge), env(safe-area-inset-right, 0px));
         }
@@ -2007,32 +2000,41 @@
             transform: translateX(-50%);
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 6px 10px;
-            height: 56px;
+            gap: 2px;
+            padding: 6px 8px;
+            height: 52px;
             border-radius: 999px;
             background: var(--zoom-toolbar-bg);
             color: var(--zoom-toolbar-text);
+            border: 1px solid var(--zoom-toolbar-border);
             box-shadow: var(--zoom-toolbar-shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 210;
         }
 
         #zoomControls .zoom-btn {
             width: 40px;
             height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
             border: 0;
             border-radius: 50%;
             background: transparent;
             color: var(--zoom-toolbar-text);
             font-size: 26px;
-            font-weight: 400;
+            line-height: 1;
+            font-weight: 300;
+            cursor: pointer;
             backdrop-filter: none;
         }
 
         #zoomControls .zoom-btn:hover { background: var(--zoom-toolbar-hover); transform: none; }
         #zoomControls .zoom-btn:focus-visible { outline: 2px solid var(--zoom-toolbar-text); outline-offset: 1px; }
-        #zoomControls .zoom-divider { height: 24px; width: 1px; background: var(--zoom-toolbar-border); margin: 0 4px; }
-        #floatingZoomPercentage { width: 64px; text-align: center; font-size: 18px; font-variant-numeric: tabular-nums; color: var(--zoom-toolbar-muted); }
+        #zoomControls .zoom-divider { height: 24px; width: 1px; background: var(--zoom-toolbar-border); margin: 0 6px; }
+        #floatingZoomPercentage { width: 60px; text-align: center; font-size: 15px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--zoom-toolbar-muted); }
 
         #simon-labs-launcher {
             top: auto !important;
@@ -6989,7 +6991,7 @@
                 const sidebarRight = document.body.classList.contains('embed-mode') ? 0 : sidebar?.getBoundingClientRect().right || 0;
                 const available = window.innerWidth - sidebarRight;
                 const compact = available < 360;
-                const center = compact ? window.innerWidth / 2 : sidebarRight + available / 2;
+                const center = window.innerWidth / 2;
                 document.documentElement.style.setProperty('--network-zoom-center', `${center}px`);
                 document.body.classList.toggle('network-widgets-compact', compact);
             };
