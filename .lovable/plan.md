@@ -1,43 +1,18 @@
+# Separate chat and network zoom controls
 
-Root cause identified: your Mac is not resolving the domain to Lovable’s IP. It is being intercepted and rewritten to `securityblock.durham.ac.uk -> 10.0.0.57`, then timing out. This is a DNS/security-policy block on your device/network path, not a Lovable deployment issue.
+## Confirmed issue
+The network zoom buttons are anchored 24px from the bottom-right edge. The chat launcher defaults to the same corner with a 56px button, causing the overlap shown in your screenshot.
 
-Implementation plan (no code changes):
+## Planned changes
+- Keep chat in the bottom-right corner and move the main network zoom controls to the bottom-left corner.
+- Anchor both to the visible screen with consistent edge spacing and device safe-area allowances, reducing margins on smaller screens.
+- Keep the chat panel within the available screen width and height, including short landscape screens; retain its existing full-screen behaviour on phones.
+- While the phone chat is full-screen, keep network controls behind it; restore their availability when chat closes.
+- Check the left-side network controls for collisions and adjust only the zoom placement if necessary.
+- Preserve the existing zoom behaviour, chat service, colours, navigation, and other pages. No new dependencies.
 
-1) Confirm interception source on your Mac
-- Run:
-  - `scutil --dns | grep -E "nameserver|resolver"`
-  - `networksetup -getdnsservers "Wi-Fi"`
-  - `networksetup -getdnsservers "USB 10/100/1000 LAN"` (if applicable)
-- Goal: identify which resolver/profile is forcing the block.
+## Technical scope
+Changes are limited to `public/artefact/index.html`. Use narrowly scoped CSS for `#zoomControls` and the existing chat launcher/panel, with minimal integration code only if needed to identify the dynamically inserted panel. Preserve existing embed-mode control visibility and topic-network controls.
 
-2) Remove policy/agent DNS control
-- Disable any active VPN/security DNS agents (commonly Cisco Secure Client/Umbrella, Zscaler, Cloudflare Zero Trust/WARP, NextDNS profiles).
-- macOS: System Settings → Privacy & Security → Profiles (remove org DNS/security profile if present and allowed).
-- Browser: disable Secure DNS override temporarily in Chrome and retry.
-
-3) Reset local network state
-- Set DNS manually to `1.1.1.1` and `8.8.8.8` on active adapter (if profile allows).
-- Flush caches:
-  - `sudo dscacheutil -flushcache`
-  - `sudo killall -HUP mDNSResponder`
-- Re-test:
-  - `dig policyliteracy.enterprises A +short`
-  - `dig www.policyliteracy.enterprises A +short`
-  - `curl -Iv --connect-timeout 10 https://policyliteracy.enterprises`
-
-4) Branch by outcome
-- If it now resolves to `185.158.133.1`: issue fixed.
-- If it still resolves to `10.0.0.57` or Cloudflare/Google DNS remain unreachable: enforcement is upstream (managed policy/firewall), not local cache.
-
-5) Escalate with exact evidence
-- Send this to Durham IT/security admin:
-  - Domain(s): `policyliteracy.enterprises`, `www.policyliteracy.enterprises`
-  - Expected A record: `185.158.133.1`
-  - Current forced resolution: `securityblock.durham.ac.uk / 10.0.0.57`
-  - Request: remove block / allowlist both hostnames.
-- This is the definitive fix if policy is centrally enforced.
-
-Technical details:
-- `dig @1.1.1.1` and `dig @8.8.8.8` timing out indicates outbound DNS is blocked/redirected.
-- `curl` resolving to `10.0.0.57` confirms DNS sinkholing before TLS.
-- `/etc/hosts` is clean, so override is not from hosts file.
+## Verification
+Inspect the live network page at the screenshot dimensions (1007×687), desktop, narrow phone, and short landscape sizes. Test both zoom buttons and chat opening/closing, resize with chat open, and confirm no launcher/zoom overlap, clipped chat panel, or inaccessible close control.
