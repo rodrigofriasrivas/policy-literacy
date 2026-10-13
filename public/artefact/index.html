@@ -2031,6 +2031,16 @@
         }
 
         @media (max-width: 479px) {
+            #simon-labs-launcher[aria-expanded="true"] {
+                display: flex !important;
+                z-index: 2147483002 !important;
+                top: max(12px, env(safe-area-inset-top, 0px)) !important;
+                bottom: auto !important;
+                width: 40px !important;
+                height: 40px !important;
+                padding: 8px !important;
+            }
+
             #network-chat-panel {
                 inset: 0 !important;
                 width: 100% !important;
