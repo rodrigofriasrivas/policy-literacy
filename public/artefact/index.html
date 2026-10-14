@@ -1707,13 +1707,13 @@
                         <div class="stitch-card">
                             <div class="stitch-card-title"
                                 style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
-                                <span>Paper Library &mdash; <span id="library-total-count">0</span> papers with network connections</span>
+                                <span>Paper Library &mdash; <span id="library-total-count">0</span></span>
                             </div>
 
                             <!-- Instructions -->
                             <div
                                 style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; opacity: 0.85;">
-                                <div>The full corpus contains 5,799 papers. This library shows 3,682 &mdash; those with direct connections to the 25 research topics. The remaining 2,117 have no direct topic connections in the network.</div>
+                                <div>The corpus contains 5,799 papers. 3,682 are connected to the 25 research topics and appear in the network. The remaining 2,117 are part of the corpus but contain none of the topics' key terms, so the model did not link them to any topic. They are shown in grey.</div>
                                 <ul style="margin: 8px 0 0 0; padding-left: 20px;">
                                     <li>Search: type a keyword (title, author, or journal) or a Paper ID.</li>
                                     <li>Sort: click a column header to toggle ▲/▼.</li>
@@ -1727,6 +1727,13 @@
                                     placeholder="Search title, author, or journal..."
                                     style="width: 100%; max-width: 400px;"
                                     oninput="if(typeof LibraryManager !== 'undefined'){ LibraryManager.searchQuery = this.value; LibraryManager.applyFilters(); }">
+                                <select id="library-network-filter" class="stitch-input"
+                                    style="width: auto; min-width: 190px;"
+                                    onchange="if(typeof LibraryManager !== 'undefined'){ LibraryManager.networkFilter = this.value; LibraryManager.applyFilters(); }">
+                                    <option value="all" selected>All papers</option>
+                                    <option value="connected">Connected to topics</option>
+                                    <option value="not-connected">Not connected</option>
+                                </select>
                                 <span onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.resetSort()"
                                     style="font-size: 12px; color: var(--text-secondary); cursor: pointer; text-decoration: underline; transition: color 0.1s;"
                                     onmouseover="this.style.color='var(--text-primary)'"
@@ -1756,6 +1763,8 @@
                                                 onclick="if(typeof LibraryManager !== 'undefined') LibraryManager.sort('journal')">
                                                 Journal <span id="sort-icon-journal" style="font-size:10px;">▲▼</span>
                                             </th>
+                                            <th style="text-align: left; padding: 10px 12px; color: var(--text-secondary); font-size: 11px; width: 110px; white-space: nowrap;">
+                                                Topic network</th>
                                             <th style="width: 40px; padding: 10px 12px;"></th>
                                         </tr>
                                     </thead>
@@ -2170,6 +2179,11 @@
             width: 100%;
             height: 400px;
         }
+
+        /* Paper Library: papers not connected to any topic (dimmed but legible) */
+        .lib-row-not-connected > td {
+            opacity: 0.55;
+        }
     </style>
 
     <div id="tooltip" style="z-index: 20000000; pointer-events: none;"></div>
@@ -2509,6 +2523,22 @@
                     });
                 });
 
+                // Full corpus for the Paper Library only (network views keep using allData.papers).
+                // Connected papers reuse the network objects; the rest are flagged as not connected.
+                const connectedById = new Map(allData.papers.map(p => [p.paper_id, p]));
+                allData.libraryPapers = papers.map(p => {
+                    const net = connectedById.get(p.paper_id);
+                    if (net) { net.connected = true; return net; }
+                    return {
+                        ...p,
+                        type: 'paper',
+                        title: capitalizeText(p.title || 'Untitled'),
+                        journal: formatJournal(p.journal || p.source_title || ''),
+                        bigramIds: [],
+                        connected: false
+                    };
+                });
+
                 // Store links
                 allData.links = topicPaperLinks;
 
@@ -2549,6 +2579,7 @@
 
                 // POPULATE JOURNAL FILTER
                 const uniqueJournals = [...new Set(allData.papers.map(p => p.journal || 'Unknown'))].sort();
+                allData.journalUniverse = new Set(uniqueJournals); // journals that have a checkbox in the filter
                 // Initialize all as selected
                 uniqueJournals.forEach(j => selectedJournals.add(j));
 
@@ -6527,6 +6558,7 @@
             filteredPapers: [],
             expandedPaperId: null,
             topicFilter: null,
+            networkFilter: 'all', // 'all' | 'connected' | 'not-connected'
 
             toggleAbstract: function (paperId) {
                 const prevId = this.expandedPaperId;
@@ -6581,13 +6613,20 @@
             },
 
             applyFilters: function () {
-                // Return all network-connected papers by default unless topicFilter is set
-                const rawPapers = (window.globalAllPapers || allData.papers) || [];
+                // Full corpus (connected + not connected); falls back to network papers
+                const rawPapers = allData.libraryPapers || (window.globalAllPapers || allData.papers) || [];
 
                 // 1. Initial Topic filter if set
                 let libraryPapers = rawPapers;
                 if (this.topicFilter) {
                     libraryPapers = rawPapers.filter(p => Number(p.topicId) === Number(this.topicFilter));
+                }
+
+                // 1b. Topic network filter
+                if (this.networkFilter === 'connected') {
+                    libraryPapers = libraryPapers.filter(p => p.connected !== false);
+                } else if (this.networkFilter === 'not-connected') {
+                    libraryPapers = libraryPapers.filter(p => p.connected === false);
                 }
 
                 // 2. Filter logic (Search + Timeframe + Journals)
@@ -6601,8 +6640,9 @@
                     // Time filter
                     if (pYear < startYear || pYear > endYear) return false;
 
-                    // Journal filter
-                    if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0 && p.journal) {
+                    // Journal filter (journals without a checkbox, i.e. only in unconnected papers, are not filtered out)
+                    if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0 && p.journal &&
+                        (!allData.journalUniverse || allData.journalUniverse.has(p.journal))) {
                         if (!selectedJournals.has(p.journal)) return false;
                     }
 
@@ -6665,14 +6705,27 @@
                 console.groupEnd();
 
                 // Update total count
-                const totalLabel = document.getElementById('library-total-count');
-                if (totalLabel) {
-                    totalLabel.textContent = this.filteredPapers.length;
-                }
+                this.updateHeader();
 
                 // Make sure pagination restarts to first page when filtering
                 this.currentPage = 1;
                 this.render();
+            },
+
+            updateHeader: function () {
+                const totalLabel = document.getElementById('library-total-count');
+                if (!totalLabel) return;
+                const fmt = n => n.toLocaleString('en-US');
+                const total = this.filteredPapers.length;
+                const connected = this.filteredPapers.filter(p => p.connected !== false).length;
+                const noun = total === 1 ? 'paper' : 'papers';
+                if (this.networkFilter === 'connected') {
+                    totalLabel.textContent = `${fmt(total)} ${noun} connected to topics`;
+                } else if (this.networkFilter === 'not-connected') {
+                    totalLabel.textContent = `${fmt(total)} ${noun} not connected to topics`;
+                } else {
+                    totalLabel.textContent = `${fmt(total)} ${noun} (${fmt(connected)} connected to topics)`;
+                }
             },
 
             resetSort: function () {
@@ -6760,6 +6813,8 @@
                     const isExpanded = (this.expandedPaperId === paperId);
 
                     const tr = document.createElement('tr');
+                    const isConnected = p.connected !== false;
+                    if (!isConnected) tr.classList.add('lib-row-not-connected');
                     tr.style.borderBottom = '1px solid var(--chart-row-border)';
                     tr.style.transition = 'background 0.1s';
                     tr.onmouseover = () => tr.style.background = 'var(--chart-row-hover)';
@@ -6786,6 +6841,7 @@
                         <td style="padding:8px 12px; color:var(--text-primary); font-weight:600; font-size:13px; line-height:1.4; white-space:normal; overflow-wrap:anywhere; vertical-align:top;">${titleHTML}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top;" ${!isMissingAuthor ? `title="${safeAuthorsAttr}"` : ''}>${authorsHTML}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-style:italic; font-size:12px; line-height:1.4; vertical-align:top;">${journalHTML}</td>
+                        <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top; white-space:nowrap;">${isConnected ? 'Connected' : 'Not connected'}</td>
                         <td style="padding:8px 12px; vertical-align:top; display:flex; justify-content:flex-end;">${chevronHTML}</td>
                     `;
                     tbody.appendChild(tr);
@@ -6827,7 +6883,7 @@
                         }
 
                         abstractTr.innerHTML = `
-                            <td colspan="6" style="padding:16px 24px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--chart-row-border);">
+                            <td colspan="7" style="padding:16px 24px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--chart-row-border);">
                                 <div style="font-size:11px; color:var(--text-secondary); margin-bottom:12px; line-height:1.4;">
                                     ${metadataLine}
                                 </div>
@@ -6854,7 +6910,7 @@
                 if (info) info.textContent = `Page ${this.currentPage} of ${totalPages}`;
                 if (prev) prev.disabled = (this.currentPage <= 1);
                 if (next) next.disabled = (this.currentPage >= totalPages);
-                if (totalLabel) totalLabel.textContent = `${totalCount}`;
+                if (totalLabel) this.updateHeader();
 
                 // Log Audit
                 console.groupCollapsed('PAPER LIBRARY PAGINATION AUDIT');
