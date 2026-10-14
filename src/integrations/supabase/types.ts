@@ -145,28 +145,40 @@ export type Database = {
         Row: {
           abstract: string | null
           authors: string | null
+          dominant_topic_name: string | null
+          dominant_topic_number: number | null
           embedding: string | null
+          in_network: boolean | null
           journal: string | null
           paper_id: number
           title: string
+          topics: string | null
           year: number | null
         }
         Insert: {
           abstract?: string | null
           authors?: string | null
+          dominant_topic_name?: string | null
+          dominant_topic_number?: number | null
           embedding?: string | null
+          in_network?: boolean | null
           journal?: string | null
           paper_id: number
           title: string
+          topics?: string | null
           year?: number | null
         }
         Update: {
           abstract?: string | null
           authors?: string | null
+          dominant_topic_name?: string | null
+          dominant_topic_number?: number | null
           embedding?: string | null
+          in_network?: boolean | null
           journal?: string | null
           paper_id?: number
           title?: string
+          topics?: string | null
           year?: number | null
         }
         Relationships: []
