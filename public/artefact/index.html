@@ -2229,6 +2229,7 @@
                 });
             }
             const heading = `<div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px; font-weight:600;">Connected Topics</div>`;
+            const orderNote = `<div style="font-size:11px; color:var(--text-secondary); opacity:0.75; margin:-6px 0 12px;">Ordered by number of key terms found in this paper.</div>`;
             const byTopic = _ctPaperIndex.get(paperId);
             if (!byTopic || byTopic.size === 0) {
                 return `<div style="margin-top:16px;">${heading}<div style="font-size:13px; color:var(--text-secondary);">Not connected to any topic: this paper contains none of the topics' key terms.</div></div>`;
@@ -2241,23 +2242,24 @@
                 .map(([tid, terms]) => ({ tid, terms: [...terms] }))
                 .sort((a, b) => b.terms.length - a.terms.length || a.tid - b.tid);
             const chipStyle = "display:inline-block; padding:2px 6px; border-radius:4px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11px; background:rgba(128,128,128,0.18); color:var(--text-secondary); border:1px solid rgba(128,128,128,0.3);";
-            const html = blocks.map((blk, i) => {
+            const html = blocks.map(blk => {
                 const color = topicColors[(blk.tid - 1) % topicColors.length];
                 const chips = blk.terms.map(term => {
                     const others = [...(_ctTermTopics.get(term) || [])].filter(t => t !== blk.tid).sort((a, b) => a - b);
                     const also = others.length ? `<span style="font-size:10px; color:var(--text-secondary); opacity:0.75; margin-left:4px;">also in ${others.map(t => 'Topic ' + t).join(', ')}</span>` : '';
                     return `<span style="display:inline-flex; align-items:center; margin:0 10px 6px 0;"><span style="${chipStyle}">${esc(term)}</span>${also}</span>`;
                 }).join('');
-                const dominant = i === 0 ? `<span style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; padding:1px 6px; border-radius:8px; border:1px solid ${color}; color:${color}; margin-left:8px; vertical-align:middle;">dominant</span>` : '';
+                const termCount = blk.terms.length;
+                const countLabel = `<span style="font-size:11px; color:var(--text-secondary); opacity:0.75; margin-left:8px; white-space:nowrap;">${termCount} key term${termCount === 1 ? '' : 's'}</span>`;
                 return `<div style="margin-bottom:12px;">
                     <div style="display:flex; align-items:center;">
                         <span style="width:9px; height:9px; border-radius:50%; background:${color}; display:inline-block; margin-right:8px; flex-shrink:0;"></span>
-                        <a href="?mode=topic&topicId=${blk.tid}" style="font-size:14px; font-weight:600; color:var(--text-primary); text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Topic ${blk.tid}: ${esc(topicName(blk.tid))}</a>${dominant}
+                        <a href="?mode=topic&topicId=${blk.tid}" style="font-size:14px; font-weight:600; color:var(--text-primary); text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Topic ${blk.tid}: ${esc(topicName(blk.tid))}</a>${countLabel}
                     </div>
                     <div style="margin:6px 0 0 17px;"><div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px;">via key terms:</div>${chips}</div>
                 </div>`;
             }).join('');
-            return `<div style="margin-top:16px;">${heading}${html}</div>`;
+            return `<div style="margin-top:16px;">${heading}${orderNote}${html}</div>`;
         }
 
         // Enhanced Palette per request
