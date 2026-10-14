@@ -2210,6 +2210,56 @@
         canvas.width = width;
         canvas.height = height;
 
+        // Paper Library: "Connected topics" section for an expanded paper row
+        let _ctPaperIndex = null, _ctTermTopics = null;
+        function renderConnectedTopicsHTML(paperId) {
+            const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+            if (!_ctPaperIndex) {
+                _ctPaperIndex = new Map();
+                (allData.links || []).forEach(l => {
+                    if (!_ctPaperIndex.has(l.paper_id)) _ctPaperIndex.set(l.paper_id, new Map());
+                    const byTopic = _ctPaperIndex.get(l.paper_id);
+                    if (!byTopic.has(l.topic_id)) byTopic.set(l.topic_id, new Set());
+                    byTopic.get(l.topic_id).add(l.bigram);
+                });
+                _ctTermTopics = new Map();
+                (allData.bigrams || []).forEach(b => {
+                    if (!_ctTermTopics.has(b.bigram)) _ctTermTopics.set(b.bigram, new Set());
+                    _ctTermTopics.get(b.bigram).add(b.topic_id);
+                });
+            }
+            const heading = `<div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px; font-weight:600;">Connected Topics</div>`;
+            const byTopic = _ctPaperIndex.get(paperId);
+            if (!byTopic || byTopic.size === 0) {
+                return `<div style="margin-top:16px;">${heading}<div style="font-size:13px; color:var(--text-secondary);">Not connected to any topic: this paper contains none of the topics' key terms.</div></div>`;
+            }
+            const topicName = id => {
+                const t = (allData.topics || []).find(tt => tt.topic_id === id);
+                return t ? (t.topic_name || t.name || '') : '';
+            };
+            const blocks = [...byTopic.entries()]
+                .map(([tid, terms]) => ({ tid, terms: [...terms] }))
+                .sort((a, b) => b.terms.length - a.terms.length || a.tid - b.tid);
+            const chipStyle = "display:inline-block; padding:2px 6px; border-radius:4px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:11px; background:rgba(128,128,128,0.18); color:var(--text-secondary); border:1px solid rgba(128,128,128,0.3);";
+            const html = blocks.map((blk, i) => {
+                const color = topicColors[(blk.tid - 1) % topicColors.length];
+                const chips = blk.terms.map(term => {
+                    const others = [...(_ctTermTopics.get(term) || [])].filter(t => t !== blk.tid).sort((a, b) => a - b);
+                    const also = others.length ? `<span style="font-size:10px; color:var(--text-secondary); opacity:0.75; margin-left:4px;">also in ${others.map(t => 'Topic ' + t).join(', ')}</span>` : '';
+                    return `<span style="display:inline-flex; align-items:center; margin:0 10px 6px 0;"><span style="${chipStyle}">${esc(term)}</span>${also}</span>`;
+                }).join('');
+                const dominant = i === 0 ? `<span style="font-size:9px; text-transform:uppercase; letter-spacing:0.06em; padding:1px 6px; border-radius:8px; border:1px solid ${color}; color:${color}; margin-left:8px; vertical-align:middle;">dominant</span>` : '';
+                return `<div style="margin-bottom:12px;">
+                    <div style="display:flex; align-items:center;">
+                        <span style="width:9px; height:9px; border-radius:50%; background:${color}; display:inline-block; margin-right:8px; flex-shrink:0;"></span>
+                        <a href="?mode=topic&topicId=${blk.tid}" style="font-size:14px; font-weight:600; color:var(--text-primary); text-decoration:none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">Topic ${blk.tid}: ${esc(topicName(blk.tid))}</a>${dominant}
+                    </div>
+                    <div style="margin:6px 0 0 17px;"><div style="font-size:11px; color:var(--text-secondary); margin-bottom:4px;">via key terms:</div>${chips}</div>
+                </div>`;
+            }).join('');
+            return `<div style="margin-top:16px;">${heading}${html}</div>`;
+        }
+
         // Enhanced Palette per request
         const topicColors = [
             '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8',
@@ -5935,28 +5985,7 @@
                     const absRow = document.createElement('tr');
                     absRow.style.display = 'none';
 
-                    // Bigrams logic (Change 2)
-                    let pBigrams = [];
-                    if (p.bigramIds && allData.bigrams) {
-                        pBigrams = [...new Set(p.bigramIds.map(bid => {
-                            const b = allData.bigrams.find(bb => bb.id === bid);
-                            return b ? b.bigram : null;
-                        }).filter(Boolean))];
-                    }
-
-                    let bigramsHTML = '';
-                    if (pBigrams.length > 0) {
-                        const tagStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; background:rgba(255,255,255,0.08); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); margin-right:4px; margin-bottom:4px;";
-                        
-                        bigramsHTML = `
-                            <div style="margin-top:16px;">
-                                <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; font-weight:600;">Key Terms</div>
-                                <div class="bigram-tags-container">
-                                    ${pBigrams.map(b => `<span style="${tagStyle}">${b}</span>`).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
+                    const bigramsHTML = renderConnectedTopicsHTML(p.paper_id);
 
                     absRow.innerHTML = `
                             <td colspan="6" style="padding:0 12px 24px 12px;border-bottom:1px solid var(--chart-row-border);">
@@ -6859,28 +6888,7 @@
                         const metaAuthors = isMissingAuthor ? 'Unknown Author(s)' : displayAuthors;
                         const metadataLine = `${metaYear} &bull; <span style="font-style:italic;">${metaJournal}</span> &bull; ${metaAuthors}`;
 
-                        // Bigrams logic (Change 2)
-                        let pBigrams = [];
-                        if (p.bigramIds && allData.bigrams) {
-                            pBigrams = [...new Set(p.bigramIds.map(bid => {
-                                const b = allData.bigrams.find(bb => bb.id === bid);
-                                return b ? b.bigram : null;
-                            }).filter(Boolean))];
-                        }
-
-                        let bigramsHTML = '';
-                        if (pBigrams.length > 0) {
-                            const tagStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; background:rgba(255,255,255,0.08); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1); margin-right:4px; margin-bottom:4px;";
-                            
-                            bigramsHTML = `
-                                <div style="margin-top:16px;">
-                                    <div style="font-size:11px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; font-weight:600;">Key Terms</div>
-                                    <div class="bigram-tags-container">
-                                        ${pBigrams.map(b => `<span style="${tagStyle}">${b}</span>`).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        }
+                        const bigramsHTML = renderConnectedTopicsHTML(p.paper_id);
 
                         abstractTr.innerHTML = `
                             <td colspan="7" style="padding:16px 24px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--chart-row-border);">
