@@ -1715,7 +1715,7 @@
                                 style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; opacity: 0.85;">
                                 <div>The full corpus contains 5,799 papers. This library shows 3,682 &mdash; those with direct connections to the 25 research topics. The remaining 2,117 have no direct topic connections in the network.</div>
                                 <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-                                    <li>Search: type a keyword (title, author, or journal).</li>
+                                    <li>Search: type a keyword (title, author, or journal) or a Paper ID.</li>
                                     <li>Sort: click a column header to toggle ▲/▼.</li>
                                     <li>Read: expand ▾ to preview the abstract.</li>
                                 </ul>
@@ -6608,6 +6608,9 @@
 
                     // Search filter
                     if (q) {
+                        // Paper ID match: "3108" or "P3108" (exact ID)
+                        const idMatch = q.trim().match(/^p?(\d+)$/);
+                        if (idMatch && Number(p.id ?? p.paper_id) === Number(idMatch[1])) return true;
                         return (p.title && p.title.toLowerCase().includes(q)) ||
                             (p.authors && p.authors.toLowerCase().includes(q)) ||
                             (p.journal && p.journal.toLowerCase().includes(q));
