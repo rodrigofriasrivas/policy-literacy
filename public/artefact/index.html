@@ -1244,17 +1244,78 @@
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Header theme selector (header stays black in both themes) */
-        .artefact-theme-selector { display: inline-flex; flex-shrink: 0; margin-left: 24px; padding: 2px; gap: 2px; border: 1px solid rgba(255,255,255,0.22); border-radius: 999px; }
-        .artefact-theme-option { font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1; padding: 5px 10px; border: 0; border-radius: 999px; background: transparent; color: #a9b1b6; cursor: pointer; white-space: nowrap; }
-        .artefact-theme-option:hover { color: #fff; }
-        .artefact-theme-option[aria-pressed="true"] { background: rgba(255,255,255,0.16); color: #fff; font-weight: 600; }
-        .artefact-theme-option:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-        .stitch-top-bar .stitch-menu { margin-left: auto; }
-        @media (max-width: 767px) {
-            .stitch-top-bar { height: auto !important; min-height: 64px; flex-wrap: wrap; row-gap: 8px; padding: 10px 16px !important; }
-            .stitch-top-bar .stitch-menu { order: 3; width: 100%; margin-left: 0; gap: 20px; flex-wrap: wrap; }
+        /* Standalone equivalent of React's transparent SiteHeader. */
+        .stitch-top-bar {
+            position: relative; height: auto; padding: 16px 24px;
+            background: var(--header-background); border-bottom: 0;
+            font-family: 'Inter', system-ui, -apple-system, ui-sans-serif, sans-serif;
+            font-size: 14px; line-height: 1.5;
+        }
+        .stitch-brand {
+            font-size: 22px; font-weight: 400; line-height: 1; white-space: nowrap;
+            transition: color 0.2s ease;
+        }
+        .stitch-top-bar .stitch-brand:hover { color: var(--header-brand-hover); }
+        .stitch-top-bar .stitch-menu { margin-left: auto; gap: 32px; }
+        .stitch-menu-link {
+            position: relative; font-family: inherit; font-size: 14px;
+            font-weight: 500; line-height: 1.5;
+        }
+        .stitch-menu-link.active { border-bottom: 0; padding-bottom: 0; }
+        .stitch-menu-link::after {
+            content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+            height: 1px; background: var(--header-link-hover);
+            transform: scaleX(0); transition: transform 0.2s ease;
+        }
+        .stitch-menu-link:hover::after { transform: scaleX(1); }
+        .artefact-theme-selector {
+            display: inline-flex; flex-shrink: 0; margin-left: 24px;
+            padding: 3px; gap: 2px; border: 1px solid var(--header-selector-border);
+            border-radius: 6px; background: var(--header-selector-surface);
+        }
+        .artefact-theme-option {
+            box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center;
+            gap: 6px; height: 36px; min-width: 70px; padding: 0 10px;
+            font-family: inherit; font-size: 12px; font-weight: 500; line-height: 20px;
+            border: 0; border-radius: 3px; background: transparent;
+            color: var(--header-selector-ink); cursor: pointer; white-space: nowrap;
+        }
+        .artefact-theme-option svg { width: 15px; height: 15px; flex-shrink: 0; }
+        .artefact-theme-option:hover { color: var(--header-selector-active-ink); }
+        .artefact-theme-option[aria-pressed="true"] {
+            background: var(--header-selector-active); color: var(--header-selector-active-ink);
+        }
+        .stitch-top-bar .artefact-theme-option:focus-visible,
+        .stitch-top-bar a:focus-visible,
+        .stitch-menu-toggle:focus-visible { outline: 2px solid var(--header-focus); outline-offset: 4px; }
+        .stitch-top-bar .artefact-theme-option:focus-visible { outline-offset: 2px; }
+        .stitch-menu-toggle {
+            display: none; box-sizing: border-box; flex-shrink: 0; width: 44px; height: 44px;
+            padding: 8px; border: 0; background: transparent; color: var(--header-hamburger); cursor: pointer;
+            align-items: center; justify-content: center;
+        }
+        .stitch-menu-toggle svg { width: 22px; height: 22px; }
+        .stitch-menu-toggle .menu-close-icon { display: none; }
+        .stitch-menu-toggle[aria-expanded="true"] .menu-open-icon { display: none; }
+        .stitch-menu-toggle[aria-expanded="true"] .menu-close-icon { display: block; }
+        @media (max-width: 768px) {
+            .stitch-top-bar { gap: 8px; }
+            .stitch-brand { white-space: normal; max-width: calc(100% - 210px); }
+            .stitch-menu-toggle { display: inline-flex; margin-left: 0; }
+            .stitch-top-bar .stitch-menu {
+                display: none; position: absolute; top: 100%; left: 0; right: 0;
+                flex-direction: column; margin-left: 0; padding: 16px 24px; gap: 12px;
+                background: var(--header-menu-surface); backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--header-menu-border);
+            }
+            .stitch-top-bar .stitch-menu.is-open { display: flex; }
+            .stitch-menu-link { min-height: 44px; display: flex; align-items: center; }
+            .stitch-menu-link::after { display: none; }
             .artefact-theme-selector { margin-left: auto; }
+            .artefact-theme-option { height: 44px; min-width: 68px; padding: 0 8px; }
+        }
+        @media (max-width: 480px) {
+            .stitch-top-bar { padding: 12px 0; }
         }
     </style>
 </head>
@@ -1281,15 +1342,19 @@
             <a href="/" class="stitch-brand" style="text-decoration:none;">Enterprise Policy
                 Literacy
                 Tool</a>
-            <nav class="stitch-menu">
+            <button type="button" class="stitch-menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="artefact-global-navigation">
+                <svg class="menu-open-icon" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M0 4h22M0 11h22M0 18h22" /></svg>
+                <svg class="menu-close-icon" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 3 16 16M3 19 19 3" /></svg>
+            </button>
+            <nav class="stitch-menu" id="artefact-global-navigation">
                 <a href="/artefact/index.html" class="stitch-menu-link active">Network visualisation</a>
                 <a href="/about" class="stitch-menu-link">About the project</a>
                 <!-- <a href="/policy" class="stitch-menu-link">Policy engagement</a> -->
                 <a href="/contact" class="stitch-menu-link">Contact</a>
             </nav>
             <div class="artefact-theme-selector" role="group" aria-label="Colour theme">
-                <button type="button" class="artefact-theme-option" data-theme-option="light" aria-pressed="false" aria-label="Light mode"><span aria-hidden="true">&#9728;</span> Light</button>
-                <button type="button" class="artefact-theme-option" data-theme-option="dark" aria-pressed="true" aria-label="Dark mode"><span aria-hidden="true">&#9790;</span> Dark</button>
+                <button type="button" class="artefact-theme-option" data-theme-option="light" aria-pressed="false" aria-label="Light mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg> Light</button>
+                <button type="button" class="artefact-theme-option" data-theme-option="dark" aria-pressed="true" aria-label="Dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6.25 6.25 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg> Dark</button>
             </div>
         </div>
 
@@ -2201,7 +2266,14 @@
         :root {
             --ink-white: #fff; --ink-soft: #ddd; --ink-label: #ccc;
             --ink-muted: #888; --ink-dim: #666; --ink-loading: #aaa; --ink-warning: #ff6b6b;
-            --header-ink: #fff; --header-muted: #888;
+            --header-background: hsl(210 16.66667% 2.35294%);
+            --header-ink: hsl(0 0% 100% / .85); --header-muted: hsl(0 0% 100% / .55);
+            --header-brand-hover: hsl(0 0% 100%); --header-link-hover: hsl(185 70% 55%);
+            --header-selector-surface: hsl(0 0% 10%); --header-selector-ink: hsl(0 0% 70%);
+            --header-selector-active: hsl(0 0% 24%); --header-selector-active-ink: hsl(0 0% 98%);
+            --header-selector-border: hsl(0 0% 25%); --header-focus: hsl(185 70% 55%);
+            --header-menu-surface: hsl(225 28.57143% 5.49020% / .95);
+            --header-menu-border: hsl(0 0% 100% / .08); --header-hamburger: hsl(0 0% 100% / .7);
             --surface-active: rgba(255,255,255,0.1); --surface-row: rgba(255,255,255,0.05);
             --surface-hover: rgba(255,255,255,0.08); --surface-results: rgba(0,0,0,0.2);
             --surface-selected: rgba(78,205,196,0.2); --surface-abstract: rgba(255,255,255,0.03);
@@ -2215,6 +2287,14 @@
         }
         body.theme-light {
             --ink-white: #111; --ink-soft: #30383c; --ink-label: #37434a;
+            --header-background: hsl(200 14% 98%);
+            --header-ink: hsl(210 14.28571% 14%); --header-muted: hsl(210 14.28571% 14% / .8);
+            --header-brand-hover: hsl(210 14.28571% 14%); --header-link-hover: hsl(185 70% 34%);
+            --header-selector-surface: hsl(200 12% 93%); --header-selector-ink: hsl(210 6% 38%);
+            --header-selector-active: hsl(0 0% 100%); --header-selector-active-ink: hsl(210 12% 12%);
+            --header-selector-border: hsl(210 10% 82%); --header-focus: hsl(185 70% 30%);
+            --header-menu-surface: hsl(0 0% 100% / .95);
+            --header-menu-border: hsl(210 14.28571% 14% / .16); --header-hamburger: hsl(210 8% 32%);
             --ink-muted: #4c5860; --ink-dim: #4c5860; --ink-loading: #4c5860; --ink-warning: #b42323;
             --accent-color: #096b66;
             --accent-on: #fff;
@@ -2233,10 +2313,11 @@
             --zoom-toolbar-hover: #e3ecef; --zoom-toolbar-shadow: 0 8px 28px rgba(25,45,55,0.16);
             --bg-card: #fff; --border-color: #c0cbd2; --bg-hover: #e8eef1;
         }
-        /* The top bar deliberately stays black in BOTH themes. */
+        /* Global header follows React; internal analytical navigation is unchanged. */
         .stitch-brand { color: var(--header-ink); }
         .stitch-menu-link { color: var(--header-muted); }
-        .stitch-menu-link.active, .stitch-menu-link:hover { color: var(--header-ink); }
+        .stitch-menu-link.active { color: var(--header-muted); }
+        .stitch-menu-link:hover { color: var(--header-link-hover); }
         .stitch-sub-link { color: var(--tab-text); }
         .stitch-sub-link.active { color: var(--tab-text-active); }
         .stitch-sub-link:hover { color: var(--text-primary); }
@@ -2278,7 +2359,7 @@
         body.theme-light .btn:disabled { color: var(--ink-muted); background: var(--surface-row); border-color: var(--input-border); cursor: not-allowed; }
         :where(a, button, select, input, [tabindex]):focus-visible { outline: 2px solid var(--accent-color); outline-offset: 3px; }
         .toggle-switch:focus-within .slider { outline: 2px solid var(--accent-color); outline-offset: 3px; }
-        .stitch-top-bar a:focus-visible { outline-color: var(--header-ink); }
+        .stitch-top-bar a:focus-visible { outline-color: var(--header-focus); }
     </style>
 
     <div id="tooltip" style="z-index: 20000000; pointer-events: none;"></div>
@@ -4186,6 +4267,24 @@
         }
 
 
+
+        // Only the global website menu is collapsible; analytical tabs are untouched.
+        (function () {
+            const button = document.querySelector('.stitch-menu-toggle');
+            const menu = document.getElementById('artefact-global-navigation');
+            const setOpen = open => {
+                button.setAttribute('aria-expanded', String(open));
+                menu.classList.toggle('is-open', open);
+            };
+            button.addEventListener('click', () => setOpen(button.getAttribute('aria-expanded') !== 'true'));
+            menu.addEventListener('click', event => { if (event.target.closest('a')) setOpen(false); });
+            button.parentElement.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') {
+                    setOpen(false);
+                    button.focus();
+                }
+            });
+        })();
 
         // Header theme selector: reuses window.EpltTheme; state follows body.theme-light
         // so in-page and cross-tab changes stay in sync without touching the shared bridge.
