@@ -11,7 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBigramTrends } from "@/hooks/useBigramTrends";
 
-const COLORS = ["#4ECDC4", "#FF6B6B", "#C084FC", "#FBBF24", "#34D399"];
+const COLORS = ["var(--trend-1)", "var(--trend-2)", "var(--trend-3)", "var(--trend-4)", "var(--trend-5)"];
 
 interface BigramTrendsChartProps {
   topicId?: number;
@@ -24,8 +24,8 @@ export function BigramTrendsChart({ topicId, topicName }: BigramTrendsChartProps
   if (isLoading) {
     return (
       <div className="topic-glass-card p-5">
-        <Skeleton className="h-5 w-64 bg-white/10 mb-4" />
-        <Skeleton className="h-64 w-full bg-white/10" />
+        <Skeleton className="h-5 w-64 bg-muted mb-4" />
+        <Skeleton className="h-64 w-full bg-muted" />
       </div>
     );
   }
@@ -33,10 +33,10 @@ export function BigramTrendsChart({ topicId, topicName }: BigramTrendsChartProps
   if (!raw || raw.length === 0) {
     return (
       <div className="topic-glass-card p-5">
-        <h4 className="text-sm font-semibold text-white mb-2">
+        <h4 className="text-sm font-semibold text-foreground mb-2">
           Bigram trends over time
         </h4>
-        <p className="text-xs text-[#a0a0a0]">No trend data available for this topic.</p>
+        <p className="text-xs text-muted-foreground">No trend data available for this topic.</p>
       </div>
     );
   }
@@ -55,7 +55,8 @@ export function BigramTrendsChart({ topicId, topicName }: BigramTrendsChartProps
   raw.forEach((r) => {
     if (r.year == null || !r.bigram) return;
     if (!byYear.has(r.year)) byYear.set(r.year, { year: r.year });
-    const row = byYear.get(r.year)!;
+    const row = byYear.get(r.year);
+    if (!row) return;
     row[r.bigram] = r.papers_count ?? 0;
   });
 
@@ -78,37 +79,37 @@ export function BigramTrendsChart({ topicId, topicName }: BigramTrendsChartProps
 
   return (
     <div className="topic-glass-card p-5">
-      <h4 className="text-sm font-semibold text-white mb-4">
+      <h4 className="text-sm font-semibold text-foreground mb-4">
         Bigram trends over time {topicName ? `(Topic: ${topicName})` : ""}
       </h4>
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={chartData}>
-          <CartesianGrid stroke="rgba(255,255,255,0.06)" />
+          <CartesianGrid stroke="var(--topic-grid)" />
           <XAxis
             dataKey="year"
             type="number"
             domain={[1980, 2025]}
             ticks={[1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025]}
-            tick={{ fill: "#a0a0a0", fontSize: 10 }}
-            stroke="rgba(255,255,255,0.1)"
+            tick={{ fill: "var(--topic-muted)", fontSize: 10 }}
+            stroke="var(--topic-axis)"
           />
           <YAxis
-            tick={{ fill: "#a0a0a0", fontSize: 10 }}
-            stroke="rgba(255,255,255,0.1)"
+            tick={{ fill: "var(--topic-muted)", fontSize: 10 }}
+            stroke="var(--topic-axis)"
             label={{
               value: "Papers per year",
               angle: -90,
               position: "insideLeft",
-              style: { fill: "#a0a0a0", fontSize: 10 },
+              style: { fill: "var(--topic-muted)", fontSize: 10 },
             }}
           />
           <Tooltip
             contentStyle={{
-              background: "rgba(15,15,15,0.95)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "var(--topic-tooltip)",
+              border: "1px solid var(--topic-axis)",
               borderRadius: 8,
               fontSize: 11,
-              color: "#fff",
+              color: "var(--topic-ink)",
             }}
             formatter={(value: number, name: string) => [
               value,
@@ -117,7 +118,7 @@ export function BigramTrendsChart({ topicId, topicName }: BigramTrendsChartProps
           />
           <Legend
             formatter={(value: string) => (
-              <span style={{ color: "#a0a0a0", fontSize: 11 }}>
+              <span style={{ color: "var(--topic-muted)", fontSize: 11 }}>
                 {value.replace(/_/g, " ")}
               </span>
             )}

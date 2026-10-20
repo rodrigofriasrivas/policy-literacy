@@ -37,7 +37,7 @@ export default function TopicExploration() {
   }, [topicId, allTopics, navigate]);
 
   return (
-    <div className="topic-dark-wrapper flex h-screen overflow-hidden">
+    <div className="topic-dark-wrapper flex h-dvh overflow-hidden">
       {/* Left Sidebar */}
       <TopicSidebar
         topics={allTopics}
@@ -46,7 +46,7 @@ export default function TopicExploration() {
       />
 
       {/* Main Panel */}
-      <main className="flex-1 p-6 space-y-8 overflow-y-auto" style={{ background: '#050505' }}>
+      <main className="topic-main flex-1 min-w-0 p-6 space-y-8 overflow-y-auto">
         {/* Network + Info Card row — aligned at top */}
         <div className="flex items-start gap-5">
           <div className="flex-1 min-w-0">
