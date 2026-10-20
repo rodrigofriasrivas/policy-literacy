@@ -13,10 +13,12 @@ import NotFound from "./pages/NotFound";
 import IntroModule1 from "./pages/IntroModule1";
 import IntroModule2 from "./pages/IntroModule2";
 import IntroModule3 from "./pages/IntroModule3";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <ThemeProvider>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -56,6 +58,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;

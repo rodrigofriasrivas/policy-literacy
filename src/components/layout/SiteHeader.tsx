@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink as RouterNavLink, Link, useLocation } from "react-router-dom";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const homepageNavItems = [
   { path: "/about", label: "About the project", external: false },
@@ -53,9 +54,12 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
         >
           <span className={`hamburger-icon ${menuOpen ? "hamburger-open" : ""}`} />
         </button>
-        <nav className={`home-nav ${menuOpen ? "mobile-menu-open" : ""}`}>
-          {navItems.map((item) => renderNavLink(item, () => setMenuOpen(false)))}
-        </nav>
+        <div className="ml-auto flex items-center gap-6">
+          <nav className={`home-nav ${menuOpen ? "mobile-menu-open" : ""}`}>
+            {navItems.map((item) => renderNavLink(item, () => setMenuOpen(false)))}
+          </nav>
+          <ThemeToggle onDarkSurface />
+        </div>
       </header>
     );
   }
@@ -94,6 +98,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
                 </RouterNavLink>
               )
             )}
+            <ThemeToggle />
           </nav>
         </div>
       </div>

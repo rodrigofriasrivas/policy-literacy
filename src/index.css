@@ -44,6 +44,12 @@
 
     --radius: 0.25rem;
 
+    /* Phase 1 control tokens; existing page palettes remain unchanged. */
+    --theme-control-background: 0 0% 10%;
+    --theme-control-foreground: 0 0% 92%;
+    --theme-control-border: 0 0% 30%;
+    --theme-control-hover: 0 0% 18%;
+
     /* Sidebar - slightly darker */
     --sidebar-background: 0 0% 96%;
     --sidebar-foreground: 0 0% 25%;
@@ -106,6 +112,18 @@
     --chart-4: 0 0% 30%;
     --chart-5: 0 0% 20%;
   }
+}
+
+.theme-toggle-dark-surface {
+  flex-shrink: 0;
+  color: hsl(var(--theme-control-foreground));
+  background: hsl(var(--theme-control-background));
+  border-color: hsl(var(--theme-control-border));
+}
+
+.theme-toggle-dark-surface:hover {
+  color: hsl(var(--theme-control-foreground));
+  background: hsl(var(--theme-control-hover));
 }
 
 @layer base {
