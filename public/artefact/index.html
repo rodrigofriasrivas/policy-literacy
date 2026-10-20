@@ -2201,6 +2201,7 @@
             --border-subtle: rgba(255,255,255,0.05);
             --tooltip-bg: rgba(15,15,15,0.95); --tooltip-border: rgba(255,255,255,0.15);
             --chart-axis: #666; --chart-area-stroke: #fff;
+            --accent-on: #000;
             --network-label: #ddd; --network-paper-label: #999; --network-selected-label: #FFF;
             --network-outline: transparent; --network-label-halo: transparent; --network-grid: rgba(255,255,255,0.05);
         }
@@ -2208,6 +2209,7 @@
             --ink-white: #111; --ink-soft: #30383c; --ink-label: #37434a;
             --ink-muted: #4c5860; --ink-dim: #4c5860; --ink-loading: #4c5860; --ink-warning: #b42323;
             --accent-color: #096b66;
+            --accent-on: #fff;
             --surface-active: #e3ecef; --surface-row: #f2f5f7; --surface-hover: #e8eef1;
             --surface-results: #f7f9fa; --surface-selected: #d5eeeb;
             --surface-abstract: #f2f5f7; --surface-expanded: #f7f9fa;
@@ -2237,7 +2239,7 @@
         body.theme-light .info-icon { color: var(--ink-white) !important; background: var(--surface-active); opacity: 1; }
         body.theme-light .info-icon:hover { background: var(--surface-hover); }
         body.theme-light .topic-identity-ink, body.theme-light .tooltip-header { color: var(--text-primary) !important; }
-        body.theme-light .topic-identity-ink { border-left: 3px solid; padding-left: 6px; }
+        body.theme-light .topic-identity-ink { padding-left: 6px; }
         body.theme-light select:hover, body.theme-light input[type="text"]:hover,
         body.theme-light select:focus, body.theme-light input[type="text"]:focus { background: var(--surface-hover); border-color: var(--accent-color); }
         body.theme-light input[type="text"]::placeholder { color: var(--ink-muted); opacity: 1; }
@@ -2252,7 +2254,7 @@
         body.theme-light .range-track, body.theme-light input[type="range"] { background: var(--input-border); }
         body.theme-light .range-slider input[type="range"] { background: transparent; }
         body.theme-light .dashboard-sidebar-col.is-disabled { opacity: 1; }
-        body.theme-light .dashboard-sidebar-col.is-disabled #controls { opacity: 0.75; }
+        body.theme-light .dashboard-sidebar-col.is-disabled #controls { opacity: 1; }
         body.theme-light .lib-row-not-connected > td { opacity: 1; color: var(--ink-muted) !important; }
         body.theme-light td[style*="opacity:0.7"] { opacity: 1 !important; }
         body.theme-light .controls-scroll-content { scrollbar-color: var(--input-border) transparent; }
@@ -2262,7 +2264,7 @@
         body.theme-light .dashboard-view-section svg .tick text { fill: var(--chart-axis); }
         /* Preserve categorical fills and line colours; an outline distinguishes pale marks. */
         body.theme-light .distribution-bar { stroke: var(--network-outline); stroke-width: 0.6; }
-        body.theme-light .trend-line { filter: drop-shadow(0 0 0.6px var(--network-outline)); }
+        body.theme-light .trend-line { filter: drop-shadow(0 0 1px var(--network-outline)); }
         body.theme-light #topic-trends-legend > span { color: var(--text-primary) !important; }
         body.theme-light #distribution-tooltip .topic-identity-ink { color: var(--text-primary) !important; }
         body.theme-light .btn:disabled { color: var(--ink-muted); background: var(--surface-row); border-color: var(--input-border); cursor: not-allowed; }
@@ -3462,6 +3464,11 @@
                         if (isHoveredOrSelected) {
                             ctx.fillStyle = networkPaint.selectedLabel;
                         }
+                        if (networkPaint.light) {
+                            ctx.strokeStyle = networkPaint.halo;
+                            ctx.lineWidth = 3 / transform.k;
+                            ctx.strokeText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius, paper.y);
+                        }
                         ctx.fillText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius, paper.y);
 
                         // Register drawn position if not an explicit active target
@@ -4399,7 +4406,7 @@
             container.innerHTML = '';
             searchTags.forEach((tag, idx) => {
                 const chip = document.createElement('div');
-                chip.style.cssText = "display: flex; align-items: center; gap: 4px; background: var(--accent-color); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;";
+                chip.style.cssText = "display: flex; align-items: center; gap: 4px; background: var(--accent-color); color: var(--accent-on); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;";
                 chip.innerHTML = `<span>${tag}</span><span style="cursor: pointer; opacity: 0.6; font-size: 10px;">✕</span>`;
                 chip.querySelector('span:last-child').onclick = (e) => {
                     e.stopPropagation();
