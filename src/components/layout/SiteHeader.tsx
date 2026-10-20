@@ -54,10 +54,12 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
         >
           <span className={`hamburger-icon ${menuOpen ? "hamburger-open" : ""}`} />
         </button>
-        <nav className={`home-nav ${menuOpen ? "mobile-menu-open" : ""}`}>
-          {navItems.map((item) => renderNavLink(item, () => setMenuOpen(false)))}
-        </nav>
-        <ThemeToggle onDarkSurface />
+        <div className="ml-auto flex items-center gap-6">
+          <nav className={`home-nav ${menuOpen ? "mobile-menu-open" : ""}`}>
+            {navItems.map((item) => renderNavLink(item, () => setMenuOpen(false)))}
+          </nav>
+          <ThemeToggle onDarkSurface />
+        </div>
       </header>
     );
   }
