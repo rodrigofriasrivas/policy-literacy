@@ -1,7 +1,8 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { ThemeProvider, useTheme } from "@/components/theme/ThemeProvider";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { DEFAULT_THEME, THEME_STORAGE_KEY, readTheme, themeFromStorageEvent } from "@/lib/themePreference";
 
 function Probe() {
@@ -20,6 +21,23 @@ afterEach(() => {
 });
 
 describe("global theme preference", () => {
+  it("selects either labelled mode through the existing preference and cannot deselect the active mode", () => {
+    render(<ThemeProvider><ThemeToggle /><Probe /></ThemeProvider>);
+    const light = screen.getByRole("radio", { name: "Light Mode" });
+    const dark = screen.getByRole("radio", { name: "Dark Mode" });
+    expect(dark).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(light);
+    expect(light).toHaveAttribute("aria-checked", "true");
+    expect(dark).toHaveAttribute("aria-checked", "false");
+    expect(localStorage.getItem("eplt-theme")).toBe("light");
+    expect(screen.getByRole("button").textContent).toBe("light");
+    fireEvent.click(light);
+    expect(light).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(dark);
+    expect(localStorage.getItem("eplt-theme")).toBe("dark");
+    expect(screen.getByRole("button").textContent).toBe("dark");
+  });
+
   it("defaults to dark, including invalid saved preferences", () => {
     expect(DEFAULT_THEME).toBe("dark");
     expect(readTheme()).toBe("dark");

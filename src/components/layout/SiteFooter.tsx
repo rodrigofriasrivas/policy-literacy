@@ -1,11 +1,14 @@
 import durhamLogo from "@/assets/durham_logo_white_720_300_rodrigo_frias.png";
+import durhamLogoLight from "@/assets/durham_logo_black_720_300_rodrigo_frias.png";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 export function SiteFooter() {
+  const { theme } = useTheme();
   return (
     <footer className="site-footer px-8 py-6">
       <div className="footer-single-row">
         <img
-          src={durhamLogo}
+          src={theme === "light" ? durhamLogoLight : durhamLogo}
           alt="Durham University"
           className="footer-logo"
         />

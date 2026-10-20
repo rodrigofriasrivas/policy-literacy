@@ -24,9 +24,9 @@ export function PapersTable({ topicId }: PapersTableProps) {
   if (isLoading) {
     return (
       <div className="topic-glass-card p-5 space-y-2">
-        <Skeleton className="h-5 w-48 bg-white/10" />
+        <Skeleton className="h-5 w-48 bg-muted" />
         {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full bg-white/10" />
+          <Skeleton key={i} className="h-10 w-full bg-muted" />
         ))}
       </div>
     );
@@ -35,8 +35,8 @@ export function PapersTable({ topicId }: PapersTableProps) {
   if (!data || data.papers.length === 0) {
     return (
       <div className="topic-glass-card p-5">
-        <h4 className="text-sm font-semibold text-white mb-2">Papers informing this topic</h4>
-        <p className="text-xs text-[#a0a0a0]">No papers found for this topic.</p>
+        <h4 className="text-sm font-semibold text-foreground mb-2">Papers informing this topic</h4>
+        <p className="text-xs text-muted-foreground">No papers found for this topic.</p>
       </div>
     );
   }
@@ -44,9 +44,9 @@ export function PapersTable({ topicId }: PapersTableProps) {
   return (
     <div className="topic-glass-card p-5">
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-semibold text-white">
+        <h4 className="text-sm font-semibold text-foreground">
           Papers informing this topic
-          <span className="text-[#a0a0a0] font-normal ml-2 text-xs">
+          <span className="text-muted-foreground font-normal ml-2 text-xs">
             ({data.totalCount} papers)
           </span>
         </h4>
@@ -55,7 +55,7 @@ export function PapersTable({ topicId }: PapersTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-white/10 text-[#a0a0a0] uppercase tracking-wider">
+            <tr className="border-b border-border text-muted-foreground uppercase tracking-wider">
               <th className="text-left py-2 pr-2 w-6"></th>
               <th className="text-left py-2 pr-4">Title</th>
               <th className="text-left py-2 pr-4 whitespace-nowrap">Author(s)</th>
@@ -68,31 +68,31 @@ export function PapersTable({ topicId }: PapersTableProps) {
               <>
                 <tr
                   key={p.paper_id}
-                  className="border-b border-white/5 hover:bg-white/5 cursor-pointer transition-colors"
+                  className="border-b border-border hover:bg-accent cursor-pointer transition-colors"
                   onClick={() =>
                     setExpandedId(expandedId === p.paper_id ? null : p.paper_id)
                   }
                 >
-                  <td className="py-2 pr-2 text-[#a0a0a0]">
+                  <td className="py-2 pr-2 text-muted-foreground">
                     {expandedId === p.paper_id ? (
                       <ChevronUp className="w-3 h-3" />
                     ) : (
                       <ChevronDown className="w-3 h-3" />
                     )}
                   </td>
-                  <td className="py-2 pr-4 text-white max-w-xs truncate">{p.title}</td>
-                  <td className="py-2 pr-4 text-[#a0a0a0] max-w-[180px] truncate">
+                  <td className="py-2 pr-4 text-foreground max-w-xs truncate">{p.title}</td>
+                  <td className="py-2 pr-4 text-muted-foreground max-w-[180px] truncate">
                     {p.authors ?? "–"}
                   </td>
-                  <td className="py-2 pr-4 text-[#a0a0a0]">{p.year ?? "–"}</td>
-                  <td className="py-2 text-[#a0a0a0] max-w-[140px] truncate">
+                  <td className="py-2 pr-4 text-muted-foreground">{p.year ?? "–"}</td>
+                  <td className="py-2 text-muted-foreground max-w-[140px] truncate">
                     {p.journal ?? "–"}
                   </td>
                 </tr>
                 {expandedId === p.paper_id && (
                   <tr key={`${p.paper_id}-abstract`}>
                     <td colSpan={5} className="py-3 px-4">
-                      <div className="text-[11px] leading-relaxed text-[#a0a0a0] bg-white/5 rounded-lg p-3">
+                      <div className="text-[11px] leading-relaxed text-muted-foreground bg-accent rounded-lg p-3">
                         {p.abstract || "Abstract not available."}
                       </div>
                     </td>
@@ -106,7 +106,7 @@ export function PapersTable({ topicId }: PapersTableProps) {
 
       {/* Pagination */}
       {data.totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 text-xs text-[#a0a0a0]">
+        <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
           <span>
             Page {page + 1} of {data.totalPages}
           </span>

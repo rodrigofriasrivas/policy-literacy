@@ -259,7 +259,7 @@ export default function AboutPage() {
                 He previously served as Chief Executive of Start-Up Chile and as Director of Early Investment at CORFO (Chile's Economic Development Agency), leading national programmes supporting early-stage ventures and policy innovation initiatives.
               </p>
               <p>
-                <strong style={{ color: 'rgba(255,255,255,0.80)' }}>PhD Research — Rethinking how entrepreneurship policy is designed</strong>
+                <strong className="about-emphasis">PhD Research — Rethinking how entrepreneurship policy is designed</strong>
               </p>
               <p>
                 In his PhD, Rodrigo studies how entrepreneurship policy is framed and designed—not just which instruments are used. His work focuses on the early stages of policy formulation, where assumptions are set and future paths are shaped. Using design science, qualitative fieldwork, and computational text analysis, he translates theory and evidence into practical principles and tools for more reflective, context-sensitive policy design.

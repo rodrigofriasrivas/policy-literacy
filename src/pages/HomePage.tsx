@@ -27,7 +27,7 @@ export default function HomePage() {
     <HomeLayout>
       <div className="ascii-container">
         {/* Animated ASCII Background with colored words */}
-        <pre className="ascii-pre">
+        <pre className="ascii-pre" aria-hidden="true">
           {asciiWords.map((row, rowIndex) => (
             <span key={rowIndex}>
               {row.map((word, wordIndex) => (
