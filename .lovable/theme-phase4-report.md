@@ -1,5 +1,7 @@
 # Phase 4: Full-site theme regression
 
+**Status: complete and accepted (20 Oct 2026).** The Dark/Light Mode implementation is accepted as final; no further UI, styling, analytical or functional changes are in scope.
+
 ## Verified (Chromium, 1280x900 and 375x812)
 - React Light selection carries into `/artefact/index.html` (body `theme-light`, Artefact toggle off); reverse direction also verified.
 - Artefact toggle writes the shared `eplt-theme` preference in both directions.
