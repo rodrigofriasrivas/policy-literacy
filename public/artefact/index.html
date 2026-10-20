@@ -2232,7 +2232,7 @@
         .stitch-sub-link { color: var(--tab-text); }
         .stitch-sub-link.active { color: var(--tab-text-active); }
         .stitch-sub-link:hover { color: var(--text-primary); }
-        #tooltip { background: var(--tooltip-bg); border-color: var(--tooltip-border); }
+        #tooltip { background: var(--tooltip-bg); border-color: var(--tooltip-border); max-width: calc(100vw - 32px); }
         body.theme-light .stitch-bc-current { color: var(--ink-muted); }
         body.theme-light .stitch-breadcrumbs > span { opacity: 1 !important; }
         body.theme-light .section-label { color: var(--ink-dim) !important; }
@@ -3929,8 +3929,8 @@
                 canvas.style.cursor = 'pointer';
                 tooltip.classList.add('visible');
                 // Tooltip position remains in SCREEN coordinates
-                tooltip.style.left = (e.clientX + 15) + 'px';
-                tooltip.style.top = (e.clientY + 15) + 'px';
+                tooltip.style.left = Math.max(16, Math.min(e.clientX + 15, window.innerWidth - tooltip.offsetWidth - 16)) + 'px';
+                tooltip.style.top = Math.max(16, Math.min(e.clientY + 15, window.innerHeight - tooltip.offsetHeight - 16)) + 'px';
 
                 // Re-use tooltip content logic from Macro View
                 if (hoveredNode.type === 'topic') {
