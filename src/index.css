@@ -158,11 +158,11 @@
   --sphere-green: 150 60% 45%;
   
   /* Homepage semantic tokens */
-  --home-bg: #050607;
-  --home-fg: #F2F4F8;
-  --home-muted: rgba(242, 244, 248, 0.70);
-  --home-muted2: rgba(242, 244, 248, 0.55);
-  --home-stroke: rgba(242, 244, 248, 0.10);
+  --home-bg: hsl(210.00000 16.66667% 2.35294% / 1);
+  --home-fg: hsl(220.00000 30.00000% 96.07843% / 1);
+  --home-muted: hsl(220.00000 30.00000% 96.07843% / 0.7);
+  --home-muted2: hsl(220.00000 30.00000% 96.07843% / 0.55);
+  --home-stroke: hsl(220.00000 30.00000% 96.07843% / 0.1);
   
   /* Typography stacks */
   --font-display: Georgia, 'Times New Roman', ui-serif, serif;
@@ -2286,39 +2286,39 @@
   --site-surface-28: hsl(235.00000 30.00000% 12.00000% / 1);
   --site-ink-56: hsl(0.00000 0.00000% 100.00000% / 0.88);
   --site-ink-57: hsl(0.00000 0.00000% 100.00000% / 0.52);
-  --home-canvas-gradient: radial-gradient(ellipse at 50% 30%, rgba(20, 20, 25, 1) 0%, rgba(0, 0, 0, 1) 70%);
-  --home-term-gradient: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(30, 30, 35, 0.4) 0%, transparent 60%);
+  --home-canvas-gradient: radial-gradient(ellipse at 50% 30%, hsl(240.00000 11.11111% 8.82353% / 1) 0%, hsl(0.00000 0.00000% 0.00000% / 1) 70%);
+  --home-term-gradient: radial-gradient(ellipse 80% 70% at 50% 50%, hsl(240.00000 7.69231% 12.74510% / 0.4) 0%, transparent 60%);
   --home-reading-gradient: radial-gradient(
     circle at center,
-    rgba(5, 6, 7, 0.65) 0%,
-    rgba(5, 6, 7, 0.35) 40%,
-    rgba(5, 6, 7, 0.10) 65%,
+    hsl(210.00000 16.66667% 2.35294% / 0.65) 0%,
+    hsl(210.00000 16.66667% 2.35294% / 0.35) 40%,
+    hsl(210.00000 16.66667% 2.35294% / 0.1) 65%,
     transparent 100%
   );
   --module-reading-gradient: radial-gradient(
     ellipse 90% 80% at 50% 50%,
-    rgba(5, 6, 7, 0.88) 0%,
-    rgba(5, 6, 7, 0.70) 55%,
-    rgba(5, 6, 7, 0.20) 100%
+    hsl(210.00000 16.66667% 2.35294% / 0.88) 0%,
+    hsl(210.00000 16.66667% 2.35294% / 0.7) 55%,
+    hsl(210.00000 16.66667% 2.35294% / 0.2) 100%
   );
 
-  --topic-canvas: #050505;
-  --topic-ink: #fff;
-  --topic-muted: #a0a0a0;
-  --topic-soft: rgba(255,255,255,0.55);
-  --topic-dim: rgba(255,255,255,0.45);
-  --topic-description: rgba(255,255,255,0.75);
-  --topic-surface: rgba(20,20,20,0.55);
-  --topic-term-surface: rgba(20,20,20,0.5);
-  --topic-sidebar: rgba(10,10,10,0.95);
-  --topic-border: rgba(255,255,255,0.08);
-  --topic-hover: rgba(255,255,255,0.05);
-  --topic-selected: rgba(255,255,255,0.1);
-  --topic-shadow: 0 8px 32px rgba(0,0,0,0.25);
-  --topic-grid: rgba(255,255,255,0.06);
-  --topic-axis: rgba(255,255,255,0.1);
-  --topic-tooltip: rgba(15,15,15,0.95);
-  --trend-1: #4ECDC4; --trend-2: #FF6B6B; --trend-3: #C084FC; --trend-4: #FBBF24; --trend-5: #34D399;
+  --topic-canvas: hsl(0.00000 0.00000% 1.96078% / 1);
+  --topic-ink: hsl(0.00000 0.00000% 100.00000% / 1);
+  --topic-muted: hsl(0.00000 0.00000% 62.74510% / 1);
+  --topic-soft: hsl(0.00000 0.00000% 100.00000% / 0.55);
+  --topic-dim: hsl(0.00000 0.00000% 100.00000% / 0.45);
+  --topic-description: hsl(0.00000 0.00000% 100.00000% / 0.75);
+  --topic-surface: hsl(0.00000 0.00000% 7.84314% / 0.55);
+  --topic-term-surface: hsl(0.00000 0.00000% 7.84314% / 0.5);
+  --topic-sidebar: hsl(0.00000 0.00000% 3.92157% / 0.95);
+  --topic-border: hsl(0.00000 0.00000% 100.00000% / 0.08);
+  --topic-hover: hsl(0.00000 0.00000% 100.00000% / 0.05);
+  --topic-selected: hsl(0.00000 0.00000% 100.00000% / 0.1);
+  --topic-shadow: 0 8px 32px hsl(0.00000 0.00000% 0.00000% / 0.25);
+  --topic-grid: hsl(0.00000 0.00000% 100.00000% / 0.06);
+  --topic-axis: hsl(0.00000 0.00000% 100.00000% / 0.1);
+  --topic-tooltip: hsl(0.00000 0.00000% 5.88235% / 0.95);
+  --trend-1: hsl(175.74803 55.94714% 55.49020% / 1); --trend-2: hsl(0.00000 100.00000% 70.98039% / 1); --trend-3: hsl(270.00000 95.23810% 75.29412% / 1); --trend-4: hsl(43.25581 96.41256% 56.27451% / 1); --trend-5: hsl(158.11321 64.37247% 51.56863% / 1);
   --selector-surface: hsl(0 0% 93%);
   --selector-ink: hsl(0 0% 35%);
   --selector-active: hsl(0 0% 100%);
@@ -2518,7 +2518,7 @@
  .topic-sidebar > div:last-child { height: 240px; }
  .topic-main > div:first-child { flex-direction: column; }
  .topic-info-card { width: 100%; }
- .home-page .hero-title { white-space: normal; font-size: 32px !important; }
+ :root[data-theme="light"] .home-page .hero-title { white-space: normal; font-size: 32px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
  .ascii-word { transition: none; }
