@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink as RouterNavLink, Link, useLocation } from "react-router-dom";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 const homepageNavItems = [
   { path: "/about", label: "About the project", external: false },
@@ -56,6 +57,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
         <nav className={`home-nav ${menuOpen ? "mobile-menu-open" : ""}`}>
           {navItems.map((item) => renderNavLink(item, () => setMenuOpen(false)))}
         </nav>
+        <ThemeToggle onDarkSurface />
       </header>
     );
   }
@@ -94,6 +96,7 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
                 </RouterNavLink>
               )
             )}
+            <ThemeToggle />
           </nav>
         </div>
       </div>

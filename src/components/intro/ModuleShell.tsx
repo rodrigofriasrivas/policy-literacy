@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface ModuleShellProps {
   children: ReactNode;
@@ -43,6 +44,7 @@ export function ModuleShell({
           <Link to="/policy" className="module-top-nav-link">Policy engagement</Link>
           <Link to="/contact" className="module-top-nav-link">Contact</Link>
         </nav>
+        <ThemeToggle onDarkSurface />
       </header>
 
       {/* Sequencer pill */}

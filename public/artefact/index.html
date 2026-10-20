@@ -1248,6 +1248,7 @@
 </head>
 
 <body>
+    <script src="/theme-preference.js"></script>
     <div id="container">
         <canvas id="canvas"></canvas>
         <div id="topicTitle"></div>
@@ -1575,7 +1576,7 @@
                                 <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Grey/Dark
                                     mode</span>
                                 <label class="toggle-switch">
-                                    <input type="checkbox" id="themeToggle" checked>
+                                    <input type="checkbox" id="themeToggle" aria-label="Dark Mode" checked>
                                     <span class="slider"></span>
                                 </label>
                             </div>
@@ -4065,18 +4066,14 @@
         // Theme Toggle Listener
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
-            if (document.body.classList.contains('theme-light')) {
-                themeToggle.checked = false;
-            } else {
-                themeToggle.checked = true;
-            }
+            themeToggle.checked = window.EpltTheme.read() === 'dark';
 
             themeToggle.addEventListener('change', (e) => {
                 if (!e.target.checked) {
-                    document.body.classList.add('theme-light');
+                    window.EpltTheme.set('light');
                     updateStatus('Switched to Light Mode');
                 } else {
-                    document.body.classList.remove('theme-light');
+                    window.EpltTheme.set('dark');
                     updateStatus('Switched to Dark Mode');
                 }
             });
