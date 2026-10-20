@@ -85,7 +85,7 @@
         }
 
         body.theme-light .journal-item {
-            color: #666;
+            color: var(--ink-dim);
         }
 
         body.theme-light .journal-item:hover {
@@ -164,7 +164,7 @@
         }
 
         body.theme-light .slider:before {
-            background-color: #fff;
+            background-color: var(--ink-white);
             transform: translateX(0px);
         }
 
@@ -560,7 +560,7 @@
             font-weight: 700;
             font-size: 14px;
             line-height: 1.3;
-            color: #fff;
+            color: var(--ink-white);
             margin-bottom: 2px;
         }
 
@@ -571,7 +571,7 @@
         }
 
         .tooltip-meta strong {
-            color: #ddd;
+            color: var(--ink-soft);
         }
 
         /* Loading */
@@ -603,14 +603,14 @@
             gap: 8px;
             padding: 4px 8px;
             font-size: 11px;
-            color: #ccc;
+            color: var(--ink-label);
             cursor: pointer;
             border-radius: 4px;
         }
 
         .journal-item:hover {
             background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            color: var(--ink-white);
         }
 
         .journal-item input {
@@ -685,7 +685,7 @@
             font-family: 'Times New Roman', serif;
             /* Editorial feel */
             font-size: 22px;
-            color: #fff;
+            color: var(--ink-white);
             letter-spacing: -0.01em;
             line-height: 1;
         }
@@ -698,14 +698,14 @@
         .stitch-menu-link {
             font-family: 'Inter', sans-serif;
             font-size: 13px;
-            color: #888;
+            color: var(--ink-muted);
             text-decoration: none;
             transition: color 0.2s;
         }
 
         .stitch-menu-link.active,
         .stitch-menu-link:hover {
-            color: #fff;
+            color: var(--ink-white);
         }
 
         .stitch-menu-link.active {
@@ -728,18 +728,18 @@
         .stitch-sub-link {
             font-family: 'Inter', sans-serif;
             font-size: 13px;
-            color: #666;
+            color: var(--ink-dim);
             text-decoration: none;
             font-weight: 500;
         }
 
         .stitch-sub-link.active {
-            color: #fff;
+            color: var(--ink-white);
             font-weight: 600;
         }
 
         .stitch-sub-link:hover {
-            color: #ccc;
+            color: var(--ink-label);
         }
 
         /* Breadcrumbs */
@@ -1023,11 +1023,11 @@
 
         /* Refine breadcrumbs/submenu text colors for contrast against canvas if transparent */
         .stitch-sub-link {
-            color: #888;
+            color: var(--ink-muted);
         }
 
         .stitch-sub-link.active {
-            color: #fff;
+            color: var(--ink-white);
         }
 
         /* Tweak Topic Title position */
@@ -1266,7 +1266,7 @@
 
         <!-- 1. Top Navigation Bar (Full Width) -->
         <div class="stitch-top-bar">
-            <a href="/" class="stitch-brand" style="text-decoration:none;color:inherit;">Enterprise Policy
+            <a href="/" class="stitch-brand" style="text-decoration:none;">Enterprise Policy
                 Literacy
                 Tool</a>
             <nav class="stitch-menu">
@@ -1375,7 +1375,7 @@
                                 <!-- Terms linked to papers -->
                                 <div class="row-align-center" style="margin-bottom: 8px;">
                                     <label for="bigramPaperToggle"
-                                        style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms
+                                        style="margin: 0; font-size: 11px; cursor: pointer; color: var(--ink-label);">Terms
                                         linked to
                                         papers</label>
                                     <label class="toggle-switch">
@@ -1387,7 +1387,7 @@
                                 <!-- Terms-to-terms link -->
                                 <div class="row-align-center">
                                     <label for="bigramToggle"
-                                        style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Terms-to-terms
+                                        style="margin: 0; font-size: 11px; cursor: pointer; color: var(--ink-label);">Terms-to-terms
                                         link</label>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="bigramToggle">
@@ -1398,7 +1398,7 @@
                                 <!-- Show all paper IDs -->
                                 <div class="row-align-center" style="margin-top: 8px;">
                                     <label for="paperIdToggle"
-                                        style="margin: 0; font-size: 11px; cursor: pointer; color: #ccc;">Show all paper
+                                        style="margin: 0; font-size: 11px; cursor: pointer; color: var(--ink-label);">Show all paper
                                         IDs</label>
                                     <label class="toggle-switch">
                                         <input type="checkbox" id="paperIdToggle">
@@ -1409,7 +1409,7 @@
                                 <!-- Macro Layout Mode -->
                                 <div style="margin-top: 16px;">
                                     <label for="macroLayoutSelect"
-                                        style="display: block; font-size: 11px; margin-bottom: 6px; color: #ccc;">Macro
+                                        style="display: block; font-size: 11px; margin-bottom: 6px; color: var(--ink-label);">Macro
                                         Layout Force</label>
                                     <select id="macroLayoutSelect"
                                         style="width: 100%; padding: 6px; border-radius: 4px; background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary); font-size: 11px;">
@@ -1445,7 +1445,7 @@
                                         </div>
                                         <div id="journalList" class="scroll-y" style="max-height: 150px;">
                                             <div
-                                                style="padding: 10px; color: #888; text-align: center; font-size: 11px;">
+                                                style="padding: 10px; color: var(--ink-muted); text-align: center; font-size: 11px;">
                                                 Loading
                                                 journals...</div>
                                         </div>
@@ -1469,10 +1469,10 @@
                             <div style="display: flex; gap: 8px; margin-bottom: 8px;">
                                 <!-- Tag Container Wrapper -->
                                 <div
-                                    style="flex: 2; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); border-radius: 4px; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; min-height: 32px;">
+                                    style="flex: 2; background: var(--surface-active); border: 1px solid var(--glass-border); border-radius: 4px; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; min-height: 32px;">
                                     <div id="advSearchTags" style="display: contents;"></div>
                                     <input type="text" id="advSearchInput" placeholder="Search..."
-                                        style="border: none; background: transparent; color: #fff; font-size: 12px; outline: none; flex: 1; min-width: 60px; padding: 2px;">
+                                        style="border: none; background: transparent; color: var(--ink-white); font-size: 12px; outline: none; flex: 1; min-width: 60px; padding: 2px;">
                                 </div>
                                 <select id="advSearchScope" style="flex: 1; font-size: 11px; padding: 0 4px;">
                                     <option value="all">All</option>
@@ -1483,19 +1483,19 @@
                                     <option value="topic">Topics</option>
                                 </select>
                             </div>
-                            <div style="font-size: 10px; color: #888; margin-bottom: 16px;">Press Enter/Comma to add
+                            <div style="font-size: 10px; color: var(--ink-muted); margin-bottom: 16px;">Press Enter/Comma to add
                                 tag</div>
 
                             <!-- B) Match Toggle -->
                             <div class="row-align-center"
                                 style="justify-content: flex-start; gap: 16px; margin-bottom: 20px;">
                                 <label
-                                    style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: #ccc; font-size: 11px;">
+                                    style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: var(--ink-label); font-size: 11px;">
                                     <input type="radio" name="matchType" value="contains" checked style="margin: 0;">
                                     Contains
                                 </label>
                                 <label
-                                    style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: #ccc; font-size: 11px;">
+                                    style="display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 400; cursor: pointer; color: var(--ink-label); font-size: 11px;">
                                     <input type="radio" name="matchType" value="exact" style="margin: 0;"> Exact
                                 </label>
                             </div>
@@ -1531,7 +1531,7 @@
                                     <!-- Simple Journal Multi-select for Refine -->
                                     <label style="font-size: 10px; color: var(--text-secondary);">Journals</label>
                                     <div id="advJournalList" class="scroll-y"
-                                        style="max-height: 80px; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
+                                        style="max-height: 80px; background: var(--surface-row); padding: 8px; border-radius: 4px;">
                                         <!-- Populated via JS -->
                                     </div>
                                 </div>
@@ -1540,7 +1540,7 @@
                             <!-- D) Results Panel -->
                             <div class="section-label" style="margin-bottom: 8px;">Results</div>
                             <div id="searchResultsPanel" class="scroll-y"
-                                style="flex: 1; min-height: 0; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                                style="flex: 1; min-height: 0; background: var(--surface-results); border-radius: 8px; padding: 8px; border: 1px solid var(--border-subtle);">
                                 <div id="searchResultsCount"
                                     style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1);">
                                     Enter search term to begin</div>
@@ -2187,6 +2187,92 @@
         }
     </style>
 
+    <style>
+
+        /* Phase 3: paired standalone presentation tokens; dark literals are the baseline. */
+        :root {
+            --ink-white: #fff; --ink-soft: #ddd; --ink-label: #ccc;
+            --ink-muted: #888; --ink-dim: #666; --ink-loading: #aaa; --ink-warning: #ff6b6b;
+            --header-ink: #fff; --header-muted: #888;
+            --surface-active: rgba(255,255,255,0.1); --surface-row: rgba(255,255,255,0.05);
+            --surface-hover: rgba(255,255,255,0.08); --surface-results: rgba(0,0,0,0.2);
+            --surface-selected: rgba(78,205,196,0.2); --surface-abstract: rgba(255,255,255,0.03);
+            --surface-expanded: rgba(255,255,255,0.02); --separator-strong: rgba(255,255,255,0.15);
+            --border-subtle: rgba(255,255,255,0.05);
+            --tooltip-bg: rgba(15,15,15,0.95); --tooltip-border: rgba(255,255,255,0.15);
+            --chart-axis: #666; --chart-area-stroke: #fff;
+            --accent-on: #000;
+            --network-label: #ddd; --network-paper-label: #999; --network-selected-label: #FFF;
+            --network-outline: transparent; --network-label-halo: transparent; --network-grid: rgba(255,255,255,0.05);
+        }
+        body.theme-light {
+            --ink-white: #111; --ink-soft: #30383c; --ink-label: #37434a;
+            --ink-muted: #4c5860; --ink-dim: #4c5860; --ink-loading: #4c5860; --ink-warning: #b42323;
+            --accent-color: #096b66;
+            --accent-on: #fff;
+            --surface-active: #e3ecef; --surface-row: #f2f5f7; --surface-hover: #e8eef1;
+            --surface-results: #f7f9fa; --surface-selected: #d5eeeb;
+            --surface-abstract: #f2f5f7; --surface-expanded: #f7f9fa;
+            --separator-strong: #a8b6bf; --border-subtle: #c0cbd2;
+            --glass-border: #c0cbd2; --input-border: #a8b6bf; --l-border: #c0cbd2;
+            --chart-panel-border: #a8b6bf; --chart-row-border: #c0cbd2;
+            --tooltip-bg: #fff; --tooltip-border: #80929e;
+            --chart-axis: #44535c; --chart-area-stroke: #34464f;
+            --network-label: #222; --network-paper-label: #46535b; --network-selected-label: #000;
+            --network-outline: #43525e; --network-label-halo: #f0f2f5; --network-grid: #a8b6bf;
+            --zoom-toolbar-bg: rgba(255,255,255,0.96); --zoom-toolbar-text: #172b34;
+            --zoom-toolbar-muted: #34464f; --zoom-toolbar-border: #a8b6bf;
+            --zoom-toolbar-hover: #e3ecef; --zoom-toolbar-shadow: 0 8px 28px rgba(25,45,55,0.16);
+            --bg-card: #fff; --border-color: #c0cbd2; --bg-hover: #e8eef1;
+        }
+        /* The top bar deliberately stays black in BOTH themes. */
+        .stitch-brand { color: var(--header-ink); }
+        .stitch-menu-link { color: var(--header-muted); }
+        .stitch-menu-link.active, .stitch-menu-link:hover { color: var(--header-ink); }
+        .stitch-sub-link { color: var(--tab-text); }
+        .stitch-sub-link.active { color: var(--tab-text-active); }
+        .stitch-sub-link:hover { color: var(--text-primary); }
+        #tooltip { background: var(--tooltip-bg); border-color: var(--tooltip-border); max-width: calc(100vw - 32px); }
+        body.theme-light .stitch-bc-current { color: var(--ink-muted); }
+        body.theme-light .stitch-breadcrumbs > span { opacity: 1 !important; }
+        body.theme-light .section-label { color: var(--ink-dim) !important; }
+        body.theme-light .info-icon { color: var(--ink-white) !important; background: var(--surface-active); opacity: 1; }
+        body.theme-light .info-icon:hover { background: var(--surface-hover); }
+        body.theme-light .topic-identity-ink, body.theme-light .tooltip-header { color: var(--text-primary) !important; }
+        body.theme-light .topic-identity-ink { padding-left: 6px; }
+        body.theme-light select:hover, body.theme-light input[type="text"]:hover,
+        body.theme-light select:focus, body.theme-light input[type="text"]:focus { background: var(--surface-hover); border-color: var(--accent-color); }
+        body.theme-light input[type="text"]::placeholder { color: var(--ink-muted); opacity: 1; }
+        body.theme-light .topic-card:hover { background: var(--surface-hover); border-color: var(--input-border); }
+        body.theme-light .topic-dot { outline: 1px solid var(--network-outline); }
+        body.theme-light .topic-num, body.theme-light .section-label-muted, body.theme-light .topic-expand-icon { opacity: 1; }
+        body.theme-light input[type="range"]::-webkit-slider-thumb { background: var(--accent-color); box-shadow: none; }
+        body.theme-light input:checked + .slider { background: var(--surface-selected); border-color: var(--accent-color); }
+        body.theme-light .slider { border-color: var(--input-border); }
+        body.theme-light .slider:before { background: var(--ink-muted); }
+        body.theme-light input:checked + .slider:before { background: var(--accent-color); }
+        body.theme-light .range-track, body.theme-light input[type="range"] { background: var(--input-border); }
+        body.theme-light .range-slider input[type="range"] { background: transparent; }
+        body.theme-light .dashboard-sidebar-col.is-disabled { opacity: 1; }
+        body.theme-light .dashboard-sidebar-col.is-disabled #controls { opacity: 1; }
+        body.theme-light .lib-row-not-connected > td { opacity: 1; color: var(--ink-muted) !important; }
+        body.theme-light td[style*="opacity:0.7"] { opacity: 1 !important; }
+        body.theme-light .controls-scroll-content { scrollbar-color: var(--input-border) transparent; }
+        body.theme-light .dashboard-view-section::-webkit-scrollbar-thumb { background: var(--input-border); }
+        body.theme-light .dashboard-view-section svg .domain,
+        body.theme-light .dashboard-view-section svg .tick line { stroke: var(--input-border); opacity: 1; }
+        body.theme-light .dashboard-view-section svg .tick text { fill: var(--chart-axis); }
+        /* Preserve categorical fills and line colours; an outline distinguishes pale marks. */
+        body.theme-light .distribution-bar { stroke: var(--network-outline); stroke-width: 0.6; }
+        body.theme-light .trend-line { filter: drop-shadow(0 0 1px var(--network-outline)); }
+        body.theme-light #topic-trends-legend > span { color: var(--text-primary) !important; }
+        body.theme-light #distribution-tooltip .topic-identity-ink { color: var(--text-primary) !important; }
+        body.theme-light .btn:disabled { color: var(--ink-muted); background: var(--surface-row); border-color: var(--input-border); cursor: not-allowed; }
+        :where(a, button, select, input, [tabindex]):focus-visible { outline: 2px solid var(--accent-color); outline-offset: 3px; }
+        .toggle-switch:focus-within .slider { outline: 2px solid var(--accent-color); outline-offset: 3px; }
+        .stitch-top-bar a:focus-visible { outline-color: var(--header-ink); }
+    </style>
+
     <div id="tooltip" style="z-index: 20000000; pointer-events: none;"></div>
 
     <script>
@@ -2767,9 +2853,9 @@
             } catch (error) {
                 console.error('💥 Error:', error);
                 loading.innerHTML = `
-                    <div style="color: #ff6b6b; padding: 24px; text-align: center; max-width: 300px;">
+                    <div style="color: var(--ink-warning); padding: 24px; text-align: center; max-width: 300px;">
                         <div style="font-size: 24px; margin-bottom: 12px;">❌ Connection Error</div>
-                        <div style="font-size: 13px; color: #aaa; margin-bottom: 16px; line-height: 1.5;">${error.message}</div>
+                        <div style="font-size: 13px; color: var(--ink-loading); margin-bottom: 16px; line-height: 1.5;">${error.message}</div>
                         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                             <button onclick="location.reload()" class="btn" style="width: auto;">
                                 🔄 Retry
@@ -2848,7 +2934,7 @@
                     const safeName = topic.topic_name || topic.name || `Topic ${topic.id}`;
                     cell.innerHTML = `
                         <div style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Topic ${topic.id}</div>
-                        <div style="font-size: 13px; font-weight: 700; color: ${topic.color || 'var(--accent-color)'}; margin-top: 4px; margin-bottom: 8px; line-height: 1.2;">${safeName}</div>
+                        <div class="topic-identity-ink" style="font-size: 13px; font-weight: 700; color: ${topic.color || 'var(--accent-color)'}; margin-top: 4px; margin-bottom: 8px; line-height: 1.2;">${safeName}</div>
                     `;
                 }
 
@@ -3150,6 +3236,20 @@
             }
         }
 
+        let networkPaint = {};
+        function refreshNetworkPaint() {
+            const css = getComputedStyle(document.body);
+            const read = name => css.getPropertyValue(name).trim();
+            networkPaint = {
+                light: document.body.classList.contains('theme-light'),
+                label: read('--network-label'), paperLabel: read('--network-paper-label'),
+                selectedLabel: read('--network-selected-label'), outline: read('--network-outline'),
+                halo: read('--network-label-halo'), grid: read('--network-grid')
+            };
+        }
+        refreshNetworkPaint();
+        new MutationObserver(refreshNetworkPaint).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
         function drawMacroView() {
             // Clear entire canvas (in screen coordinates)
             ctx.save();
@@ -3242,7 +3342,7 @@
                         if (bigram) {
                             ctx.beginPath();
                             ctx.strokeStyle = bigram.color;
-                            ctx.globalAlpha = 0.15; // Subtle connection
+                            ctx.globalAlpha = networkPaint.light ? 0.32 : 0.15; // Theme-only edge contrast
                             ctx.lineWidth = 0.5;
                             ctx.moveTo(paper.x, paper.y);
                             ctx.lineTo(bigram.x, bigram.y);
@@ -3287,7 +3387,7 @@
                         if (bigram) {
                             ctx.beginPath();
                             ctx.strokeStyle = bigram.color;
-                            ctx.globalAlpha = isMatch ? 0.3 : 0.05; // Highlight connections if paper matches
+                            ctx.globalAlpha = isMatch ? (networkPaint.light ? 0.5 : 0.3) : 0.05; // Preserve matching logic
                             ctx.lineWidth = isMatch ? 1.0 : 0.5;
                             ctx.moveTo(paper.x, paper.y);
                             ctx.lineTo(bigram.x, bigram.y);
@@ -3308,6 +3408,11 @@
                 ctx.beginPath();
                 ctx.arc(paper.x, paper.y, paper.radius * scale, 0, Math.PI * 2);
                 ctx.fill();
+                if (networkPaint.light) {
+                    ctx.strokeStyle = networkPaint.outline;
+                    ctx.lineWidth = 0.65 / transform.k;
+                    ctx.stroke();
+                }
 
                 // Smarter labeling logic in Macro View:
                 // We avoid overlapping labels and only label nearby/hovered/selected items.
@@ -3355,9 +3460,14 @@
                         ctx.textAlign = 'left';
                         ctx.textBaseline = 'middle';
                         ctx.font = '10px Inter, sans-serif';
-                        ctx.fillStyle = document.body.classList.contains('theme-light') ? '#666' : '#999';
+                        ctx.fillStyle = networkPaint.paperLabel;
                         if (isHoveredOrSelected) {
-                            ctx.fillStyle = document.body.classList.contains('theme-light') ? '#000' : '#FFF';
+                            ctx.fillStyle = networkPaint.selectedLabel;
+                        }
+                        if (networkPaint.light) {
+                            ctx.strokeStyle = networkPaint.halo;
+                            ctx.lineWidth = 3 / transform.k;
+                            ctx.strokeText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius, paper.y);
                         }
                         ctx.fillText(`P${paper.paper_id || paper.id || '?'}`, paper.x + paper.radius, paper.y);
 
@@ -3402,6 +3512,11 @@
                 ctx.arc(bigram.x, bigram.y, bigram.radius * 0.6, 0, Math.PI * 2);
                 ctx.fillStyle = bigram.color;
                 ctx.fill();
+                if (networkPaint.light) {
+                    ctx.strokeStyle = networkPaint.outline;
+                    ctx.lineWidth = 1 / transform.k;
+                    ctx.stroke();
+                }
 
                 ctx.globalAlpha = 1.0;
             });
@@ -3479,16 +3594,17 @@
                     ctx.globalAlpha = alpha;
 
                     // Text Color Logic: Check for Light Mode
-                    if (document.body.classList.contains('theme-light')) {
-                        ctx.fillStyle = '#222'; // Dark text for light background
-                    } else {
-                        ctx.fillStyle = '#ddd'; // Light text for dark background
-                    }
+                    ctx.fillStyle = networkPaint.label;
 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
 
                     // FULL UNTRUNCATED LABEL
+                    if (networkPaint.light) {
+                        ctx.strokeStyle = networkPaint.halo;
+                        ctx.lineWidth = 3 / transform.k;
+                        ctx.strokeText(bigram.bigram, bigram.x, bigram.y - bigram.radius - 2);
+                    }
                     ctx.fillText(bigram.bigram, bigram.x, bigram.y - bigram.radius - 2);
                     ctx.globalAlpha = 1.0;
                 });
@@ -3513,7 +3629,7 @@
 
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillStyle = document.body.classList.contains('theme-light') ? '#666' : '#999';
+                ctx.fillStyle = networkPaint.paperLabel;
 
                 allData.topics.forEach((topic, i) => {
                     const col = i % numCols;
@@ -3532,7 +3648,7 @@
                     ctx.fillText(label, cx, cy + yOffset);
 
                     // Optional: Draw subtle cell borders
-                    ctx.strokeStyle = document.body.classList.contains('theme-light') ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+                    ctx.strokeStyle = networkPaint.grid;
                     ctx.lineWidth = 1 / transform.k;
                     ctx.strokeRect(panelW + (col * cellW), topM + (row * cellH), cellW, cellH);
                 });
@@ -3813,8 +3929,8 @@
                 canvas.style.cursor = 'pointer';
                 tooltip.classList.add('visible');
                 // Tooltip position remains in SCREEN coordinates
-                tooltip.style.left = (e.clientX + 15) + 'px';
-                tooltip.style.top = (e.clientY + 15) + 'px';
+                tooltip.style.left = Math.max(16, Math.min(e.clientX + 15, window.innerWidth - tooltip.offsetWidth - 16)) + 'px';
+                tooltip.style.top = Math.max(16, Math.min(e.clientY + 15, window.innerHeight - tooltip.offsetHeight - 16)) + 'px';
 
                 // Re-use tooltip content logic from Macro View
                 if (hoveredNode.type === 'topic') {
@@ -3846,18 +3962,18 @@
 
                     tooltip.innerHTML = `
                         <div style="margin-bottom: 4px;">
-                             <span class="tooltip-tag" style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">${hoveredNode.year || 'N/A'}</span>
+                             <span class="tooltip-tag" style="background: var(--surface-active); padding: 2px 6px; border-radius: 4px;">${hoveredNode.year || 'N/A'}</span>
                         </div>
                         <div class="tooltip-header" style="color:${hoveredNode.color}; margin-bottom: 2px;">Paper ${hoveredNode.paper_id || hoveredNode.id || 'Unknown'}</div>
-                        <div class="tooltip-title" style="margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3;">${hoveredNode.title || 'Untitled Paper'}</div>
+                        <div class="tooltip-title" style="margin-bottom: 12px; font-size: 14px; font-weight: 700; color: var(--ink-white); line-height: 1.3;">${hoveredNode.title || 'Untitled Paper'}</div>
                         
-                        <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.15); margin-bottom: 12px;"></div>
+                        <div style="width: 100%; height: 1px; background: var(--separator-strong); margin-bottom: 12px;"></div>
 
                         <div class="tooltip-meta" style="margin-bottom: 6px; font-size: 12px; line-height: 1.4;">
-                             <span style="color: #888;">Authors:</span> <span style="color: #ddd;">${authorsShort}</span>
+                             <span style="color: var(--ink-muted);">Authors:</span> <span style="color: var(--ink-soft);">${authorsShort}</span>
                         </div>
                         <div class="tooltip-meta" style="font-size: 12px; line-height: 1.4;">
-                             <span style="color: #888;">Journal:</span> <span style="color: var(--accent-color);">${hoveredNode.journal || 'N/A'}</span>
+                             <span style="color: var(--ink-muted);">Journal:</span> <span style="color: var(--accent-color);">${hoveredNode.journal || 'N/A'}</span>
                         </div>
                     `;
                 }
@@ -4086,13 +4202,13 @@
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
                 btn.style.background = 'transparent';
-                btn.style.color = '#888';
+                btn.style.color = 'var(--ink-muted)';
             });
 
             const activeBtn = document.getElementById(`tab-${tab}`);
             activeBtn.classList.add('active');
-            activeBtn.style.background = 'rgba(255,255,255,0.1)';
-            activeBtn.style.color = '#fff';
+            activeBtn.style.background = 'var(--surface-active)';
+            activeBtn.style.color = 'var(--ink-white)';
 
             // Show Content
             document.querySelectorAll('.tab-content').forEach(content => {
@@ -4166,7 +4282,7 @@
 
                 uniqueJournals.forEach(j => {
                     const div = document.createElement('div');
-                    div.style.cssText = "display: flex; gap: 6px; align-items: center; margin-bottom: 4px; color: #ccc;";
+                    div.style.cssText = "display: flex; gap: 6px; align-items: center; margin-bottom: 4px; color: var(--ink-label);";
                     div.innerHTML = `
                             <input type="checkbox" id="adv-j-${j.replace(/\s+/g, '')}" value="${j}" checked style="accent-color: var(--accent-color);">
                             <label for="adv-j-${j.replace(/\s+/g, '')}" style="margin:0; cursor:pointer; font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${j}</label>
@@ -4243,21 +4359,21 @@
                 };
 
                 overlay.innerHTML = `
-                        <div style="position: relative; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 40px; border-radius: 16px; max-width: 500px; color: #fff; font-family: Inter, sans-serif; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-                            <button id="closeOverlayBtn" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer; opacity: 0.7;">&times;</button>
+                        <div style="position: relative; background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); padding: 40px; border-radius: 16px; max-width: 500px; color: var(--ink-white); font-family: Inter, sans-serif; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+                            <button id="closeOverlayBtn" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; color: var(--ink-white); font-size: 24px; cursor: pointer; opacity: 0.7;">&times;</button>
                             
                             <div style="margin-bottom: 30px;">
                                 <div style="font-size: 14px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">1. Choose your lens</div>
-                                <div style="font-size: 13px; color: #ccc; line-height: 1.5;">Select specific topics to isolate the network. The macro view shows the entire landscape.</div>
+                                <div style="font-size: 13px; color: var(--ink-label); line-height: 1.5;">Select specific topics to isolate the network. The macro view shows the entire landscape.</div>
                                 <div style="width: 50px; height: 1px; background: rgba(255,255,255,0.2); margin-top: 12px;"></div>
                             </div>
                             <div style="margin-bottom: 30px;">
                                 <div style="font-size: 14px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">2. Define scope</div>
-                                <div style="font-size: 13px; color: #ccc; line-height: 1.5;">Slide the timeframe to filter papers by year. Watch patterns emerge and fade over time.</div>
+                                <div style="font-size: 13px; color: var(--ink-label); line-height: 1.5;">Slide the timeframe to filter papers by year. Watch patterns emerge and fade over time.</div>
                             </div>
                             <div>
                                 <div style="font-size: 14px; font-weight: 700; color: var(--accent-color); margin-bottom: 4px;">3. Search</div>
-                                <div style="font-size: 13px; color: #ccc; line-height: 1.5;">Use Advanced Search for targeted discovery of papers, authors, or concepts.</div>
+                                <div style="font-size: 13px; color: var(--ink-label); line-height: 1.5;">Use Advanced Search for targeted discovery of papers, authors, or concepts.</div>
                             </div>
                         </div>
                     `;
@@ -4290,7 +4406,7 @@
             container.innerHTML = '';
             searchTags.forEach((tag, idx) => {
                 const chip = document.createElement('div');
-                chip.style.cssText = "display: flex; align-items: center; gap: 4px; background: var(--accent-color); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;";
+                chip.style.cssText = "display: flex; align-items: center; gap: 4px; background: var(--accent-color); color: var(--accent-on); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;";
                 chip.innerHTML = `<span>${tag}</span><span style="cursor: pointer; opacity: 0.6; font-size: 10px;">✕</span>`;
                 chip.querySelector('span:last-child').onclick = (e) => {
                     e.stopPropagation();
@@ -4485,7 +4601,7 @@
 
                 // Dynamic styling based on selection
                 const isSelected = activeSpotlights.has(item);
-                const baseBg = isSelected ? 'rgba(78, 205, 196, 0.2)' : 'rgba(255,255,255,0.05)';
+                const baseBg = isSelected ? 'var(--surface-selected)' : 'var(--surface-row)';
                 const baseBorder = isSelected ? 'var(--accent-color)' : 'transparent';
 
                 row.style.cssText = `padding: 8px; background: ${baseBg}; border-radius: 4px; cursor: pointer; border: 1px solid ${baseBorder}; transition: all 0.1s; margin-bottom: 6px;`;
@@ -4493,20 +4609,20 @@
                 row.onmouseover = () => {
                     if (!activeSpotlights.has(item)) {
                         row.style.borderColor = 'var(--accent-color)';
-                        row.style.background = 'rgba(255,255,255,0.1)';
+                        row.style.background = 'var(--surface-active)';
                     }
                 };
                 row.onmouseout = () => {
                     if (!activeSpotlights.has(item)) {
                         row.style.borderColor = 'transparent';
-                        row.style.background = 'rgba(255,255,255,0.05)';
+                        row.style.background = 'var(--surface-row)';
                     }
                 };
 
                 let label = '';
                 let sub = '';
                 let tag = item.type.toUpperCase();
-                let tagColor = '#888';
+                let tagColor = 'var(--ink-muted)';
 
                 if (item.type === 'topic') {
                     label = item.topic_name;
@@ -4519,16 +4635,16 @@
                 } else if (item.type === 'paper') {
                     label = item.title;
                     sub = `${item.year} · ${item.authors ? item.authors.substring(0, 20) + '...' : 'Unknown'}`;
-                    tagColor = '#fff';
+                    tagColor = 'var(--ink-white)';
                 }
 
                 row.innerHTML = `
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
-                            <span style="font-size: 9px; font-weight: 700; background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 2px; color: ${tagColor}">${tag}</span>
-                            <span style="font-size: 9px; color: #666;">➔</span>
+                            <span class="topic-identity-ink" style="font-size: 9px; font-weight: 700; background: var(--surface-active); padding: 2px 4px; border-radius: 2px; color: ${tagColor}">${tag}</span>
+                            <span style="font-size: 9px; color: var(--ink-dim);">➔</span>
                         </div>
-                        <div style="font-size: 11px; font-weight: 600; color: #ddd; line-height: 1.3; margin-bottom: 2px;">${label}</div>
-                        <div style="font-size: 10px; color: #888;">${sub}</div>
+                        <div style="font-size: 11px; font-weight: 600; color: var(--ink-soft); line-height: 1.3; margin-bottom: 2px;">${label}</div>
+                        <div style="font-size: 10px; color: var(--ink-muted);">${sub}</div>
                     `;
 
                 row.onclick = () => {
@@ -4550,7 +4666,7 @@
                     if (item.type === 'paper') {
                         const paperToggle = document.getElementById('bigramPaperToggle');
                         if (paperToggle && !paperToggle.checked) {
-                            if (countLabel) countLabel.innerHTML = '<span style="color:#ff6b6b">⚠️ Enable "Terms linked to papers" to locate this paper.</span>';
+                            if (countLabel) countLabel.innerHTML = '<span style="color:var(--ink-warning)">⚠️ Enable "Terms linked to papers" to locate this paper.</span>';
                             return;
                         }
                     }
@@ -4802,7 +4918,7 @@
                 .attr('height', height - margin.top - margin.bottom)
                 .attr('fill', 'transparent')
                 .on('mouseover', function (event, d) {
-                    d3.select(this).attr('fill', 'rgba(255,255,255,0.05)');
+                    d3.select(this).attr('fill', 'var(--surface-row)');
                     const tt = d3.select('#temporal-tooltip');
                     tt.style('opacity', 1).html(`Year: ${d.year}<br>Papers: ${d.count}`)
                         .style('left', (event.pageX + 10) + 'px').style('top', (event.pageY - 20) + 'px');
@@ -4980,7 +5096,7 @@
                 d3.select(this).attr('opacity', 0.8);
                 tooltipEl.style('visibility', 'visible')
                     .html(`
-                        <div style="font-weight:700; border-bottom:1px solid var(--l-border); margin-bottom:6px; padding-bottom:4px; color:${d.color}">Topic ${d.id}: ${d.name.replace(/^Topic \d+:\s*/i, '')}</div>
+                        <div class="topic-identity-ink" style="font-weight:700; border-bottom:1px solid var(--l-border); margin-bottom:6px; padding-bottom:4px; color:${d.color}">Topic ${d.id}: ${d.name.replace(/^Topic \d+:\s*/i, '')}</div>
                         <div style="display:flex; justify-content:space-between; gap:20px;">
                             <span>Papers:</span>
                             <span style="font-weight:600;">${d.count.toLocaleString()}</span>
@@ -5132,11 +5248,11 @@
                 .attr('fill', d => seriesMeta[d.key].color)
                 .attr('d', area)
                 .attr('opacity', 0.85)
-                .attr('stroke', '#fff')
+                .attr('stroke', 'var(--chart-area-stroke)')
                 .attr('stroke-width', 0.5)
                 .attr('stroke-opacity', 0.2)
                 .on('mouseover', function (event, d) {
-                    d3.select(this).attr('opacity', 1).attr('stroke', '#fff').attr('stroke-width', 1).attr('stroke-opacity', 0.8);
+                    d3.select(this).attr('opacity', 1).attr('stroke', 'var(--chart-area-stroke)').attr('stroke-width', 1).attr('stroke-opacity', 0.8);
                     const pt = d3.pointer(event, this);
                     const xVal = x.invert(pt[0]);
                     const year = Math.round(xVal);
@@ -5150,7 +5266,7 @@
                         .style('left', (event.pageX + 10) + 'px').style('top', (event.pageY - 20) + 'px');
                 })
                 .on('mouseout', function (event, d) {
-                    d3.select(this).attr('opacity', 0.85).attr('stroke', '#fff').attr('stroke-width', 0.5).attr('stroke-opacity', 0.2);
+                    d3.select(this).attr('opacity', 0.85).attr('stroke', 'var(--chart-area-stroke)').attr('stroke-width', 0.5).attr('stroke-opacity', 0.2);
                     d3.select('#temporal-tooltip').style('opacity', 0);
                 });
 
@@ -5368,7 +5484,7 @@
                                 <div id="c4-clear-btn" style="
                                     padding: 10px 12px;
                                     font-size: 11px;
-                                    color: #ff6b6b;
+                                    color: var(--ink-warning);
                                     cursor: pointer;
                                     border-bottom: 1px solid var(--l-border);
                                     font-weight: 600;
@@ -5434,7 +5550,7 @@
                             `;
                         opt.dataset.tid = t.id;
 
-                        opt.onmouseover = () => { opt.style.background = 'rgba(255, 255, 255, 0.08)'; };
+                        opt.onmouseover = () => { opt.style.background = 'var(--surface-hover)'; };
                         opt.onmouseout = () => { opt.style.background = 'transparent'; };
 
                         opt.onclick = (e) => {
@@ -5665,7 +5781,7 @@
                                 labelStr = `Topic ${tId}: ${labelStr}`;
                             }
 
-                            legend.innerHTML = `<span style="font-weight:700; color:${pointData.series_color || '#fff'}">${labelStr}</span> &bull; ${pointData.year}: ${pointData.papers_count} papers`;
+                            legend.innerHTML = `<span class="topic-identity-ink" style="font-weight:700; color:${pointData.series_color || '#fff'}">${labelStr}</span> &bull; ${pointData.year}: ${pointData.papers_count} papers`;
 
                             const tooltip = d3.select('#temporal-tooltip');
                             tooltip.style('opacity', 1)
@@ -5695,7 +5811,7 @@
                             labelStr = `Topic ${tId}: ${labelStr}`;
                         }
 
-                        legend.innerHTML = `<span style="font-weight:700; color:${pointData.series_color || '#fff'}">${labelStr}</span> &bull; ${pointData.year}: ${pointData.papers_count} papers`;
+                        legend.innerHTML = `<span class="topic-identity-ink" style="font-weight:700; color:${pointData.series_color || '#fff'}">${labelStr}</span> &bull; ${pointData.year}: ${pointData.papers_count} papers`;
 
                         const tooltip = d3.select('#temporal-tooltip');
                         tooltip.style('opacity', 1)
@@ -5988,7 +6104,7 @@
 
                     absRow.innerHTML = `
                             <td colspan="6" style="padding:0 12px 24px 12px;border-bottom:1px solid var(--chart-row-border);">
-                                <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:8px;color:var(--text-secondary);font-size:13px;line-height:1.6;">
+                                <div style="background:var(--surface-abstract);padding:16px;border-radius:8px;color:var(--text-secondary);font-size:13px;line-height:1.6;">
                                     <strong style="color:var(--text-primary);display:block;margin-bottom:8px;">Abstract</strong>
                                     ${p.abstract || 'No abstract available.'}
                                     ${bigramsHTML}
@@ -6109,13 +6225,13 @@
 
                     // Axis
                     const xAxisTicks = d3.range(1980, 2026, 5);
-                    svg.append("g").attr("transform", `translate(0,${h - margin.bottom})`).call(d3.axisBottom(x).tickValues(xAxisTicks).tickFormat(d3.format("d"))).attr("color", "#666");
+                    svg.append("g").attr("transform", `translate(0,${h - margin.bottom})`).call(d3.axisBottom(x).tickValues(xAxisTicks).tickFormat(d3.format("d"))).attr("color", "var(--chart-axis)");
 
                     if (isSparse) {
                         svg.append("g")
                             .attr("transform", `translate(${margin.left},0)`)
                             .call(d3.axisLeft(y).tickSize(0).tickPadding(10))
-                            .attr("color", "#666")
+                            .attr("color", "var(--chart-axis)")
                             .selectAll('text')
                             .style('font-size', '11px')
                             .style('fill', 'var(--text-primary)')
@@ -6133,7 +6249,7 @@
                             .attr("stroke", "var(--chart-panel-border)")
                             .style("opacity", 0.5);
                     } else {
-                        svg.append("g").attr("transform", `translate(${margin.left},0)`).call(d3.axisLeft(y).ticks(5)).attr("color", "#666");
+                        svg.append("g").attr("transform", `translate(${margin.left},0)`).call(d3.axisLeft(y).ticks(5)).attr("color", "var(--chart-axis)");
                     }
 
                     // Chart 5 Tooltip Element Preparation
@@ -6834,7 +6950,7 @@
                     return false;
                 };
 
-                const badgeStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:500; background:rgba(255,255,255,0.05); color:var(--text-secondary); border:1px solid rgba(255,255,255,0.1);";
+                const badgeStyle = "display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:500; background:var(--surface-row); color:var(--text-secondary); border:1px solid var(--input-border);";
 
                 pageData.forEach((p, index) => {
                     const paperId = String(p.id || p.paper_id || `paper-${start + index}`);
@@ -6861,7 +6977,7 @@
                         : '';
 
                     const chevronTransform = isExpanded ? 'transform: rotate(180deg);' : '';
-                    const chevronHTML = `<div class="js-accordion-toggle" data-paper-id="${paperId}" style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:rgba(255,255,255,0.05); cursor:pointer; transition:transform 0.2s; font-size:10px; color:var(--text-secondary); ${chevronTransform}">▼</div>`;
+                    const chevronHTML = `<div class="js-accordion-toggle" data-paper-id="${paperId}" style="width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:4px; background:var(--surface-row); cursor:pointer; transition:transform 0.2s; font-size:10px; color:var(--text-secondary); ${chevronTransform}">▼</div>`;
 
                     tr.innerHTML = `
                         <td style="padding:12px; color:var(--text-secondary); font-family:monospace; font-size:12px; opacity:0.7; vertical-align:top;">${paperId}</td>
@@ -6890,7 +7006,7 @@
                         const bigramsHTML = renderConnectedTopicsHTML(p.paper_id);
 
                         abstractTr.innerHTML = `
-                            <td colspan="7" style="padding:16px 24px; background:rgba(255,255,255,0.02); border-bottom:1px solid var(--chart-row-border);">
+                            <td colspan="7" style="padding:16px 24px; background:var(--surface-expanded); border-bottom:1px solid var(--chart-row-border);">
                                 <div style="font-size:11px; color:var(--text-secondary); margin-bottom:12px; line-height:1.4;">
                                     ${metadataLine}
                                 </div>

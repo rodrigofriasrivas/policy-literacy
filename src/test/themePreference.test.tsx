@@ -98,6 +98,28 @@ describe("global theme preference", () => {
 });
 
 describe("standalone artefact bridge", () => {
+  it("preserves the live visualisation DOM and analytical state while changing either theme", () => {
+    const canvas = document.createElement("canvas");
+    const search = document.createElement("input");
+    search.value = "enterprise";
+    document.body.append(canvas, search);
+    const state = { zoom: 2.5, minYear: 2000, selectedPaper: 5710, topic: 14 };
+    const original = { ...state };
+    const host = window as unknown as { allData: typeof state; EpltTheme: { set(theme: string): void } };
+    host.allData = state;
+    window.eval(readFileSync("public/theme-preference.js", "utf8"));
+    for (const theme of ["light", "dark"]) {
+      host.EpltTheme.set(theme);
+      expect(host.allData).toBe(state);
+      expect(host.allData).toEqual(original);
+      expect(document.body.contains(canvas)).toBe(true);
+      expect(search.value).toBe("enterprise");
+      expect(localStorage.getItem("eplt-theme")).toBe(theme);
+    }
+    canvas.remove();
+    search.remove();
+  });
+
   it("uses the same key, applies saved light mode, and updates locally without synthetic events", () => {
     localStorage.setItem("eplt-theme", "light");
     const dispatch = vi.spyOn(window, "dispatchEvent");
