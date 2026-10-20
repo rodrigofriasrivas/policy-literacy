@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { NavLink as RouterNavLink, Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Button } from "@/components/ui/button";
 
 const homepageNavItems = [
   { path: "/about", label: "About the project", external: false },
@@ -47,15 +48,19 @@ export function SiteHeader({ variant = "solid" }: SiteHeaderProps) {
             Enterprise Policy Literacy Tool
           </Link>
         )}
-        <button
+          <Button
+            variant="ghost"
+            size="icon"
           className="mobile-menu-toggle"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation menu"
+            aria-expanded={menuOpen}
+            aria-controls="site-mobile-navigation"
         >
           <span className={`hamburger-icon ${menuOpen ? "hamburger-open" : ""}`} />
-        </button>
+        </Button>
         <div className="ml-auto flex items-center gap-6">
-          <nav className={`home-nav ${menuOpen ? "mobile-menu-open" : ""}`}>
+          <nav id="site-mobile-navigation" className={`home-nav ${menuOpen ? "mobile-menu-open" : ""}`}>
             {navItems.map((item) => renderNavLink(item, () => setMenuOpen(false)))}
           </nav>
           <ThemeToggle onDarkSurface />
