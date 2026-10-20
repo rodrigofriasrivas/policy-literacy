@@ -5,3 +5,4 @@
 - Phase 1 applies `data-theme` on the document root without activating legacy React `.dark` tokens; existing token defaults and hardcoded dark surfaces must remain visually unchanged until the approved visual coverage phases.
 - React presentation uses paired semantic CSS tokens with light overrides scoped to root `data-theme`; preserve dark values and leave the standalone artefact stylesheet independent to avoid altering analytical rendering.
 - Shared React theme selectors use the existing Radix single-selection primitive and ThemeProvider; this keeps keyboard selection and persisted state on one contract.
+- Standalone Artefact presentation uses paired CSS tokens and a class-observed canvas paint cache; theme changes must never reinitialise views, charts, selections or physics, preserving live analytical state.
