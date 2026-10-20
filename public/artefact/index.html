@@ -1244,6 +1244,18 @@
             from { opacity: 0; transform: translateY(-5px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Header theme selector (header stays black in both themes) */
+        .artefact-theme-selector { display: inline-flex; flex-shrink: 0; margin-left: 24px; padding: 2px; gap: 2px; border: 1px solid rgba(255,255,255,0.22); border-radius: 999px; }
+        .artefact-theme-option { font-family: 'Inter', sans-serif; font-size: 12px; line-height: 1; padding: 5px 10px; border: 0; border-radius: 999px; background: transparent; color: #a9b1b6; cursor: pointer; white-space: nowrap; }
+        .artefact-theme-option:hover { color: #fff; }
+        .artefact-theme-option[aria-pressed="true"] { background: rgba(255,255,255,0.16); color: #fff; font-weight: 600; }
+        .artefact-theme-option:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+        .stitch-top-bar .stitch-menu { margin-left: auto; }
+        @media (max-width: 767px) {
+            .stitch-top-bar { height: auto !important; min-height: 64px; flex-wrap: wrap; row-gap: 8px; padding: 10px 16px !important; }
+            .stitch-top-bar .stitch-menu { order: 3; width: 100%; margin-left: 0; gap: 20px; flex-wrap: wrap; }
+            .artefact-theme-selector { margin-left: auto; }
+        }
     </style>
 </head>
 
@@ -1275,6 +1287,10 @@
                 <!-- <a href="/policy" class="stitch-menu-link">Policy engagement</a> -->
                 <a href="/contact" class="stitch-menu-link">Contact</a>
             </nav>
+            <div class="artefact-theme-selector" role="group" aria-label="Colour theme">
+                <button type="button" class="artefact-theme-option" data-theme-option="light" aria-pressed="false" aria-label="Light mode"><span aria-hidden="true">&#9728;</span> Light</button>
+                <button type="button" class="artefact-theme-option" data-theme-option="dark" aria-pressed="true" aria-label="Dark mode"><span aria-hidden="true">&#9790;</span> Dark</button>
+            </div>
         </div>
 
         <!-- 2. Dashboard Grid (Sidebar + Content) -->
@@ -1572,14 +1588,6 @@
                                 <span>↺</span> Reset View
                             </button>
 
-                            <div class="row-align-center">
-                                <span style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Grey/Dark
-                                    mode</span>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="themeToggle" aria-label="Dark Mode" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
                             <input type="hidden" id="searchInput" value="">
                         </div>
                     </div>
@@ -4179,21 +4187,23 @@
 
 
 
-        // Theme Toggle Listener
-        const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) {
-            themeToggle.checked = window.EpltTheme.read() === 'dark';
-
-            themeToggle.addEventListener('change', (e) => {
-                if (!e.target.checked) {
-                    window.EpltTheme.set('light');
-                    updateStatus('Switched to Light Mode');
-                } else {
-                    window.EpltTheme.set('dark');
-                    updateStatus('Switched to Dark Mode');
-                }
-            });
-        }
+        // Header theme selector: reuses window.EpltTheme; state follows body.theme-light
+        // so in-page and cross-tab changes stay in sync without touching the shared bridge.
+        (function () {
+            const options = document.querySelectorAll('.artefact-theme-option');
+            const sync = () => {
+                const current = document.body.classList.contains('theme-light') ? 'light' : 'dark';
+                options.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeOption === current)));
+            };
+            options.forEach(b => b.addEventListener('click', () => {
+                const theme = b.dataset.themeOption;
+                if (window.EpltTheme.read() === theme && b.getAttribute('aria-pressed') === 'true') return;
+                window.EpltTheme.set(theme);
+                updateStatus(theme === 'light' ? 'Switched to Light Mode' : 'Switched to Dark Mode');
+            }));
+            new MutationObserver(sync).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+            sync();
+        })();
 
         // --- NEW: UI Logic for Tabs & Advanced Search ---
 
