@@ -8,12 +8,11 @@ export default function ContactPage() {
           <h1>Contact</h1>
           <p>
             For questions about the Enterprise Policy Literacy Tool, research collaborations,
-            or feedback on the artefact, please feel free to get in touch.
+            or discussions about entrepreneurship and enterprise policy, please get in touch.
           </p>
-          <p className="text-muted">You are welcome to contact me in English or Spanish.</p>
 
           <div className="contact-person">
-            <p className="contact-name">Rodrigo Frías, PhD</p>
+            <p className="contact-name">Rodrigo Frías, PhD (c)</p>
             <p className="contact-role">Researcher &amp; Developer</p>
             <p className="contact-line">
               <span className="contact-label">Email:</span>
@@ -29,6 +28,9 @@ export default function ContactPage() {
               >
                 linkedin.com/in/rodrigofrias
               </a>
+            </p>
+            <p className="contact-line">
+              <span className="contact-label">Languages:</span> English and Spanish
             </p>
           </div>
         </div>
