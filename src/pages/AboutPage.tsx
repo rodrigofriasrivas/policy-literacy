@@ -253,7 +253,7 @@ export default function AboutPage() {
             <h2>About the author</h2>
             <div className="about-body">
               <p>
-                <strong className="about-emphasis">Rodrigo Frías, PhD</strong>
+                <strong className="about-emphasis">Rodrigo Frías, PhD (c)</strong>
               </p>
               <p className="about-lead">
                 Rodrigo Frías is a Researcher at Durham University Business School focused on entrepreneurship policy, innovation, and evidence-informed policymaking. His research bridges academic insight with real-world policy, entrepreneurship, and innovation challenges, combining rigorous methodologies with practical experience to generate evidence that matters.
