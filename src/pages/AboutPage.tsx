@@ -252,17 +252,23 @@ export default function AboutPage() {
             <span className="about-watermark">09</span>
             <h2>About the author</h2>
             <div className="about-body">
+              <p>
+                <strong className="about-emphasis">Rodrigo Frías, PhD</strong>
+              </p>
               <p className="about-lead">
-                Rodrigo Frías is a PhD Researcher at Durham University Business School focused on entrepreneurship policy, innovation, and evidence-informed policymaking. His research bridges academic insight with real-world policy, entrepreneurship, and innovation challenges, combining rigorous methodologies with practical experience to generate evidence that matters.
+                Rodrigo Frías is a Researcher at Durham University Business School focused on entrepreneurship policy, innovation, and evidence-informed policymaking. His research bridges academic insight with real-world policy, entrepreneurship, and innovation challenges, combining rigorous methodologies with practical experience to generate evidence that matters.
               </p>
               <p>
                 He previously served as Chief Executive of Start-Up Chile and as Director of Early Investment at CORFO (Chile's Economic Development Agency), leading national programmes supporting early-stage ventures and policy innovation initiatives.
               </p>
               <p>
-                <strong className="about-emphasis">PhD Research — Rethinking how entrepreneurship policy is designed</strong>
+                <strong className="about-emphasis">PhD Research — Rethinking How Entrepreneurship Policy Is Designed</strong>
               </p>
               <p>
-                In his PhD, Rodrigo studies how entrepreneurship policy is framed and designed—not just which instruments are used. His work focuses on the early stages of policy formulation, where assumptions are set and future paths are shaped. Using design science, qualitative fieldwork, and computational text analysis, he translates theory and evidence into practical principles and tools for more reflective, context-sensitive policy design.
+                Rodrigo's doctoral research examines how entrepreneurship policy is framed and designed, beyond the instruments governments ultimately adopt. His work focuses on the early stages of policy formulation, where assumptions are established and future policy directions take shape.
+              </p>
+              <p>
+                Drawing on design science, qualitative fieldwork, and computational text analysis, his research translates theory and evidence into practical principles and tools for more reflective, context-sensitive policy design.
               </p>
             </div>
           </section>
