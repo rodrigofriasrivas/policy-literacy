@@ -8,4 +8,4 @@
 - Standalone Artefact presentation uses paired CSS tokens and a class-observed canvas paint cache; theme changes must never reinitialise views, charts, selections or physics, preserving live analytical state.
 - Keep standalone global-header styling and its mobile menu local to the static document, mirroring React header metrics without importing React or changing the shared preference bridge; this preserves independent hard-navigation rendering.- The Artefact Reading List has one store, `public/reading-list.js` (`window.EpltReadingList`, versioned `eplt-reading-list` key holding paper IDs with `savedAt`); every entry point, including future network cards, must use it, and unreadable data is never overwritten.
 
-- "Copy for Simon" text is built only by `public/simon-copy.js` (`window.EpltSimonCopy`) from bibliographic metadata; never include abstracts or invented fields, so output stays consistent and testable.
+- "Copy for Simon" text is built only by `public/simon-copy.js` (`window.EpltSimonCopy`) as paper ID, full title and year only; never include authors, journals, abstracts or invented fields, so output stays consistent and testable.

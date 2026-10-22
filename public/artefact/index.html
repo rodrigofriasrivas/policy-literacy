@@ -1808,11 +1808,16 @@
                                 <button type="button" class="rl-link-btn" id="rl-copy-simon" aria-label="Copy for Simon: copies selected papers, or the whole list if none are selected">Copy for Simon</button>
                                 <span id="rl-copy-status" class="rl-selected-count" role="status" aria-live="polite"></span>
                             </div>
-                            <div id="rl-confirm" class="rl-confirm" role="alertdialog" aria-labelledby="rl-confirm-msg" hidden>
-                                <span id="rl-confirm-msg"></span>
-                                <span class="rl-toolbar-spacer"></span>
-                                <button type="button" class="rl-link-btn" id="rl-confirm-cancel">Cancel</button>
-                                <button type="button" class="rl-link-btn rl-danger" id="rl-confirm-ok">Remove</button>
+                            <div id="rl-confirm" class="rl-confirm" role="alertdialog" aria-labelledby="rl-confirm-msg" aria-describedby="rl-confirm-desc" hidden>
+                                <svg class="rl-confirm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <div class="rl-confirm-body">
+                                    <strong id="rl-confirm-msg" class="rl-confirm-title"></strong>
+                                    <p id="rl-confirm-desc" class="rl-confirm-desc"></p>
+                                    <div class="rl-confirm-actions">
+                                        <button type="button" class="rl-link-btn" id="rl-confirm-cancel">Cancel</button>
+                                        <button type="button" class="rl-link-btn rl-danger" id="rl-confirm-ok">Remove</button>
+                                    </div>
+                                </div>
                             </div>
                             <div id="rl-list"></div>
                         </div>
@@ -2320,7 +2325,16 @@
         .rl-abstract { margin-top:10px; background:var(--surface-abstract); padding:12px 14px; border-radius:6px; color:var(--text-secondary); font-size:13px; line-height:1.6; }
         .rl-toolbar, .rl-confirm { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:8px 0 12px; font-size:12px; color:var(--text-secondary); }
         .rl-toolbar[hidden], .rl-confirm[hidden] { display:none; }
-        .rl-confirm { border:1px solid var(--chart-row-border); background:var(--surface-row); border-radius:6px; padding:10px 12px; margin-bottom:12px; color:var(--text-primary); }
+        .rl-confirm { align-items:flex-start; flex-wrap:nowrap; gap:12px; border:1px solid var(--text-secondary); border-left-width:4px; background:var(--surface-abstract); border-radius:8px; padding:16px 18px; margin:4px 0 16px; color:var(--text-primary); }
+        body.theme-light { --rl-danger-ink:#ffffff; } body.theme-dark, body:not(.theme-light) { --rl-danger-ink:#0a0a0a; }
+        .rl-confirm-icon { flex-shrink:0; width:20px; height:20px; margin-top:1px; color:var(--text-primary); }
+        .rl-confirm-body { flex:1; min-width:0; }
+        .rl-confirm-title { display:block; font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+        .rl-confirm-desc { margin:0 0 12px; font-size:12px; line-height:1.5; color:var(--text-secondary); }
+        .rl-confirm-actions { display:flex; flex-wrap:wrap; gap:8px; }
+        .rl-confirm-actions .rl-link-btn { font-size:12px; padding:6px 14px; }
+        .rl-confirm-actions .rl-danger { background:var(--text-primary); color:var(--rl-danger-ink); border-color:var(--text-primary); }
+        .rl-confirm-actions .rl-danger:hover { color:var(--rl-danger-ink); opacity:0.88; }
         .rl-toolbar-spacer { flex:1; }
         .rl-check-label { display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:var(--text-primary); }
         .rl-check { width:15px; height:15px; margin:0; accent-color:var(--accent-color); cursor:pointer; flex-shrink:0; }
@@ -7353,8 +7367,12 @@
             rlPending = kind;
             const noun = n === 1 ? 'paper' : 'papers';
             document.getElementById('rl-confirm-msg').textContent = kind === 'all'
-                ? `Remove all ${n} ${noun} from My Reading List?`
-                : `Remove ${n} selected ${noun} from My Reading List?`;
+                ? `Remove all ${n} ${noun}?`
+                : `Remove ${n} ${noun}?`;
+            document.getElementById('rl-confirm-desc').textContent = n === 1
+                ? 'This paper will be removed from My Reading List. This cannot be undone.'
+                : 'These papers will be removed from My Reading List. This cannot be undone.';
+            document.getElementById('rl-confirm-ok').textContent = kind === 'all' ? 'Remove all' : 'Remove';
             const box = document.getElementById('rl-confirm');
             box.hidden = false;
             document.getElementById('rl-confirm-cancel').focus();
