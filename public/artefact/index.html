@@ -6772,6 +6772,7 @@
 
         // Global Switch View Function
         window.switchView = function (view) {
+            if (typeof rlClearSelection === 'function') rlClearSelection(); // temporary selection never outlives the view
             // Update Nav Active State
             document.querySelectorAll('.stitch-sub-link').forEach(el => el.classList.remove('active'));
             const nav = document.getElementById('nav-' + view);
