@@ -13,6 +13,7 @@
 - [x] Search & Reading List Stage 1: exact paper ID search (1618 / P1618, no substring matches), network-only scope explained; awaiting user approval.
 - [x] Stage 2: Reading List (bookmarks in Papers + Topic tables, Reading List (n) view, shared versioned store, cross-tab sync, unreadable data preserved); awaiting user review.
 - [x] Stage 3: bookmark on the existing paper hover card (shared store, 250 ms grace, card frozen while hovered); Macro + Topic View, both themes verified; awaiting user review.
+- [x] My Reading List rename, Clear all, multi-select with Remove selected (temporary selection, inline confirmation); 120-paper list, both themes, cross-tab verified; awaiting user review.
 - [ ] Follow-up: invalid topic route (`/evidence/topic/:topicId` with an unknown ID) shows the shell with an empty card instead of an explicit "topic not found" message — pre-existing behaviour, address separately.
 - [ ] Follow-up: pre-existing React ref warnings in development console; non-blocking, no runtime errors — clean up separately.
 
