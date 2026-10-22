@@ -1114,6 +1114,19 @@
             }
         }
 
+        .topic-header-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .topic-header-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .topic-card {
             background: var(--input-bg);
             border: 1px solid var(--glass-border);
@@ -1870,10 +1883,10 @@
 
                 <!-- Individual Topic Dashboard -->
                 <div id="view-topic" class="dashboard-view-section custom-scrollbar" style="display: none;">
-                    <div style="max-width: 1400px; margin: 0 auto; padding-bottom: 40px;">
+                    <div>
 
                         <!-- Header Region: Two-Column (Topic Brief + Network Graph) -->
-                        <div style="display: grid; grid-template-columns: 350px 1fr; gap: 24px; margin-bottom: 24px;">
+                        <div class="topic-header-grid">
                             <!-- Left: Topic Brief -->
                             <div class="stitch-card" style="margin-bottom: 0; display: flex; flex-direction: column;">
                                 <div class="stitch-card-title" id="topic-brief-title">Loading...</div>
