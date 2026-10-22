@@ -12,7 +12,7 @@ const p = (id: number, extra: Record<string, unknown> = {}) => ({
   paper_id: id, title: `Title ${id}`, authors: ["A. One"], year: 2020, journal: "JOURNALNAME", abstract: `SECRET ABSTRACT ${id}`, ...extra,
 });
 
-describe("Copy for Simon message", () => {
+describe("Copy for AI Assistant message", () => {
   it("lists each paper once as [P<id>] full title (year)", () => {
     const { text, count } = api.buildMessage([p(1059, { title: "The emergence of entrepreneurship policy", year: 2004 }), p(2), p(1059)]);
     expect(count).toBe(2);
