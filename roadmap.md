@@ -9,6 +9,7 @@
 - [x] Phase 4: full regression matrix including `/evidence/topic/:topicId` and React/Artefact preference round-trips — complete and accepted by user (20 Oct 2026).
 - [x] Artefact header now has the labelled Light | Dark selector (legacy sidebar switch removed); headers otherwise remain separate by design.
 - [x] Align standalone global header presentation with the React header; internal navigation and analytical state preserved; both themes verified at 1280/768/375px, cross-navigation and native synchronisation passed, 11/11 regression tests passed.
+- [x] Topic View card alignment: removed the 1400px centered wrapper so the topic brief and network cards span the full section width and align with the sections below; cards stack below 768px; topics 1/2/14 verified in both themes at 1280px and 375px with no overflow; 11/11 regression tests passed.
 - [ ] Follow-up: invalid topic route (`/evidence/topic/:topicId` with an unknown ID) shows the shell with an empty card instead of an explicit "topic not found" message — pre-existing behaviour, address separately.
 - [ ] Follow-up: pre-existing React ref warnings in development console; non-blocking, no runtime errors — clean up separately.
 
