@@ -18,3 +18,4 @@
 - [ ] Follow-up: pre-existing React ref warnings in development console; non-blocking, no runtime errors — clean up separately.
 
 Phase 1 must preserve existing rendering, dark appearance, navigation, data, and analytical logic. No export mode is in scope.
+- [x] Copy for Simon in My Reading List (selected or whole list, metadata only, approved wording); awaiting user review.

@@ -1336,6 +1336,7 @@
 <body>
     <script src="/theme-preference.js"></script>
     <script src="/reading-list.js"></script>
+    <script src="/simon-copy.js"></script>
     <div id="container">
         <canvas id="canvas"></canvas>
         <div id="topicTitle"></div>
@@ -1804,6 +1805,8 @@
                                 <span class="rl-toolbar-spacer"></span>
                                 <button type="button" class="rl-link-btn" id="rl-remove-selected" disabled>Remove selected</button>
                                 <button type="button" class="rl-link-btn" id="rl-clear-all">Clear all</button>
+                                <button type="button" class="rl-link-btn" id="rl-copy-simon" aria-label="Copy for Simon: copies selected papers, or the whole list if none are selected">Copy for Simon</button>
+                                <span id="rl-copy-status" class="rl-selected-count" role="status" aria-live="polite"></span>
                             </div>
                             <div id="rl-confirm" class="rl-confirm" role="alertdialog" aria-labelledby="rl-confirm-msg" hidden>
                                 <span id="rl-confirm-msg"></span>
@@ -7340,6 +7343,7 @@
             all.disabled = !editable;
             document.getElementById('rl-remove-selected').disabled = !editable || n === 0;
             document.getElementById('rl-clear-all').disabled = !editable || total === 0;
+            document.getElementById('rl-copy-simon').disabled = total === 0;
             if (total === 0) rlHideConfirm();
         }
         function rlAskConfirm(kind) {
@@ -7359,6 +7363,32 @@
             rlPending = null;
             const box = document.getElementById('rl-confirm');
             if (box) box.hidden = true;
+        }
+        let rlCopyTimer = null;
+        function rlCopyFallback(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+            const prev = document.activeElement;
+            document.body.appendChild(ta); ta.select();
+            let ok = false; try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+            ta.remove(); if (prev && prev.focus) prev.focus(); return ok;
+        }
+        async function rlCopyForSimon() {
+            const RL = window.EpltReadingList;
+            if (!RL || !window.EpltSimonCopy) return;
+            const all = RL.list().map(it => it.id);
+            const ids = rlSelection.size ? all.filter(id => rlSelection.has(id)) : all;
+            if (!ids.length) return;
+            const corpus = allData.libraryPapers || allData.papers || [];
+            const byId = new Map(corpus.map(p => [Number(p.paper_id), p]));
+            const { text } = window.EpltSimonCopy.buildMessage(ids.map(id => byId.get(id)).filter(Boolean));
+            let ok = false;
+            try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); ok = true; } } catch (_) { ok = false; }
+            if (!ok) ok = rlCopyFallback(text);
+            const st = document.getElementById('rl-copy-status');
+            st.textContent = ok ? "Copied! Paste into Simon's chat to explore these papers." : "Couldn't copy \u2014 your browser blocked clipboard access.";
+            clearTimeout(rlCopyTimer);
+            rlCopyTimer = setTimeout(() => { st.textContent = ''; }, ok ? 4000 : 6000);
         }
         function rlClearSelection() { rlSelection.clear(); rlHideConfirm(); }
         document.addEventListener('change', function (e) {
@@ -7421,6 +7451,7 @@
             }
             if (e.target.closest('#rl-remove-selected')) { rlAskConfirm('selected'); return; }
             if (e.target.closest('#rl-clear-all')) { rlAskConfirm('all'); return; }
+            if (e.target.closest('#rl-copy-simon')) { rlCopyForSimon(); return; }
             if (e.target.closest('#rl-confirm-cancel')) { rlHideConfirm(); return; }
             if (e.target.closest('#rl-confirm-ok')) {
                 const kind = rlPending;
