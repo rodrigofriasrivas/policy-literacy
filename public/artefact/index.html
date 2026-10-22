@@ -1577,7 +1577,7 @@
                                 </select>
                             </div>
                             <div style="font-size: 10px; color: var(--ink-muted); margin-bottom: 16px;">Press Enter/Comma to add
-                                tag</div>
+                                tag. Paper IDs (e.g. 1618 or P1618) match exactly. Searches network-connected papers only; the full corpus is in Papers.</div>
 
                             <!-- B) Match Toggle -->
                             <div class="row-align-center"
@@ -4648,6 +4648,16 @@
                 return false;
             };
 
+            // Exact paper ID lookup: "1618" or "P1618" (never substring-matched).
+            const parsePaperId = (v) => {
+                const m = String(v || '').trim().match(/^p?\s*(\d+)$/i);
+                return m ? Number(m[1]) : null;
+            };
+            const idTerms = [query, ...searchTags].map(parsePaperId).filter(v => v !== null);
+            const idSet = new Set(idTerms);
+            const idOnly = idTerms.length > 0 && idTerms.length === [query, ...searchTags].filter(Boolean).length;
+            let idNotice = '';
+
             let results = [];
 
             // 1. Search Topics
@@ -4675,7 +4685,11 @@
 
                 // Optimization: Check quick match first
                 let match = false;
-                if (scope === 'all') {
+                if (idSet.size && (scope === 'all' || scope === 'paper') && idSet.has(Number(p.paper_id))) {
+                    match = true;
+                } else if (idOnly) {
+                    match = false;
+                } else if (scope === 'all') {
                     match = checkMatch(p.title) || checkMatch(p.authors) || checkMatch(p.journal);
                 } else if (scope === 'paper') {
                     match = checkMatch(p.title);
@@ -4691,9 +4705,25 @@
                 }
             }
 
+            // Explain IDs outside the network scope (or hidden by filters) instead of expanding the search.
+            if (idSet.size && (scope === 'all' || scope === 'paper')) {
+                const found = new Set(results.filter(r => r.type === 'paper').map(r => Number(r.paper_id)));
+                const lib = allData.libraryPapers || [];
+                const notes = [];
+                idSet.forEach(id => {
+                    if (found.has(id)) return;
+                    const inNet = allData.papers.some(p => Number(p.paper_id) === id);
+                    const inLib = lib.some(p => Number(p.paper_id) === id);
+                    if (inNet) notes.push(`P${id} is hidden by the current filters.`);
+                    else if (inLib) notes.push(`P${id} is in the Papers library but not connected to the network.`);
+                    else notes.push(`No paper with ID P${id}.`);
+                });
+                idNotice = notes.join(' ');
+            }
+
             // Render Results
             const countText = results.length === 0 ? 'No matching results found' : `${results.length}${results.length > 100 ? '+' : ''} results`;
-            countLabel.innerHTML = `<span>${countText}</span>`;
+            countLabel.innerHTML = `<span>${countText}</span>` + (idNotice ? `<div class="adv-id-notice" style="font-size: 10px; color: var(--ink-muted); margin-top: 4px;">${idNotice}</div>` : '');
 
             // Restore Clear Highlight Button if active spotlights exist
             if (activeSpotlights.size > 0 && results.length > 0) { // Changed condition
