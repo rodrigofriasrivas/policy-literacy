@@ -1805,7 +1805,7 @@
                                 <span class="rl-toolbar-spacer"></span>
                                 <button type="button" class="rl-link-btn" id="rl-remove-selected" disabled>Remove selected</button>
                                 <button type="button" class="rl-link-btn" id="rl-clear-all">Clear all</button>
-                                <button type="button" class="rl-link-btn" id="rl-copy-simon" aria-label="Copy for Simon: copies selected papers, or the whole list if none are selected">Copy for Simon</button>
+                                <button type="button" class="rl-link-btn" id="rl-copy-simon" aria-label="Copy for AI Assistant: copies selected papers, or the whole list if none are selected">Copy for AI Assistant</button>
                                 <span id="rl-copy-status" class="rl-selected-count" role="status" aria-live="polite"></span>
                             </div>
                             <div id="rl-confirm" class="rl-confirm" role="alertdialog" aria-labelledby="rl-confirm-msg" aria-describedby="rl-confirm-desc" hidden>
@@ -7335,7 +7335,7 @@
         function rlEsc(v) { return String(v ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
         const rlExpanded = new Set();
         // Temporary bulk selection (UI only, never persisted). A future action such as
-        // "Copy for Simon" can call rlTargetIds() to act on the selection or the whole list.
+        // "Copy for AI Assistant" can call rlTargetIds() to act on the selection or the whole list.
         const rlSelection = new Set();
         let rlPending = null;
         function rlTargetIds() {
@@ -7404,7 +7404,7 @@
             try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(text); ok = true; } } catch (_) { ok = false; }
             if (!ok) ok = rlCopyFallback(text);
             const st = document.getElementById('rl-copy-status');
-            st.textContent = ok ? "Copied! Paste into Simon's chat to explore these papers." : "Couldn't copy \u2014 your browser blocked clipboard access.";
+            st.textContent = ok ? "Copied! Paste into the AI assistant's chat to explore these papers." : "Couldn't copy \u2014 your browser blocked clipboard access.";
             clearTimeout(rlCopyTimer);
             rlCopyTimer = setTimeout(() => { st.textContent = ''; }, ok ? 4000 : 6000);
         }
