@@ -531,6 +531,7 @@
             margin: 0 4px;
         }
 
+        #tooltip.tt-interactive.visible { pointer-events: auto !important; }
         #tooltip.visible {
             opacity: 1;
             transform: translateY(0);
@@ -3836,9 +3837,20 @@
         }
 
         // Helper to hide tooltip strictly
+        // Paper cards are interactive (bookmark); a short grace period lets the
+        // pointer travel from the node onto the card. Other cards stay pass-through.
+        let ttHideTimer = null;
         function hideTooltip() {
-            tooltip.classList.remove('visible');
+            clearTimeout(ttHideTimer); ttHideTimer = null;
+            tooltip.classList.remove('visible', 'tt-interactive');
         }
+        function softHideTooltip() {
+            if (tooltip.classList.contains('tt-interactive') && tooltip.classList.contains('visible')) {
+                if (!ttHideTimer) ttHideTimer = setTimeout(hideTooltip, 250);
+            } else hideTooltip();
+        }
+        tooltip.addEventListener('mouseenter', () => { clearTimeout(ttHideTimer); ttHideTimer = null; });
+        tooltip.addEventListener('mouseleave', () => { if (tooltip.classList.contains('tt-interactive')) hideTooltip(); });
 
         // Event listeners
         let selectedTopicId = null;
@@ -4063,6 +4075,8 @@
             if (hoveredNode) {
                 globalHoveredNode = hoveredNode;
                 canvas.style.cursor = 'pointer';
+                clearTimeout(ttHideTimer); ttHideTimer = null;
+                tooltip.classList.toggle('tt-interactive', hoveredNode.type === 'paper');
                 tooltip.classList.add('visible');
                 // Tooltip position remains in SCREEN coordinates
                 tooltip.style.left = Math.max(16, Math.min(e.clientX + 15, window.innerWidth - tooltip.offsetWidth - 16)) + 'px';
@@ -4097,8 +4111,9 @@
                     // If string, use directly (dataset default)
 
                     tooltip.innerHTML = `
-                        <div style="margin-bottom: 4px;">
+                        <div style="margin-bottom: 4px; display:flex; align-items:center; justify-content:space-between; gap:8px;">
                              <span class="tooltip-tag" style="background: var(--surface-active); padding: 2px 6px; border-radius: 4px;">${hoveredNode.year || 'N/A'}</span>
+                             ${rlButtonHTML(hoveredNode.paper_id ?? hoveredNode.id)}
                         </div>
                         <div class="tooltip-header" style="color:${hoveredNode.color}; margin-bottom: 2px;">Paper ${hoveredNode.paper_id || hoveredNode.id || 'Unknown'}</div>
                         <div class="tooltip-title" style="margin-bottom: 12px; font-size: 14px; font-weight: 700; color: var(--ink-white); line-height: 1.3;">${hoveredNode.title || 'Untitled Paper'}</div>
@@ -4116,7 +4131,7 @@
             } else {
                 globalHoveredNode = null;
                 canvas.style.cursor = 'default';
-                hideTooltip();
+                softHideTooltip();
             }
         });
 
@@ -4218,7 +4233,7 @@
         // Mouseout listener to clear tooltip when leaving canvas
         canvas.addEventListener('mouseout', () => {
             globalHoveredNode = null;
-            hideTooltip();
+            softHideTooltip();
         });
 
         window.addEventListener('resize', () => {
