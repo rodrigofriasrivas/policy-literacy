@@ -4,7 +4,7 @@
 - A discreet **Copy for Simon** button in the My Reading List action row, next to Remove selected / Clear all.
 - With papers ticked it copies only those; with none ticked it copies the whole list (newest-saved first, matching the on-screen order).
 - Disabled when the list is empty (the action row is already hidden in that case; the button also carries `disabled`).
-- Brief inline feedback "Copied for Simon" for about 2 seconds, announced to screen readers. On clipboard failure: "Couldn't copy — your browser blocked clipboard access" (no modal).
+- After a successful copy, brief inline feedback "Copied! Paste into Simon's chat to explore these papers." (announced to screen readers; the button label stays "Copy for Simon"; Simon is not opened automatically). On clipboard failure: "Couldn't copy — your browser blocked clipboard access" (no modal).
 - Copying never changes saved papers, ticks, the open abstracts or navigation.
 
 ## Copied text (plain text)
@@ -19,7 +19,7 @@ Note: paper IDs are internal corpus identifiers, not DOIs.
 2. ...
 
 Suggested request:
-Please identify connections between these papers, compare their research themes, and discuss possible enterprise policy implications.
+Based on the bibliographic metadata provided, help me explore potential thematic connections between these papers, identify questions worth investigating, and suggest possible implications for enterprise policy that would require verification through further reading.
 
 Please analyse this selection using only the bibliographic metadata provided ... This is not a full-text literature review.
 ```
@@ -33,7 +33,7 @@ Please analyse this selection using only the bibliographic metadata provided ...
 - AGENTS.md: one rule that Simon export text is built only by the shared formatter.
 
 ## Verification
-Playwright in Light and Dark: empty list (disabled), 1 paper, 3 ticked, none ticked (full list), 120 saved papers — read the clipboard and check the IDs, metadata and absence of abstracts. Keyboard: Tab to the button, Enter/Space copies. Clipboard denied → the failure message shows and nothing else changes. Run vitest; report files changed and stop for review.
+Playwright in Light and Dark: empty list (disabled), 1 paper, 3 ticked, none ticked (full list), 120 saved papers — read the clipboard and check the IDs, metadata and absence of abstracts. For 120 papers, confirm the full text is copied without truncation (last entry and closing limitation present) and the stated count equals the number of listed records. Keyboard: Tab to the button, Enter/Space copies. Clipboard denied → the failure message shows and nothing else changes. Run vitest; report files changed and stop for review.
 
 ## Not changed
 Simon's widget, Supabase, corpus, D3, tooltips, zoom, theme system, bookmark storage; no DOI enrichment or exports.
