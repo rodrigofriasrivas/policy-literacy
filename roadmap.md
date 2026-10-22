@@ -1,5 +1,7 @@
 # Theme roadmap
 
+- [ ] Restore opaque paper and key-term node information surfaces only; verify both themes, dismissal and live network state.
+
 - [x] Update Contact wording and About author credentials to the uploaded brief; contact links, both themes and 1280px/375px layouts verified without overflow or runtime errors; 11/11 regression tests passed. Only ContactPage.tsx and AboutPage.tsx changed in application code.
 - [x] Phase 1: shared theme preference, React provider, existing artefact toggle bridge, shared header/onboarding toggle, persistence and synchronisation tests.
 - [x] Phase 2: React visual Light Mode coverage, complete homepage adaptation and labelled segmented selector — accepted after user review.
