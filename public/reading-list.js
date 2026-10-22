@@ -66,6 +66,14 @@
             if (!api.has(id)) return true;
             return write(state.items.filter(it => it.id !== id));
         },
+        // Bulk removal in a single write (used by Remove selected / Clear all).
+        removeMany(ids) {
+            const drop = new Set([...ids].map(Number));
+            load();
+            if (!state.items.some(it => drop.has(it.id))) return true;
+            return write(state.items.filter(it => !drop.has(it.id)));
+        },
+        clear() { load(); if (state.status !== 'ok') return false; return api.removeMany(state.items.map(it => it.id)); },
         toggle(id) { return api.has(id) ? api.remove(id) : api.add(id); },
         subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
         reload() { load(); notify(); }

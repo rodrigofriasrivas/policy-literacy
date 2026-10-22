@@ -1687,7 +1687,7 @@
                         <a href="#" id="nav-library" class="stitch-sub-link"
                             onclick="switchView('library'); return false;">Papers</a>
                         <a href="#" id="nav-reading-list" class="stitch-sub-link"
-                            onclick="switchView('reading-list'); return false;">Reading List (<span id="rl-nav-count">0</span>)</a>
+                            onclick="switchView('reading-list'); return false;">My Reading List (<span id="rl-nav-count">0</span>)</a>
                     </div>
                     <div class="stitch-breadcrumbs">
                         <span style="opacity: 0.6; margin-right: 5px; font-weight: 400;">You are here:</span>
@@ -1798,6 +1798,19 @@
                             <div class="stitch-card-title" style="margin-bottom: 8px;">My Reading List &mdash; <span id="rl-view-count">0</span></div>
                             <p class="rl-note">Saved in this browser only. Clearing browser data will remove your list.</p>
                             <p id="rl-warning" class="rl-warning" role="status" hidden>Your saved list could not be read; it has been left untouched. Saving is paused to protect it.</p>
+                            <div id="rl-toolbar" class="rl-toolbar" hidden>
+                                <label class="rl-check-label"><input type="checkbox" id="rl-select-all" class="rl-check"> Select all</label>
+                                <span id="rl-selected-count" class="rl-selected-count" aria-live="polite">0 selected</span>
+                                <span class="rl-toolbar-spacer"></span>
+                                <button type="button" class="rl-link-btn" id="rl-remove-selected" disabled>Remove selected</button>
+                                <button type="button" class="rl-link-btn" id="rl-clear-all">Clear all</button>
+                            </div>
+                            <div id="rl-confirm" class="rl-confirm" role="alertdialog" aria-labelledby="rl-confirm-msg" hidden>
+                                <span id="rl-confirm-msg"></span>
+                                <span class="rl-toolbar-spacer"></span>
+                                <button type="button" class="rl-link-btn" id="rl-confirm-cancel">Cancel</button>
+                                <button type="button" class="rl-link-btn rl-danger" id="rl-confirm-ok">Remove</button>
+                            </div>
                             <div id="rl-list"></div>
                         </div>
                     </div>
@@ -2301,6 +2314,16 @@
         .rl-link-btn:hover { color:var(--text-primary); }
         .rl-link-btn:focus-visible { outline:2px solid var(--accent-color); outline-offset:1px; }
         .rl-abstract { margin-top:10px; background:var(--surface-abstract); padding:12px 14px; border-radius:6px; color:var(--text-secondary); font-size:13px; line-height:1.6; }
+        .rl-toolbar, .rl-confirm { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:8px 0 12px; font-size:12px; color:var(--text-secondary); }
+        .rl-toolbar[hidden], .rl-confirm[hidden] { display:none; }
+        .rl-confirm { border:1px solid var(--chart-row-border); background:var(--surface-row); border-radius:6px; padding:10px 12px; margin-bottom:12px; color:var(--text-primary); }
+        .rl-toolbar-spacer { flex:1; }
+        .rl-check-label { display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:var(--text-primary); }
+        .rl-check { width:15px; height:15px; margin:0; accent-color:var(--accent-color); cursor:pointer; flex-shrink:0; }
+        .rl-check:focus-visible { outline:2px solid var(--accent-color); outline-offset:2px; }
+        .rl-item-head > .rl-check { margin-top:2px; }
+        .rl-link-btn:disabled { opacity:0.4; cursor:not-allowed; }
+        .rl-danger { color:var(--text-primary); border-color:var(--text-secondary); font-weight:600; }
         .rl-empty { color:var(--text-secondary); font-size:13px; padding:24px 0; }
         @media (max-width: 600px) { .rl-item-head { flex-direction:column; } }
         .lib-row-not-connected > td {
@@ -6749,6 +6772,7 @@
 
         // Global Switch View Function
         window.switchView = function (view) {
+            if (typeof rlClearSelection === 'function') rlClearSelection(); // temporary selection never outlives the view
             // Update Nav Active State
             document.querySelectorAll('.stitch-sub-link').forEach(el => el.classList.remove('active'));
             const nav = document.getElementById('nav-' + view);
@@ -6759,7 +6783,7 @@
             if (bc) bc.textContent = view === 'network' ? 'NETWORK VIEW' :
                 view === 'temporal' ? 'TEMPORAL EVOLUTION' :
                     view === 'library' ? 'PAPER LIBRARY' :
-                        view === 'reading-list' ? 'READING LIST' : view.toUpperCase();
+                        view === 'reading-list' ? 'MY READING LIST' : view.toUpperCase();
 
             // 1) Hide all views
             window.hideAllMainViews();
@@ -7265,7 +7289,7 @@
             const id = Number(paperId);
             const saved = !!(RL && RL.has(id));
             const blocked = !(RL && RL.canSave());
-            const label = blocked ? 'Reading List unavailable: saved list could not be read' : (saved ? 'Remove from Reading List' : 'Save to Reading List');
+            const label = blocked ? 'My Reading List unavailable: saved list could not be read' : (saved ? 'Remove from My Reading List' : 'Save to My Reading List');
             return `<button type="button" class="rl-btn" data-rl-id="${id}" aria-pressed="${saved}" aria-label="${label}" title="${label}"${blocked ? ' aria-disabled="true"' : ''}>${RL_ICON}</button>`;
         }
         function syncReadingListUI() {
@@ -7277,7 +7301,7 @@
             const blocked = !RL.canSave();
             document.querySelectorAll('.rl-btn[data-rl-id]').forEach(btn => {
                 const saved = RL.has(btn.dataset.rlId);
-                const label = blocked ? 'Reading List unavailable: saved list could not be read' : (saved ? 'Remove from Reading List' : 'Save to Reading List');
+                const label = blocked ? 'My Reading List unavailable: saved list could not be read' : (saved ? 'Remove from My Reading List' : 'Save to My Reading List');
                 btn.setAttribute('aria-pressed', String(saved));
                 btn.setAttribute('aria-label', label);
                 btn.title = label;
@@ -7288,6 +7312,67 @@
         }
         function rlEsc(v) { return String(v ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
         const rlExpanded = new Set();
+        // Temporary bulk selection (UI only, never persisted). A future action such as
+        // "Copy for Simon" can call rlTargetIds() to act on the selection or the whole list.
+        const rlSelection = new Set();
+        let rlPending = null;
+        function rlTargetIds() {
+            const RL = window.EpltReadingList;
+            const all = RL ? RL.list().map(it => it.id) : [];
+            return rlSelection.size ? all.filter(id => rlSelection.has(id)) : all;
+        }
+        function rlUpdateToolbar(total) {
+            const RL = window.EpltReadingList;
+            const bar = document.getElementById('rl-toolbar');
+            if (!bar) return;
+            const editable = !!(RL && RL.canSave());
+            bar.hidden = total === 0;
+            const n = rlSelection.size;
+            document.getElementById('rl-selected-count').textContent = `${n} selected`;
+            const all = document.getElementById('rl-select-all');
+            all.checked = total > 0 && n === total;
+            all.indeterminate = n > 0 && n < total;
+            all.disabled = !editable;
+            document.getElementById('rl-remove-selected').disabled = !editable || n === 0;
+            document.getElementById('rl-clear-all').disabled = !editable || total === 0;
+            if (total === 0) rlHideConfirm();
+        }
+        function rlAskConfirm(kind) {
+            const RL = window.EpltReadingList;
+            const n = kind === 'all' ? RL.count() : rlSelection.size;
+            if (!n) return;
+            rlPending = kind;
+            const noun = n === 1 ? 'paper' : 'papers';
+            document.getElementById('rl-confirm-msg').textContent = kind === 'all'
+                ? `Remove all ${n} ${noun} from My Reading List?`
+                : `Remove ${n} selected ${noun} from My Reading List?`;
+            const box = document.getElementById('rl-confirm');
+            box.hidden = false;
+            document.getElementById('rl-confirm-cancel').focus();
+        }
+        function rlHideConfirm() {
+            rlPending = null;
+            const box = document.getElementById('rl-confirm');
+            if (box) box.hidden = true;
+        }
+        function rlClearSelection() { rlSelection.clear(); rlHideConfirm(); }
+        document.addEventListener('change', function (e) {
+            const t = e.target;
+            if (t.matches && t.matches('[data-rl-select]')) {
+                const id = Number(t.dataset.rlSelect);
+                t.checked ? rlSelection.add(id) : rlSelection.delete(id);
+                rlUpdateToolbar(window.EpltReadingList.count());
+            } else if (t.id === 'rl-select-all') {
+                const ids = window.EpltReadingList.list().map(it => it.id);
+                rlSelection.clear();
+                if (t.checked) ids.forEach(id => rlSelection.add(id));
+                document.querySelectorAll('#rl-list [data-rl-select]').forEach(cb => { cb.checked = t.checked; });
+                rlUpdateToolbar(ids.length);
+            }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && rlPending) { rlHideConfirm(); document.getElementById('rl-clear-all').focus(); }
+        });
         function renderReadingList() {
             const RL = window.EpltReadingList;
             const listEl = document.getElementById('rl-list');
@@ -7296,20 +7381,26 @@
             const items = RL.list();
             document.getElementById('rl-view-count').textContent = items.length;
             if (!items.length) {
-                listEl.innerHTML = `<div class="rl-empty">No saved papers yet. Use the bookmark button on any paper in Papers or in a topic's paper table to save it here.</div>`;
+                rlSelection.clear();
+                rlUpdateToolbar(0);
+                listEl.innerHTML = `<div class="rl-empty">My Reading List is empty. Use the bookmark button on any paper in Papers, in a topic's paper table or on a network paper card to save it here.</div>`;
                 return;
             }
+            const present = new Set(items.map(it => it.id));
+            [...rlSelection].forEach(id => { if (!present.has(id)) rlSelection.delete(id); });
+            rlUpdateToolbar(items.length);
+            const chk = (id, title) => `<input type="checkbox" class="rl-check" data-rl-select="${id}" aria-label="Select ${rlEsc(title)}"${rlSelection.has(id) ? ' checked' : ''}>`;
             const corpus = allData.libraryPapers || allData.papers || [];
             const byId = new Map(corpus.map(p => [Number(p.paper_id), p]));
             listEl.innerHTML = items.map(it => {
                 const p = byId.get(it.id);
-                if (!p) return `<div class="rl-item"><div class="rl-item-head"><div class="rl-item-main"><div class="rl-item-title">Paper P${it.id}</div><div class="rl-item-meta">Details not available in this dataset.</div></div><div class="rl-item-actions"><button type="button" class="rl-link-btn" data-rl-remove="${it.id}">Remove</button></div></div></div>`;
+                if (!p) return `<div class="rl-item"><div class="rl-item-head">${chk(it.id, 'paper P' + it.id)}<div class="rl-item-main"><div class="rl-item-title">Paper P${it.id}</div><div class="rl-item-meta">Details not available in this dataset.</div></div><div class="rl-item-actions"><button type="button" class="rl-link-btn" data-rl-remove="${it.id}">Remove</button></div></div></div>`;
                 const authors = Array.isArray(p.authors) ? p.authors.join(', ') : p.authors;
                 const meta = [`P${it.id}`, p.year, p.journal ? `<em>${rlEsc(p.journal)}</em>` : '', rlEsc(authors), p.connected === false ? 'Not connected' : 'Connected'].filter(Boolean).join(' &bull; ');
                 const open = rlExpanded.has(it.id);
                 const abs = p.abstract ? rlEsc(p.abstract) : '<em>Abstract not available in this dataset.</em>';
-                return `<div class="rl-item"><div class="rl-item-head"><div class="rl-item-main"><div class="rl-item-title">${rlEsc(p.title || 'Untitled paper')}</div><div class="rl-item-meta">${meta}</div></div>
-                    <div class="rl-item-actions"><button type="button" class="rl-link-btn" data-rl-abstract="${it.id}" aria-expanded="${open}">${open ? 'Hide abstract' : 'Abstract'}</button><button type="button" class="rl-link-btn" data-rl-remove="${it.id}" aria-label="Remove ${rlEsc(p.title || 'paper')} from Reading List">Remove</button></div></div>
+                return `<div class="rl-item"><div class="rl-item-head">${chk(it.id, p.title || 'paper P' + it.id)}<div class="rl-item-main"><div class="rl-item-title">${rlEsc(p.title || 'Untitled paper')}</div><div class="rl-item-meta">${meta}</div></div>
+                    <div class="rl-item-actions"><button type="button" class="rl-link-btn" data-rl-abstract="${it.id}" aria-expanded="${open}">${open ? 'Hide abstract' : 'Abstract'}</button><button type="button" class="rl-link-btn" data-rl-remove="${it.id}" aria-label="Remove ${rlEsc(p.title || 'paper')} from My Reading List">Remove</button></div></div>
                     ${open ? `<div class="rl-abstract">${abs}</div>` : ''}</div>`;
             }).join('');
         }
@@ -7321,6 +7412,16 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (RL.canSave()) RL.toggle(btn.dataset.rlId);
+                return;
+            }
+            if (e.target.closest('#rl-remove-selected')) { rlAskConfirm('selected'); return; }
+            if (e.target.closest('#rl-clear-all')) { rlAskConfirm('all'); return; }
+            if (e.target.closest('#rl-confirm-cancel')) { rlHideConfirm(); return; }
+            if (e.target.closest('#rl-confirm-ok')) {
+                const kind = rlPending;
+                rlHideConfirm();
+                if (kind === 'all') { rlSelection.clear(); rlExpanded.clear(); RL.clear(); }
+                else if (kind === 'selected') { const ids = [...rlSelection]; rlSelection.clear(); ids.forEach(id => rlExpanded.delete(id)); RL.removeMany(ids); }
                 return;
             }
             const rm = e.target.closest('[data-rl-remove]');

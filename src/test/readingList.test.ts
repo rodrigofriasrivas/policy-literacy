@@ -56,3 +56,25 @@ describe("reading list storage contract", () => {
     },
   );
 });
+
+describe("reading list bulk removal", () => {
+  beforeEach(() => localStorage.clear());
+  it("removes only the selected papers in one write", () => {
+    const rl = boot() as RL & { removeMany(ids: number[]): boolean };
+    rl.add(1); rl.add(2); rl.add(3);
+    rl.removeMany([1, 3]);
+    expect(JSON.parse(localStorage.getItem(KEY)!).items.map((i: { id: number }) => i.id)).toEqual([2]);
+  });
+  it("clear all empties the list but keeps version 1", () => {
+    const rl = boot() as RL & { clear(): boolean };
+    rl.add(1); rl.add(2);
+    rl.clear();
+    expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual({ version: 1, items: [] });
+  });
+  it("clear all never overwrites unreadable data", () => {
+    localStorage.setItem(KEY, "not json{");
+    const rl = boot() as RL & { clear(): boolean };
+    expect(rl.clear()).toBe(false);
+    expect(localStorage.getItem(KEY)).toBe("not json{");
+  });
+});
