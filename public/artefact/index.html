@@ -6795,6 +6795,10 @@
                 window.pauseNetwork();
             }
 
+            // Zoom controls act on the shared network canvas: only show them where that canvas is shown.
+            const zoomControlsEl = document.getElementById('zoomControls');
+            if (zoomControlsEl) zoomControlsEl.hidden = !(view === 'network' || view === 'topic');
+
             // 2) Show only the selected container
             const containerEl = document.getElementById('container');
             const canvasEl = document.getElementById('canvas');
