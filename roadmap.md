@@ -11,7 +11,7 @@
 - [x] Align standalone global header presentation with the React header; internal navigation and analytical state preserved; both themes verified at 1280/768/375px, cross-navigation and native synchronisation passed, 11/11 regression tests passed.
 - [x] Topic View card alignment: removed the 1400px centered wrapper so the topic brief and network cards span the full section width and align with the sections below; cards stack below 768px; topics 1/2/14 verified in both themes at 1280px and 375px with no overflow; 11/11 regression tests passed.
 - [x] Search & Reading List Stage 1: exact paper ID search (1618 / P1618, no substring matches), network-only scope explained; awaiting user approval.
-- [ ] Stage 2: Reading List foundation — waits on user approval.
+- [x] Stage 2: Reading List (bookmarks in Papers + Topic tables, Reading List (n) view, shared versioned store, cross-tab sync, unreadable data preserved); awaiting user review.
 - [ ] Stage 3: bookmark from the existing network hover card — waits on user approval.
 - [ ] Follow-up: invalid topic route (`/evidence/topic/:topicId` with an unknown ID) shows the shell with an empty card instead of an explicit "topic not found" message — pre-existing behaviour, address separately.
 - [ ] Follow-up: pre-existing React ref warnings in development console; non-blocking, no runtime errors — clean up separately.
