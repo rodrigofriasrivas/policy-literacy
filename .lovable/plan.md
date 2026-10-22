@@ -22,8 +22,9 @@ Network hover-card bookmark (Stage 3), DOI enrichment, Simon integration, PDF/CS
 
 ## Technical details
 
-- Storage: localStorage key `eplt-reading-list`, value `{ "version": 1, "items": [{ "id": <paper_id>, "savedAt": <ms> }] }`. Deduplicated by numeric `paper_id`; malformed or unknown-version data is ignored safely (treated as empty, never thrown).
-- A small local module in the artefact script (`ReadingList.has/toggle/remove/list/subscribe`) owns read/write; UI refresh is driven by its subscribers plus the native `storage` event for cross-tab sync (no synthetic events, matching the theme pattern).
+- Storage: localStorage key `eplt-reading-list`, value `{ "version": 1, "items": [{ "id": <paper_id>, "savedAt": <ms> }] }`. Deduplicated by numeric `paper_id`. `savedAt` is always preserved (re-saving an existing paper keeps its original timestamp) so other sort orders can be added later without changing the format.
+- Storage safety: if stored data is malformed or an unsupported version, it is never overwritten. The list is shown read-only as empty, saving is disabled, and a discreet warning appears in the Reading List view and as a tooltip on bookmark buttons ("Your saved list could not be read; it has been left untouched"). The original value stays in storage.
+- One shared module exposed as `window.EpltReadingList` (`has/toggle/add/remove/list/subscribe/status`) is the single owner of read/write. Stage 3's network hover-card bookmark will call this same module, so there is one Reading List and one storage mechanism for every entry point. UI refresh is driven by its subscribers plus the native `storage` event for cross-tab sync (no synthetic events, matching the theme pattern).
 - Rows render the button via the existing row templates (library ~line 7100, topic table ~line 6240); click handler calls `stopPropagation`. Refresh only toggles `aria-pressed`/icon state on visible buttons — tables are not re-rendered, so page, sort, search and expansion state are preserved.
 - Reading List view uses `switchView('reading-list')` with a new nav link and breadcrumb label, following existing view conventions; papers are resolved from `allData.libraryPapers` (full corpus).
 - Styling uses existing paired tokens (`--text-primary`, `--text-secondary`, `--chart-row-border`, `--surface-abstract`, `--accent-color`) so Light and Dark both work; native `<button>` with `aria-pressed` and visible focus.
@@ -33,5 +34,5 @@ Network hover-card bookmark (Stage 3), DOI enrichment, Simon integration, PDF/CS
 
 - Playwright, Light and Dark: save from Papers (connected and not-connected paper) and from Topic View; count updates; Reading List lists them; remove works; duplicates impossible; reload persists; second tab syncs both directions.
 - Confirm page number, search text, sort and filters unchanged after bookmarking; network view, theme selector and navigation unaffected; no page errors.
-- Vitest suite (11/11) plus new tests covering the storage contract (versioning, dedupe, malformed data).
+- Vitest suite (11/11) plus new tests covering the storage contract: versioning, dedupe, savedAt preservation, and malformed/unsupported data left byte-identical in storage.
 - Screenshots: bookmark buttons in both tables and the Reading List view, both themes. Then stop for approval before Stage 3.
