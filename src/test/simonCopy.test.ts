@@ -9,33 +9,34 @@ beforeAll(async () => {
 });
 
 const p = (id: number, extra: Record<string, unknown> = {}) => ({
-  paper_id: id, title: `Title ${id}`, authors: ["A. One", "B. Two"], year: 2020, journal: "J", abstract: `SECRET ABSTRACT ${id}`, ...extra,
+  paper_id: id, title: `Title ${id}`, authors: ["A. One"], year: 2020, journal: "JOURNALNAME", abstract: `SECRET ABSTRACT ${id}`, ...extra,
 });
 
 describe("Copy for Simon message", () => {
-  it("counts and lists each paper exactly once", () => {
-    const { text, count } = api.buildMessage([p(1), p(2), p(1)]);
+  it("lists each paper once as [P<id>] full title (year)", () => {
+    const { text, count } = api.buildMessage([p(1059, { title: "The emergence of entrepreneurship policy", year: 2004 }), p(2), p(1059)]);
     expect(count).toBe(2);
-    expect(text).toContain("Number of papers: 2");
-    expect(text.match(/\[P1\]/g)).toHaveLength(1);
+    expect(text).toContain("[P1059] The emergence of entrepreneurship policy (2004)");
+    expect(text.match(/\[P1059\]/g)).toHaveLength(1);
   });
-  it("never includes abstracts", () => {
-    expect(api.buildMessage([p(5)]).text).not.toContain("SECRET ABSTRACT");
+  it("omits authors, journals and abstracts", () => {
+    const { text } = api.buildMessage([p(5)]);
+    expect(text).not.toContain("SECRET ABSTRACT");
+    expect(text).not.toContain("JOURNALNAME");
+    expect(text).not.toContain("A. One");
   });
-  it("includes the limitation and suggested request verbatim", () => {
-    const { text } = api.buildMessage([p(3)]);
-    expect(text).toContain("This is not a full-text literature review.");
-    expect(text).toContain("would require verification through further reading.");
-    expect(text).toContain("not DOIs");
+  it("includes the safeguard instruction", () => {
+    expect(api.buildMessage([p(3)]).text).toContain("do not assume access to full texts.");
   });
-  it("marks missing metadata as not recorded", () => {
-    const { text } = api.buildMessage([{ paper_id: 9, title: "T" }]);
-    expect(text).toContain("Authors: not recorded");
-    expect(text).toContain("Year: not recorded | Journal: not recorded");
+  it("omits year when missing instead of inventing it", () => {
+    expect(api.buildMessage([{ paper_id: 9, title: "T" }]).text).toContain("[P9] T\n".trimEnd());
+    expect(api.buildMessage([{ paper_id: 9, title: "T" }]).text).not.toMatch(/\[P9\] T \(/);
   });
-  it("keeps all 120 records without truncation", () => {
-    const { text, count } = api.buildMessage(Array.from({ length: 120 }, (_, i) => p(i + 1)));
+  it("keeps long titles and 120 records untruncated", () => {
+    const long = "x".repeat(400);
+    const { text, count } = api.buildMessage([p(1, { title: long }), ...Array.from({ length: 119 }, (_, i) => p(i + 2))]);
     expect(count).toBe(120);
-    expect(text).toContain("120. [P120]");
+    expect(text).toContain(long);
+    expect(text).toContain("[P120] Title 120 (2020)");
   });
 });
