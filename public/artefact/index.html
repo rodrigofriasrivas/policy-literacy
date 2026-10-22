@@ -1334,6 +1334,7 @@
 
 <body>
     <script src="/theme-preference.js"></script>
+    <script src="/reading-list.js"></script>
     <div id="container">
         <canvas id="canvas"></canvas>
         <div id="topicTitle"></div>
@@ -1684,6 +1685,8 @@
                             onclick="switchView('temporal'); return false;">Temporal Evolution</a>
                         <a href="#" id="nav-library" class="stitch-sub-link"
                             onclick="switchView('library'); return false;">Papers</a>
+                        <a href="#" id="nav-reading-list" class="stitch-sub-link"
+                            onclick="switchView('reading-list'); return false;">Reading List (<span id="rl-nav-count">0</span>)</a>
                     </div>
                     <div class="stitch-breadcrumbs">
                         <span style="opacity: 0.6; margin-right: 5px; font-weight: 400;">You are here:</span>
@@ -1788,6 +1791,17 @@
                 </div> <!-- End #view-temporal -->
 
                 <!-- Paper Library View -->
+                <div id="view-reading-list" class="dashboard-view-section custom-scrollbar" style="display: none;">
+                    <div style="padding-bottom: 40px;">
+                        <div class="stitch-card">
+                            <div class="stitch-card-title" style="margin-bottom: 8px;">My Reading List &mdash; <span id="rl-view-count">0</span></div>
+                            <p class="rl-note">Saved in this browser only. Clearing browser data will remove your list.</p>
+                            <p id="rl-warning" class="rl-warning" role="status" hidden>Your saved list could not be read; it has been left untouched. Saving is paused to protect it.</p>
+                            <div id="rl-list"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="view-library" class="dashboard-view-section custom-scrollbar" style="display: none;">
                     <div style="padding-bottom: 40px;">
                         <div class="stitch-card">
@@ -2267,6 +2281,27 @@
         }
 
         /* Paper Library: papers not connected to any topic (dimmed but legible) */
+        .rl-btn { width:24px; height:24px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; border:1px solid transparent; background:var(--surface-row); color:var(--text-secondary); cursor:pointer; flex-shrink:0; }
+        .rl-btn:hover { color:var(--text-primary); border-color:var(--chart-row-border); }
+        .rl-btn:focus-visible { outline:2px solid var(--accent-color); outline-offset:1px; }
+        .rl-btn svg { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2; }
+        .rl-btn[aria-pressed="true"] { color:var(--accent-color); }
+        .rl-btn[aria-pressed="true"] svg { fill:currentColor; }
+        .rl-btn[aria-disabled="true"] { opacity:0.4; cursor:not-allowed; }
+        .rl-note { font-size:12px; color:var(--text-secondary); margin:0 0 16px; }
+        .rl-warning { font-size:12px; color:var(--text-primary); border:1px solid var(--chart-row-border); background:var(--surface-row); border-radius:6px; padding:8px 12px; margin:0 0 16px; }
+        .rl-item { border-top:1px solid var(--chart-row-border); padding:14px 0; }
+        .rl-item-head { display:flex; gap:12px; align-items:flex-start; }
+        .rl-item-main { flex:1; min-width:0; }
+        .rl-item-title { color:var(--text-primary); font-weight:600; font-size:13px; line-height:1.4; overflow-wrap:anywhere; }
+        .rl-item-meta { color:var(--text-secondary); font-size:12px; line-height:1.5; margin-top:4px; overflow-wrap:anywhere; }
+        .rl-item-actions { display:flex; gap:8px; flex-shrink:0; }
+        .rl-link-btn { font-size:11px; padding:4px 10px; border-radius:4px; border:1px solid var(--chart-row-border); background:transparent; color:var(--text-secondary); cursor:pointer; }
+        .rl-link-btn:hover { color:var(--text-primary); }
+        .rl-link-btn:focus-visible { outline:2px solid var(--accent-color); outline-offset:1px; }
+        .rl-abstract { margin-top:10px; background:var(--surface-abstract); padding:12px 14px; border-radius:6px; color:var(--text-secondary); font-size:13px; line-height:1.6; }
+        .rl-empty { color:var(--text-secondary); font-size:13px; padding:24px 0; }
+        @media (max-width: 600px) { .rl-item-head { flex-direction:column; } }
         .lib-row-not-connected > td {
             opacity: 0.55;
         }
@@ -6244,7 +6279,8 @@
                             <td style="padding:12px;color:var(--text-primary);font-size:13px;font-weight:500;word-break:break-word;vertical-align:top;line-height:1.5;">${title}</td>
                             <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;">${p.authors || 'Unknown'}</td>
                             <td style="padding:12px;color:var(--text-secondary);font-size:13px;vertical-align:top;font-style:italic;">${p.journal || ''}</td>
-                            <td style="padding:12px;vertical-align:top;text-align:right;">
+                            <td style="padding:12px;vertical-align:top;text-align:right;display:flex;gap:6px;justify-content:flex-end;">
+                                ${rlButtonHTML(p.paper_id)}
                                 <button class="btn expand-btn" style="width:24px;height:24px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:4px;">▼</button>
                             </td>`;
 
@@ -6691,6 +6727,8 @@
             if (libView) libView.style.display = 'none';
             if (fieldView) fieldView.style.display = 'none';
             if (topicView) topicView.style.display = 'none';
+            const rlView = document.getElementById('view-reading-list');
+            if (rlView) rlView.style.display = 'none';
             if (clusteredContainer) clusteredContainer.style.display = 'none';
         };
 
@@ -6705,7 +6743,8 @@
             const bc = document.querySelector('.stitch-bc-current');
             if (bc) bc.textContent = view === 'network' ? 'NETWORK VIEW' :
                 view === 'temporal' ? 'TEMPORAL EVOLUTION' :
-                    view === 'library' ? 'PAPER LIBRARY' : view.toUpperCase();
+                    view === 'library' ? 'PAPER LIBRARY' :
+                        view === 'reading-list' ? 'READING LIST' : view.toUpperCase();
 
             // 1) Hide all views
             window.hideAllMainViews();
@@ -6728,7 +6767,7 @@
             const topicView = document.getElementById('view-topic');
 
             // Handle sidebar disabled state
-            const disabledViews = ['temporal', 'library', 'field-structure'];
+            const disabledViews = ['temporal', 'library', 'field-structure', 'reading-list'];
             if (networkCol) {
                 if (disabledViews.includes(view)) {
                     networkCol.classList.add('is-disabled');
@@ -6739,7 +6778,7 @@
 
             // Handle single-column override logic (e.g., Paper Library)
             if (contentCol) {
-                if (view === 'library') {
+                if (view === 'library' || view === 'reading-list') {
                     contentCol.classList.add('layout-single');
                 } else {
                     contentCol.classList.remove('layout-single');
@@ -6762,6 +6801,10 @@
                 }
                 // Preserving existing logic
                 if (typeof LibraryManager !== 'undefined') LibraryManager.init();
+            } else if (view === 'reading-list') {
+                const rlView = document.getElementById('view-reading-list');
+                if (rlView) rlView.style.display = 'block';
+                if (typeof renderReadingList === 'function') renderReadingList();
             } else if (view === 'field-structure') {
                 if (fieldView) {
                     fieldView.style.display = 'block';
@@ -7137,7 +7180,7 @@
                         <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top;" ${!isMissingAuthor ? `title="${safeAuthorsAttr}"` : ''}>${authorsHTML}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-style:italic; font-size:12px; line-height:1.4; vertical-align:top;">${journalHTML}</td>
                         <td style="padding:8px 12px; color:var(--text-secondary); font-size:12px; line-height:1.4; vertical-align:top; white-space:nowrap;">${isConnected ? 'Connected' : 'Not connected'}</td>
-                        <td style="padding:8px 12px; vertical-align:top; display:flex; justify-content:flex-end;">${chevronHTML}</td>
+                        <td style="padding:8px 12px; vertical-align:top; display:flex; justify-content:flex-end; gap:6px;">${rlButtonHTML(p.paper_id)}${chevronHTML}</td>
                     `;
                     tbody.appendChild(tr);
 
@@ -7199,6 +7242,85 @@
                 console.groupEnd();
             }
         };
+
+        // --- My Reading List (shared store: window.EpltReadingList) ---
+        const RL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>';
+        function rlButtonHTML(paperId) {
+            const RL = window.EpltReadingList;
+            const id = Number(paperId);
+            const saved = !!(RL && RL.has(id));
+            const blocked = !(RL && RL.canSave());
+            const label = blocked ? 'Reading List unavailable: saved list could not be read' : (saved ? 'Remove from Reading List' : 'Save to Reading List');
+            return `<button type="button" class="rl-btn" data-rl-id="${id}" aria-pressed="${saved}" aria-label="${label}" title="${label}"${blocked ? ' aria-disabled="true"' : ''}>${RL_ICON}</button>`;
+        }
+        function syncReadingListUI() {
+            const RL = window.EpltReadingList;
+            if (!RL) return;
+            const n = RL.count();
+            const navCount = document.getElementById('rl-nav-count');
+            if (navCount) navCount.textContent = n;
+            const blocked = !RL.canSave();
+            document.querySelectorAll('.rl-btn[data-rl-id]').forEach(btn => {
+                const saved = RL.has(btn.dataset.rlId);
+                const label = blocked ? 'Reading List unavailable: saved list could not be read' : (saved ? 'Remove from Reading List' : 'Save to Reading List');
+                btn.setAttribute('aria-pressed', String(saved));
+                btn.setAttribute('aria-label', label);
+                btn.title = label;
+                if (blocked) btn.setAttribute('aria-disabled', 'true'); else btn.removeAttribute('aria-disabled');
+            });
+            const rlView = document.getElementById('view-reading-list');
+            if (rlView && rlView.style.display !== 'none') renderReadingList();
+        }
+        function rlEsc(v) { return String(v ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+        const rlExpanded = new Set();
+        function renderReadingList() {
+            const RL = window.EpltReadingList;
+            const listEl = document.getElementById('rl-list');
+            if (!RL || !listEl) return;
+            document.getElementById('rl-warning').hidden = RL.canSave();
+            const items = RL.list();
+            document.getElementById('rl-view-count').textContent = items.length;
+            if (!items.length) {
+                listEl.innerHTML = `<div class="rl-empty">No saved papers yet. Use the bookmark button on any paper in Papers or in a topic's paper table to save it here.</div>`;
+                return;
+            }
+            const corpus = allData.libraryPapers || allData.papers || [];
+            const byId = new Map(corpus.map(p => [Number(p.paper_id), p]));
+            listEl.innerHTML = items.map(it => {
+                const p = byId.get(it.id);
+                if (!p) return `<div class="rl-item"><div class="rl-item-head"><div class="rl-item-main"><div class="rl-item-title">Paper P${it.id}</div><div class="rl-item-meta">Details not available in this dataset.</div></div><div class="rl-item-actions"><button type="button" class="rl-link-btn" data-rl-remove="${it.id}">Remove</button></div></div></div>`;
+                const authors = Array.isArray(p.authors) ? p.authors.join(', ') : p.authors;
+                const meta = [`P${it.id}`, p.year, p.journal ? `<em>${rlEsc(p.journal)}</em>` : '', rlEsc(authors), p.connected === false ? 'Not connected' : 'Connected'].filter(Boolean).join(' &bull; ');
+                const open = rlExpanded.has(it.id);
+                const abs = p.abstract ? rlEsc(p.abstract) : '<em>Abstract not available in this dataset.</em>';
+                return `<div class="rl-item"><div class="rl-item-head"><div class="rl-item-main"><div class="rl-item-title">${rlEsc(p.title || 'Untitled paper')}</div><div class="rl-item-meta">${meta}</div></div>
+                    <div class="rl-item-actions"><button type="button" class="rl-link-btn" data-rl-abstract="${it.id}" aria-expanded="${open}">${open ? 'Hide abstract' : 'Abstract'}</button><button type="button" class="rl-link-btn" data-rl-remove="${it.id}" aria-label="Remove ${rlEsc(p.title || 'paper')} from Reading List">Remove</button></div></div>
+                    ${open ? `<div class="rl-abstract">${abs}</div>` : ''}</div>`;
+            }).join('');
+        }
+        document.addEventListener('click', function (e) {
+            const RL = window.EpltReadingList;
+            if (!RL) return;
+            const btn = e.target.closest('.rl-btn[data-rl-id]');
+            if (btn) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (RL.canSave()) RL.toggle(btn.dataset.rlId);
+                return;
+            }
+            const rm = e.target.closest('[data-rl-remove]');
+            if (rm) { rlExpanded.delete(Number(rm.dataset.rlRemove)); RL.remove(rm.dataset.rlRemove); return; }
+            const ab = e.target.closest('[data-rl-abstract]');
+            if (ab) {
+                const id = Number(ab.dataset.rlAbstract);
+                rlExpanded.has(id) ? rlExpanded.delete(id) : rlExpanded.add(id);
+                renderReadingList();
+            }
+        }, true);
+        if (window.EpltReadingList) {
+            window.EpltReadingList.subscribe(syncReadingListUI);
+            document.addEventListener('DOMContentLoaded', syncReadingListUI);
+        }
 
         // Event delegation for accordion
         document.addEventListener('click', function (e) {
