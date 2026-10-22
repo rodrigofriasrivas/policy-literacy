@@ -2115,6 +2115,7 @@
             --network-widget-right: max(var(--network-widget-edge), env(safe-area-inset-right, 0px));
         }
 
+        #zoomControls[hidden] { display: none !important; }
         #zoomControls {
             position: fixed;
             bottom: var(--network-widget-bottom);
@@ -6794,6 +6795,10 @@
             } else {
                 window.pauseNetwork();
             }
+
+            // Zoom controls act on the shared network canvas: only show them where that canvas is shown.
+            const zoomControlsEl = document.getElementById('zoomControls');
+            if (zoomControlsEl) zoomControlsEl.hidden = !(view === 'network' || view === 'topic');
 
             // 2) Show only the selected container
             const containerEl = document.getElementById('container');
