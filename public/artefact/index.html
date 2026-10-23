@@ -1127,6 +1127,16 @@
         #view-field-structure .topic-card .topic-dot { top: 14px; right: 14px; width: 8px; height: 8px; }
         #view-field-structure .topic-card .topic-expand-icon { top: 9px; right: 30px; font-size: 18px; }
 
+        /* Expanded topic cards: print-legible detail (thesis Figure 3.2).
+           No fixed heights — cards grow with their content; rows stay aligned via grid stretch. */
+        #view-field-structure .topic-card.expanded .topic-details { margin-top: 16px; display: flex; flex-direction: column; flex: 1; }
+        #view-field-structure .topic-card .topic-def { font-size: 15.5px; line-height: 1.62; margin-bottom: 18px; }
+        #view-field-structure .topic-card .section-label-muted { font-size: 11px; letter-spacing: 0.09em; margin-bottom: 10px; }
+        #view-field-structure .topic-card .bigram-pills { gap: 8px; margin-bottom: 20px; }
+        #view-field-structure .topic-card .bigram-pill { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; padding: 6px 12px; border-radius: 14px; }
+        #view-field-structure .topic-card .open-network-btn { font-size: 13.5px; font-weight: 600; padding: 11px 14px; gap: 6px; margin-top: auto; }
+
+
         .topic-header-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
@@ -2436,6 +2446,9 @@
         body.theme-light .topic-card:hover { background: var(--surface-hover); border-color: var(--input-border); }
         body.theme-light .topic-dot { outline: 1px solid var(--network-outline); }
         body.theme-light .topic-num, body.theme-light .section-label-muted, body.theme-light .topic-expand-icon { opacity: 1; }
+        body.theme-light #view-field-structure .topic-card .open-network-btn { background: var(--surface-active); border-color: var(--input-border); }
+        body.theme-light #view-field-structure .topic-card .open-network-btn:hover { background: var(--surface-selected); border-color: var(--accent-color); }
+
         body.theme-light input[type="range"]::-webkit-slider-thumb { background: var(--accent-color); box-shadow: none; }
         body.theme-light input:checked + .slider { background: var(--surface-selected); border-color: var(--accent-color); }
         body.theme-light .slider { border-color: var(--input-border); }
