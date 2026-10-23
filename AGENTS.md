@@ -12,3 +12,4 @@
 - In the standalone artefact, every non-network view (Topics overview, Temporal Evolution, Papers, My Reading List) hides the Network Controls sidebar entirely (`is-hidden-sidebar` on `.dashboard-sidebar-col`, toggled in `switchView`); `is-disabled` is always cleared so no stale state carries back to the Network or Topic views.
 
 - Temporal Evolution charts 1–3 measure width at draw time; a debounced width-only ResizeObserver redraws them from cached data (never refetches), while Chart 4 scales via viewBox and is never redrawn, preserving its selection.
+- The Paper Library (`LibraryManager`) never inherits Network sidebar state (topic URL, year range, journals); only its own search and connected filter apply, so the full corpus is always searchable.

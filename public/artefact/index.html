@@ -7233,7 +7233,7 @@
 
                 // Log Audit
                 console.group('PAPER LIBRARY FILTER AUDIT');
-                console.log(`startYear: ${startYear}, endYear: ${endYear}`);
+                console.log("Papers filters: own search + connected filter only (independent of Network sidebar)");
                 console.log(`selectedJournals count: ${typeof selectedJournals !== 'undefined' ? selectedJournals.size : 0}`);
                 console.log(`papers before filter: ${rawPapers.length}, papers after filter: ${this.filteredPapers.length}`);
                 console.log(`minYear in filtered: ${minFilteredYear}, maxYear in filtered: ${maxFilteredYear}`);
