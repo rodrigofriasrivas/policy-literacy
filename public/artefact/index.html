@@ -1091,6 +1091,11 @@
             /* Disable all interactions */
         }
 
+        /* Hidden sidebar state (Topics overview): remove the column entirely so content uses the full width */
+        .dashboard-sidebar-col.is-hidden-sidebar {
+            display: none !important;
+        }
+
         /* Topics Grid Styles */
         #view-field-structure {
             padding-bottom: 40px;
@@ -6897,14 +6902,12 @@
             const fieldView = document.getElementById('view-field-structure');
             const topicView = document.getElementById('view-topic');
 
-            // Handle sidebar disabled state
-            const disabledViews = ['temporal', 'library', 'field-structure', 'reading-list'];
+            // Handle sidebar state per view: some views disable it, Topics overview removes it entirely
+            const disabledViews = ['temporal', 'library', 'reading-list'];
             if (networkCol) {
-                if (disabledViews.includes(view)) {
-                    networkCol.classList.add('is-disabled');
-                } else {
-                    networkCol.classList.remove('is-disabled');
-                }
+                networkCol.classList.toggle('is-disabled', disabledViews.includes(view));
+                // Topics overview: hide the sidebar column completely so content uses the full width
+                networkCol.classList.toggle('is-hidden-sidebar', view === 'field-structure');
             }
 
             // Handle single-column override logic (e.g., Paper Library)
@@ -6969,7 +6972,7 @@
             // 3) VIEW LAYOUT AUDIT
             console.group('VIEW LAYOUT AUDIT');
             console.log('viewName:', view);
-            console.log('sidebar display + disabled state:', networkCol ? `${getComputedStyle(networkCol).display} (${networkCol.classList.contains('is-disabled') ? 'disabled' : 'active'})` : 'N/A');
+            console.log('sidebar display + disabled state:', networkCol ? `${getComputedStyle(networkCol).display} (${networkCol.classList.contains('is-hidden-sidebar') ? 'hidden' : networkCol.classList.contains('is-disabled') ? 'disabled' : 'active'})` : 'N/A');
             console.log('main container class state:', contentCol ? `layout-single: ${contentCol.classList.contains('layout-single')}` : 'N/A');
             console.log('network viewport wrapper display:', containerEl ? getComputedStyle(containerEl).display : 'N/A');
             console.log('#view-library display:', libView ? getComputedStyle(libView).display : 'N/A');
