@@ -1159,6 +1159,27 @@
         html.figure-capture #view-field-structure .topic-card .bigram-pills { gap: 5px; margin-bottom: 10px; }
         html.figure-capture #view-field-structure .topic-card .bigram-pill { font-size: 15px; padding: 3px 7px; line-height: 1.25; letter-spacing: 0; }
         html.figure-capture #view-field-structure .topic-card .open-network-btn { font-size: 15px; padding: 6px 8px; }
+        /* Figure 3.3 capture mode (?figure=3.3): all 25 expanded; separate from 3.2. 1000px figure ≈ 0.45 pt/px at 16 cm. */
+        html.figure-33 .dashboard-sidebar-col,
+        html.figure-33 #zoomControls,
+        html.figure-33 [id^="simon"], html.figure-33 [class*="simon"],
+        html.figure-33 iframe[src*="simonthinks"] { display: none !important; }
+        html.figure-33 #view-field-structure { padding-top: 6px; }
+        html.figure-33 #view-field-structure .topic-overview-wrap { max-width: 1000px; margin: 0; padding: 4px 10px 10px; }
+        html.figure-33 #view-field-structure .topic-overview-title { font-size: 30px; margin-bottom: 2px; }
+        html.figure-33 #view-field-structure .topic-overview-intro { max-width: none; font-size: 16px; line-height: 1.35; margin-bottom: 10px; }
+        html.figure-33 #view-field-structure .topic-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+        html.figure-33 #view-field-structure .topic-card { min-height: 0; padding: 8px 9px 9px; }
+        html.figure-33 #view-field-structure .topic-card .topic-num { font-size: 15px; margin-bottom: 2px; }
+        html.figure-33 #view-field-structure .topic-card .topic-name { font-size: 18px; line-height: 1.2; padding-right: 22px; hyphens: auto; }
+        html.figure-33 #view-field-structure .topic-card .topic-dot { top: 10px; right: 9px; }
+        html.figure-33 #view-field-structure .topic-card .topic-expand-icon { top: 5px; right: 20px; font-size: 15px; }
+        html.figure-33 #view-field-structure .topic-card.expanded .topic-details { margin-top: 6px; }
+        html.figure-33 #view-field-structure .topic-card .topic-def { font-size: 17px; line-height: 1.32; margin-bottom: 8px; hyphens: auto; }
+        html.figure-33 #view-field-structure .topic-card .section-label-muted { font-size: 14px; letter-spacing: 0.03em; margin-bottom: 4px; }
+        html.figure-33 #view-field-structure .topic-card .bigram-pills { gap: 4px; margin-bottom: 8px; }
+        html.figure-33 #view-field-structure .topic-card .bigram-pill { font-size: 16px; padding: 2px 6px; line-height: 1.2; letter-spacing: 0; }
+        html.figure-33 #view-field-structure .topic-card .open-network-btn { font-size: 15px; padding: 4px 8px; }
 
 
         .topic-header-grid {
@@ -7655,6 +7676,22 @@
             light();
             window.addEventListener('load', light);
             [1, 2, 3, 4, 5].forEach(id => openTopicIds.add(id));
+            const go = () => {
+                const t = window.globalAllTopics || (typeof allData !== 'undefined' && allData && allData.topics) || [];
+                if (t.length) { light(); window.switchView('field-structure'); window.renderTopicGrid(); }
+                else setTimeout(go, 200);
+            };
+            go();
+        })();
+
+        // Figure 3.3 capture mode: same approach as 3.2 but all 25 topics open. No storage write.
+        (function () {
+            if (new URLSearchParams(location.search).get('figure') !== '3.3') return;
+            document.documentElement.classList.add('figure-33');
+            const light = () => { document.documentElement.dataset.theme = 'light'; document.body.classList.add('theme-light'); };
+            light();
+            window.addEventListener('load', light);
+            for (let i = 1; i <= 25; i++) openTopicIds.add(i);
             const go = () => {
                 const t = window.globalAllTopics || (typeof allData !== 'undefined' && allData && allData.topics) || [];
                 if (t.length) { light(); window.switchView('field-structure'); window.renderTopicGrid(); }
