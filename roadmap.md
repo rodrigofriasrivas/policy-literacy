@@ -19,3 +19,4 @@
 
 Phase 1 must preserve existing rendering, dark appearance, navigation, data, and analytical logic. No export mode is in scope.
 - [x] Copy for AI Assistant in My Reading List (selected or whole list, metadata only, approved wording); button renamed from "Copy for Simon" per user request.
+- [x] Figure 3.2 (25 Research Conversations grid): larger topic cards and full-width layout in the standalone artefact, accepted by user; thesis figure supplied as a high-resolution Light Mode screenshot cropped to heading, description and 25 topic cards — no further platform changes required.
