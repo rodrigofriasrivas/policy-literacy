@@ -4400,6 +4400,8 @@
                 const container = document.getElementById('topic-network-container');
                 if (container) {
                     const rect = container.getBoundingClientRect();
+                    // Hidden (another section is shown): defer; fitTopicCanvasToContainer runs on return.
+                    if (rect.width === 0 || rect.height === 0) return;
                     width = rect.width;
                     height = rect.height;
                     canvas.width = width;
@@ -6293,6 +6295,10 @@
 
             // --- BREADCRUMB UPDATE (Override switchView) ---
             const bc = document.querySelector('.stitch-bc-current');
+            {
+                const rn = topic.topic_name || topic.name || 'Unknown';
+                window._topicBreadcrumb = `TOPIC ${topic.id}: ${rn.replace(/^Topic \d+:\s*/, '').replace(/^Topic undefined:\s*/, '')}`;
+            }
             if (bc) {
                 const rawName = topic.topic_name || topic.name || 'Unknown';
                 const cleanName = rawName.replace(/^Topic \d+:\s*/, '').replace(/^Topic undefined:\s*/, '');
@@ -6949,7 +6955,14 @@
 
             // Update Breadcrumb
             const bc = document.querySelector('.stitch-bc-current');
-            if (bc) bc.textContent = view === 'network' ? 'NETWORK VIEW' :
+            // In topic mode the Network tab returns to the Topic View: the canvas stays in its
+            // topic container and is never moved or resized to the full page.
+            if (view === 'network' && urlState.mode === 'topic' && window._topicBreadcrumb) {
+                view = 'topic';
+                if (nav) nav.classList.add('active');
+            }
+            if (bc) bc.textContent = view === 'topic' && window._topicBreadcrumb ? window._topicBreadcrumb :
+                view === 'network' ? 'NETWORK VIEW' :
                 view === 'temporal' ? 'TEMPORAL EVOLUTION' :
                     view === 'library' ? 'PAPER LIBRARY' :
                         view === 'reading-list' ? 'MY READING LIST' : view.toUpperCase();
