@@ -1092,6 +1092,14 @@
         }
 
         /* Hidden sidebar state (Topics overview): remove the column entirely so content uses the full width */
+        #view-library > div, #view-reading-list > div {
+            max-width: 1560px;
+            margin: 0 auto;
+            padding: 8px 32px 40px !important;
+        }
+        @media (max-width: 768px) {
+            #view-library > div, #view-reading-list > div { padding: 8px 12px 32px !important; }
+        }
         .dashboard-sidebar-col.is-hidden-sidebar {
             display: none !important;
         }
@@ -6959,11 +6967,11 @@
             const topicView = document.getElementById('view-topic');
 
             // Handle sidebar state per view: some views disable it, Topics overview removes it entirely
-            const disabledViews = ['library', 'reading-list'];
+            const hiddenSidebarViews = ['field-structure', 'temporal', 'library', 'reading-list'];
             if (networkCol) {
-                networkCol.classList.toggle('is-disabled', disabledViews.includes(view));
-                // Topics overview: hide the sidebar column completely so content uses the full width
-                networkCol.classList.toggle('is-hidden-sidebar', view === 'field-structure' || view === 'temporal');
+                // Non-network views hide the sidebar column completely so content uses the full width
+                networkCol.classList.remove('is-disabled');
+                networkCol.classList.toggle('is-hidden-sidebar', hiddenSidebarViews.includes(view));
             }
 
             // Handle single-column override logic (e.g., Paper Library)
