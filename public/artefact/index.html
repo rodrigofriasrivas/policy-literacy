@@ -7143,10 +7143,7 @@
                     return;
                 }
 
-                // If currently in Topic Mode, initialize the library's topic focus
-                if (typeof urlState !== 'undefined' && urlState.mode === 'topic' && urlState.topicId) {
-                    this.topicFilter = Number(urlState.topicId);
-                }
+                // Papers never inherits the Network topic selection (see AGENTS.md).
 
                 // Set default sorting state
                 this.sortKey = 'year';
@@ -7178,21 +7175,11 @@
                 }
 
                 // 2. Filter logic (Search + Timeframe + Journals)
+                // Papers is independent of the Network sidebar (topic, year, journals):
+                // only its own search and connected filter apply.
                 const q = (this.searchQuery || '').toLowerCase();
-                const startYear = typeof minYear !== 'undefined' ? minYear : 1980;
-                const endYear = typeof maxYear !== 'undefined' ? maxYear : 2024;
 
                 this.filteredPapers = libraryPapers.filter(p => {
-                    const pYear = Number(p.year) || 0;
-
-                    // Time filter
-                    if (pYear < startYear || pYear > endYear) return false;
-
-                    // Journal filter (journals without a checkbox, i.e. only in unconnected papers, are not filtered out)
-                    if (typeof selectedJournals !== 'undefined' && selectedJournals.size > 0 && p.journal &&
-                        (!allData.journalUniverse || allData.journalUniverse.has(p.journal))) {
-                        if (!selectedJournals.has(p.journal)) return false;
-                    }
 
                     // Search filter
                     if (q) {
