@@ -1142,7 +1142,23 @@
         html.figure-capture iframe[src*="simonthinks"] { display: none !important; }
         html.figure-capture #view-field-structure .topic-overview-wrap { max-width: none; padding: 4px 20px 20px; }
         html.figure-capture #view-field-structure .topic-overview-intro { max-width: none; }
-        html.figure-capture #view-field-structure .topic-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+        html.figure-capture #view-field-structure .topic-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+        /* Print sizing: a fixed 960px figure prints at ~0.47 pt/px at 16 cm, so 16px text ≈ 7.6 pt. */
+        html.figure-capture #view-field-structure { padding-top: 8px; }
+        html.figure-capture #view-field-structure .topic-overview-wrap { max-width: 960px; margin: 0; padding: 4px 12px 12px; }
+        html.figure-capture #view-field-structure .topic-overview-title { font-size: 32px; margin-bottom: 4px; }
+        html.figure-capture #view-field-structure .topic-overview-intro { font-size: 16px; line-height: 1.4; margin-bottom: 12px; }
+        html.figure-capture #view-field-structure .topic-card { min-height: 0; padding: 10px 11px 11px; }
+        html.figure-capture #view-field-structure .topic-card .topic-num { font-size: 15px; margin-bottom: 3px; }
+        html.figure-capture #view-field-structure .topic-card .topic-name { font-size: 18px; line-height: 1.22; padding-right: 16px; hyphens: auto; }
+        html.figure-capture #view-field-structure .topic-card .topic-dot { top: 11px; right: 10px; }
+        html.figure-capture #view-field-structure .topic-card .topic-expand-icon { display: none; }
+        html.figure-capture #view-field-structure .topic-card.expanded .topic-details { margin-top: 8px; }
+        html.figure-capture #view-field-structure .topic-card .topic-def { font-size: 16px; line-height: 1.38; margin-bottom: 10px; hyphens: auto; }
+        html.figure-capture #view-field-structure .topic-card .section-label-muted { font-size: 14px; letter-spacing: 0.04em; margin-bottom: 6px; }
+        html.figure-capture #view-field-structure .topic-card .bigram-pills { gap: 5px; margin-bottom: 10px; }
+        html.figure-capture #view-field-structure .topic-card .bigram-pill { font-size: 15px; padding: 3px 7px; line-height: 1.25; letter-spacing: 0; }
+        html.figure-capture #view-field-structure .topic-card .open-network-btn { font-size: 15px; padding: 6px 8px; }
 
 
         .topic-header-grid {
