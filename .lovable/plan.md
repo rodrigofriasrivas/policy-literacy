@@ -20,13 +20,15 @@ Answers to the brief's questions:
 ## Minimal fix (only in `public/artefact/index.html`)
 1. In `switchView`, when the page is in topic mode and the Network tab is chosen, show the Topic View instead of the Macro path. The canvas then stays in its Topic View box at its original size. Zoom, pan, node positions and the selected topic are all kept. The **Network** tab stays highlighted.
 2. Keep the topic breadcrumb ("TOPIC 2: Academic Spin-offs") when returning. Its text is stored once, when the Topic View opens, and reapplied.
-3. Small guard in the window-resize handler: if the topic box measures 0 × 0 because it is hidden, skip the resize. The network is then sized correctly the next time it is visible. This doesn't affect normal resizing.
+3. **Resizing while away.** If the window is resized while the Topic View box is hidden (it measures 0 × 0), the resize handler skips it and doesn't restart the simulation. When you return to Network in topic mode, a new step runs after the Topic View is visible again. It measures the box's current size, then updates the canvas and the stored width and height. It also shifts the pan by half the size change, so the network stays centred in the box. The step doesn't restart or rebuild the simulation, and node positions, zoom level and the selected topic stay the same. If the size hasn't changed, it does nothing. Resizing the window while the network is on screen works as it does today.
 
 The following stay unchanged: data, links, forces, simulation settings, the Papers/Network filter separation, the selected topic, the header, the sidebar, the theme, other sections and the Macro View path. No fixed zoom levels or coordinates are added.
 
 ## Regression checks (Playwright, Light and Dark)
 - Topic 1 → Papers → Network; Topic 2 → Topics → Network; Topic 14 → Temporal Evolution → Network; Topic 2 → My Reading List → Network.
 - Macro View → Papers → Network.
+- Topic 2 → Papers → resize the window (for example 1182 → 1440, then 1440 → 900) → Network. The canvas should match the Topic View box's new size, and the network should stay centred. Node positions and zoom stay the same, and the simulation doesn't restart. Repeat via Topics, Temporal Evolution and My Reading List.
+- From topic mode, choose Macro View in the existing topic selector. The full-page network layout should come back normally.
 - Repeat each sequence 3 times without reloading.
 - For each one, compare the canvas parent, size and zoom with the values before leaving. They should match, and a screenshot should show the network filling its box.
 - Zoom +/−, Reset View, hovering and clicking nodes, bookmarking from the hover card, and changing topic all still work. No page errors. All 26 tests pass.
