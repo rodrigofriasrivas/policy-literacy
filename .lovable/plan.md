@@ -11,14 +11,16 @@
 - Papers' own search, connected/not-connected filter, sorting, pagination, bookmarks and abstracts stay as they are. Papers' typed search is kept while you're on the page. It is not carried across a topic change, because changing topic reloads the page, and that is how it already works.
 - Topic Detail paper tables in the React site keep their topic-specific lists. They use separate code.
 
-## Note: year and journal filters
-Papers also applies the Network sidebar's year range and journal checkboxes. The brief doesn't mention these, so I'll leave them alone. Tell me if you want Papers separated from them too.
+## Year and journal filters are separated too
+- In `LibraryManager.applyFilters`, remove the Network sidebar's year range and journal checkboxes. After that, Papers is limited only by its own search and its connected/not-connected filter.
+- Nothing in Network changes. Its year range and journal choices stay exactly as you set them. There are no new controls and no data changes.
 
 ## 446 vs 443: check before changing any counts
 The Network and Papers both decide a paper's topic the same way (its first topic link). So the 3-paper gap probably comes from Papers' year-range or journal filter, which leaves out papers without a year or outside the range. The cause isn't confirmed yet. I'll find the three missing paper IDs, explain why they drop out, and report back without changing any counts.
 
 ## Checks
 - Choose Topic 1 in Network, then open Papers: it shows 5,799 papers, and searching 443 finds the paper.
+- Narrow the Network year range and untick some journals, then open Papers: it still shows 5,799 papers. Back in Network, the year range and journals are as I left them.
 - Go back to Network: Topic 1 is still selected. Switch to another topic, then back to Papers: Papers still shows the full library.
 - Papers' filters, sorting, paging and abstracts still work.
 - Bookmark a paper from Network and one from Papers: both appear in My Reading List.
