@@ -1092,13 +1092,17 @@
         }
 
         /* Hidden sidebar state (Topics overview): remove the column entirely so content uses the full width */
+        .dashboard-content-col #view-library, .dashboard-content-col #view-reading-list { padding-left: 32px !important; padding-right: 32px !important; }
+        @media (max-width: 768px) { .dashboard-content-col #view-library, .dashboard-content-col #view-reading-list { padding-left: 0 !important; padding-right: 0 !important; } }
         #view-library > div, #view-reading-list > div {
             max-width: 1560px;
             margin: 0 auto;
-            padding: 8px 32px 40px !important;
+            padding: 8px 0 40px !important;
         }
         @media (max-width: 768px) {
-            #view-library > div, #view-reading-list > div { padding: 8px 12px 32px !important; }
+            .dashboard-content-col #view-library, .dashboard-content-col #view-reading-list { padding-left: 32px !important; padding-right: 32px !important; }
+        @media (max-width: 768px) { .dashboard-content-col #view-library, .dashboard-content-col #view-reading-list { padding-left: 0 !important; padding-right: 0 !important; } }
+        #view-library > div, #view-reading-list > div { padding: 8px 12px 32px !important; }
         }
         .dashboard-sidebar-col.is-hidden-sidebar {
             display: none !important;
