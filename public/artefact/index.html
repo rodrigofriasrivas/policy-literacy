@@ -1096,6 +1096,21 @@
             display: none !important;
         }
 
+        /* Temporal Evolution: full-width 2 x 2 chart grid, top-aligned independent card heights */
+        .temporal-grid {
+            max-width: 1560px;
+            margin: 0 auto;
+            padding: 8px 32px 32px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            align-items: start;
+        }
+        .temporal-grid > .stitch-card { margin: 0; min-width: 0; }
+        @media (max-width: 1100px) {
+            .temporal-grid { grid-template-columns: minmax(0, 1fr); padding: 8px 16px 24px; }
+        }
+
         /* Topics Grid Styles */
         #view-field-structure {
             padding-bottom: 40px;
@@ -1776,7 +1791,7 @@
                  but canvas is bg so we let it be) -->
                 <!-- Temporal View Overlay -->
                 <div id="view-temporal" class="dashboard-view-section custom-scrollbar" style="display: none;">
-                    <div style="max-width: 900px; margin: 0 auto; padding-bottom: 40px;">
+                    <div class="temporal-grid">
 
                         <!-- Card 1: Corpus Growth (Placeholder) -->
                         <div class="stitch-card">
@@ -5056,6 +5071,37 @@
         // NOTE: We use SUPABASE_URL and SUPABASE_KEY defined globally in this file.
         // We do NOT assume 'supabase' client object exists, as this app uses direct fetch helper.
 
+        // Redraw width-measured temporal charts (1-3) from cached data when their container width
+        // actually changes. Debounced; no refetch. Chart 4 scales via its viewBox, so it is never
+        // redrawn here and its topic selection is preserved.
+        function initTemporalResizeObserver() {
+            if (window._temporalRO || typeof ResizeObserver === 'undefined') return;
+            const redraw = {
+                'corpus-growth-chart': el => window._temporalCorpusData && renderCorpusChartD3(el, window._temporalCorpusData),
+                'topic-distribution-chart': el => window._temporalDistData && renderDistributionChart(el, window._temporalDistData.data, window._temporalDistData.total),
+                'topic-prevalence-chart': () => window.temporalData && renderTemporalChart(window.temporalData)
+            };
+            const lastW = {}, pending = new Set();
+            let timer = null;
+            window._temporalRO = new ResizeObserver(entries => {
+                entries.forEach(e => {
+                    const w = Math.round(e.contentRect.width);
+                    if (w === 0) return; // hidden view: ignore
+                    if (lastW[e.target.id] === undefined) { lastW[e.target.id] = w; return; }
+                    if (lastW[e.target.id] === w) return; // height-only or no change: skip (prevents loops)
+                    lastW[e.target.id] = w;
+                    pending.add(e.target);
+                });
+                if (!pending.size) return;
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    pending.forEach(el => { try { redraw[el.id](el); } catch (err) { console.warn('Temporal redraw failed', el.id, err); } });
+                    pending.clear();
+                }, 150);
+            });
+            Object.keys(redraw).forEach(id => { const el = document.getElementById(id); if (el) window._temporalRO.observe(el); });
+        }
+
         async function loadTemporalView() {
             if (temporalDataLoaded) return;
 
@@ -5090,6 +5136,7 @@
                 // fetchAndRenderEmergence(); // Removed
                 fetchAndRenderTopicTrends();  // Uses v_chart4_topic_trends
                 temporalDataLoaded = true;
+                initTemporalResizeObserver();
 
                 // Init Tooltip if missing
                 if (d3.select('#temporal-tooltip').empty()) {
@@ -5147,6 +5194,7 @@
                 console.log('Last 5 years:', fullData.slice(-5));
                 console.groupEnd();
 
+                window._temporalCorpusData = fullData; // cached for resize redraws (no refetch)
                 renderCorpusChartD3(container, fullData);
 
                 // --- Temporary Audit Table ---
@@ -5294,6 +5342,7 @@
                     };
                 }).sort((a, b) => b.count - a.count);
 
+                window._temporalDistData = { data: distributionData, total: totalPapersInNetwork }; // cached for resize redraws
                 renderDistributionChart(container, distributionData, totalPapersInNetwork);
 
             } catch (e) {
@@ -6903,11 +6952,11 @@
             const topicView = document.getElementById('view-topic');
 
             // Handle sidebar state per view: some views disable it, Topics overview removes it entirely
-            const disabledViews = ['temporal', 'library', 'reading-list'];
+            const disabledViews = ['library', 'reading-list'];
             if (networkCol) {
                 networkCol.classList.toggle('is-disabled', disabledViews.includes(view));
                 // Topics overview: hide the sidebar column completely so content uses the full width
-                networkCol.classList.toggle('is-hidden-sidebar', view === 'field-structure');
+                networkCol.classList.toggle('is-hidden-sidebar', view === 'field-structure' || view === 'temporal');
             }
 
             // Handle single-column override logic (e.g., Paper Library)
