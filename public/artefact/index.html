@@ -1133,7 +1133,7 @@
         #view-field-structure .topic-card .topic-def { font-size: 15.5px; line-height: 1.62; margin-bottom: 18px; hyphens: auto; text-wrap: pretty; }
         #view-field-structure .topic-card .section-label-muted { font-size: 11px; letter-spacing: 0.09em; margin-bottom: 10px; }
         #view-field-structure .topic-card .bigram-pills { gap: 8px; margin-bottom: 20px; }
-        #view-field-structure .topic-card .bigram-pill { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; padding: 6px 12px; border-radius: 14px; max-width: 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; line-height: 1.35; text-align: center; }
+        #view-field-structure .topic-card .bigram-pill { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; padding: 6px 10px; border-radius: 14px; max-width: 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; line-height: 1.35; text-align: center; }
         #view-field-structure .topic-card .open-network-btn { font-size: 13.5px; font-weight: 600; padding: 11px 14px; gap: 6px; margin-top: auto; }
 
 
@@ -7599,7 +7599,7 @@
                             <div class="topic-def">${topic.definition || 'Research definition for this topic layer.'}</div>
                             <div class="section-label-muted">Frequent terms</div>
                             <div class="bigram-pills">
-                                ${top5Bigrams.map(b => `<span class="bigram-pill">${b.bigram}</span>`).join('')}
+                                ${top5Bigrams.map(b => `<span class="bigram-pill">${(b.bigram || '').replace(/_/g, '_\u200B')}</span>`).join('')}
                             </div>
                             <button class="open-network-btn" onclick="window.openInNetwork(${topic.id}, event)">
                                 Open in network →
