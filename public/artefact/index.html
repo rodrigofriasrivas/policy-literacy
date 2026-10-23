@@ -1115,6 +1115,18 @@
             }
         }
 
+        /* Topics overview only: larger, print-legible grid (thesis Figure 3.2) */
+        #view-field-structure { padding-top: 16px; }
+        #view-field-structure .topic-overview-wrap { max-width: 1560px; margin: 0 auto; padding: 8px 32px 24px; }
+        #view-field-structure .topic-overview-title { font-family: 'Times New Roman', serif; font-size: 38px; font-weight: 400; line-height: 1.15; margin: 0 0 6px; color: var(--text-primary); }
+        #view-field-structure .topic-overview-intro { color: var(--text-secondary); font-size: 15px; margin: 0 0 18px; max-width: 760px; line-height: 1.5; }
+        #view-field-structure .topic-grid { gap: 14px; margin-top: 0; }
+        #view-field-structure .topic-card { min-height: 100px; padding: 14px 18px; }
+        #view-field-structure .topic-card .topic-num { font-size: 13px; font-weight: 700; opacity: 0.85; margin-bottom: 6px; }
+        #view-field-structure .topic-card .topic-name { font-size: 16px; line-height: 1.32; padding-right: 22px; }
+        #view-field-structure .topic-card .topic-dot { top: 14px; right: 14px; width: 8px; height: 8px; }
+        #view-field-structure .topic-card .topic-expand-icon { top: 9px; right: 30px; font-size: 18px; }
+
         .topic-header-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
@@ -7541,9 +7553,9 @@
             const topics = (window.globalAllTopics || allData.topics).sort((a, b) => a.id - b.id);
 
             let html = `
-                <div style="max-width: 1200px; margin: 0 auto; padding: 40px 32px;">
-                    <h1 style="font-family: 'Times New Roman', serif; font-size: 32px; font-weight: 400; margin-bottom: 8px; color: var(--text-primary);">25 research conversations</h1>
-                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 40px; max-width: 650px; line-height: 1.5;">
+                <div class="topic-overview-wrap">
+                    <h1 class="topic-overview-title">25 research conversations</h1>
+                    <p class="topic-overview-intro">
                         Each topic represents a recurring pattern of co-occurring terms across the corpus. Click any card to expand its description and key terms.
                     </p>
                     <div class="topic-grid">
