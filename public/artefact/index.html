@@ -7016,6 +7016,20 @@
                 if (containerEl) containerEl.style.display = 'block';
                 if (topicView) topicView.style.display = 'block';
                 if (canvasEl) canvasEl.style.display = 'block'; // Topic view needs canvas
+                // Accommodate any window resize that happened while hidden, without restarting the simulation.
+                const tnc = document.getElementById('topic-network-container');
+                if (tnc && canvas && canvas.parentElement === tnc) {
+                    const r = tnc.getBoundingClientRect();
+                    if (r.width > 0 && r.height > 0 && (Math.round(r.width) !== canvas.width || Math.round(r.height) !== canvas.height)) {
+                        const dx = (r.width - width) / 2, dy = (r.height - height) / 2;
+                        width = r.width; height = r.height;
+                        canvas.width = width; canvas.height = height;
+                        if (zoom) {
+                            const t = d3.zoomIdentity.translate(transform.x + dx, transform.y + dy).scale(transform.k);
+                            d3.select(canvas).call(zoom.transform, t);
+                        }
+                    }
+                }
             } else if (view === 'library') {
                 if (libView) {
                     libView.style.display = 'block';
