@@ -1158,6 +1158,12 @@
         #view-field-structure { padding-top: 16px; }
         #view-field-structure .topic-overview-wrap { max-width: 1560px; margin: 0 auto; padding: 8px 32px 24px; }
         #view-field-structure .topic-overview-title { font-family: 'Times New Roman', serif; font-size: 38px; font-weight: 400; line-height: 1.15; margin: 0 0 6px; color: var(--text-primary); }
+        #view-field-structure .topic-overview-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+        #view-field-structure .topic-expand-all-btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; font: inherit; font-size: 13px; color: var(--text-primary); background: transparent; border: 1px solid var(--chart-row-border); border-radius: 6px; cursor: pointer; margin-bottom: 6px; }
+        #view-field-structure .topic-expand-all-btn:hover { border-color: var(--text-secondary); }
+        #view-field-structure .topic-expand-all-btn:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; }
+        #view-field-structure .topic-expand-all-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; }
+        html.figure-capture #view-field-structure .topic-expand-all-btn, html.figure-33 #view-field-structure .topic-expand-all-btn { display: none; }
         #view-field-structure .topic-overview-intro { color: var(--text-secondary); font-size: 15px; margin: 0 0 18px; max-width: 760px; line-height: 1.5; }
         #view-field-structure .topic-grid { gap: 14px; margin-top: 0; }
         #view-field-structure .topic-card { min-height: 100px; padding: 14px 18px; }
@@ -2448,7 +2454,9 @@
         .rl-item-head > .rl-check { margin-top:2px; }
         .rl-link-btn:disabled { opacity:0.4; cursor:not-allowed; }
         .rl-danger { color:var(--text-primary); border-color:var(--text-secondary); font-weight:600; }
-        .rl-empty { color:var(--text-secondary); font-size:13px; padding:24px 0; }
+        .rl-empty { color:var(--text-secondary); font-size:13px; padding:24px 0; display:flex; align-items:center; gap:8px; }
+        .rl-empty-icon { width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; background:var(--surface-row); color:var(--text-secondary); flex-shrink:0; }
+        .rl-empty-icon svg { width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2; }
         @media (max-width: 600px) { .rl-item-head { flex-direction:column; } }
         .lib-row-not-connected > td {
             opacity: 0.55;
@@ -7577,7 +7585,7 @@
             if (!items.length) {
                 rlSelection.clear();
                 rlUpdateToolbar(0);
-                listEl.innerHTML = `<div class="rl-empty">My Reading List is empty. Use the bookmark button on any paper in Papers, in a topic's paper table or on a network paper card to save it here.</div>`;
+                listEl.innerHTML = `<div class="rl-empty"><span class="rl-empty-icon">${RL_ICON}</span><span>Your reading list is empty. Click the bookmark icon on any paper to save it here.</span></div>`;
                 return;
             }
             const present = new Set(items.map(it => it.id));
@@ -7681,9 +7689,16 @@
             // Get the full list of topics (prioritize non-filtered if in topic mode)
             const topics = (window.globalAllTopics || allData.topics).sort((a, b) => a.id - b.id);
 
+            const allOpen = topics.length > 0 && topics.every(t => openTopicIds.has(t.id));
+            const toggleIcon = allOpen
+                ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 14l5-5 5 5"/></svg>'
+                : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>';
             let html = `
                 <div class="topic-overview-wrap">
-                    <h1 class="topic-overview-title">25 research conversations</h1>
+                    <div class="topic-overview-head">
+                        <h1 class="topic-overview-title">25 research conversations</h1>
+                        <button type="button" class="topic-expand-all-btn" aria-expanded="${allOpen}" onclick="window.toggleAllTopicCards()">${toggleIcon}<span>${allOpen ? 'Collapse all' : 'Expand all'}</span></button>
+                    </div>
                     <p class="topic-overview-intro">
                         Each topic represents a recurring pattern of co-occurring terms across the corpus. Click any card to expand its description and key terms.
                     </p>
@@ -7735,6 +7750,15 @@
             } else {
                 openTopicIds.add(id);
             }
+            window.renderTopicGrid();
+        };
+
+        // Expand all / Collapse all reuses the single openTopicIds state.
+        window.toggleAllTopicCards = function () {
+            const topics = window.globalAllTopics || allData.topics || [];
+            const allOpen = topics.length > 0 && topics.every(t => openTopicIds.has(t.id));
+            if (allOpen) openTopicIds.clear();
+            else topics.forEach(t => openTopicIds.add(t.id));
             window.renderTopicGrid();
         };
 
