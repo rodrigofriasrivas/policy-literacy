@@ -1135,6 +1135,14 @@
         #view-field-structure .topic-card .bigram-pills { gap: 8px; margin-bottom: 20px; }
         #view-field-structure .topic-card .bigram-pill { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; padding: 6px 10px; border-radius: 14px; max-width: 100%; min-width: 0; white-space: normal; overflow-wrap: anywhere; line-height: 1.35; text-align: center; }
         #view-field-structure .topic-card .open-network-btn { font-size: 13.5px; font-weight: 600; padding: 11px 14px; gap: 6px; margin-top: auto; }
+        /* Figure 3.2 capture mode (?figure=3.2): presentation only, normal view untouched. */
+        html.figure-capture .dashboard-sidebar-col,
+        html.figure-capture #zoomControls,
+        html.figure-capture [id^="simon"], html.figure-capture [class*="simon"],
+        html.figure-capture iframe[src*="simonthinks"] { display: none !important; }
+        html.figure-capture #view-field-structure .topic-overview-wrap { max-width: none; padding: 4px 20px 20px; }
+        html.figure-capture #view-field-structure .topic-overview-intro { max-width: none; }
+        html.figure-capture #view-field-structure .topic-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
 
 
         .topic-header-grid {
@@ -7621,6 +7629,23 @@
             }
             window.renderTopicGrid();
         };
+
+        // Figure 3.2 capture mode: Light Mode for this page view only (no storage write),
+        // sidebar/overlays hidden, Topics 1-5 open. Without the parameter nothing changes.
+        (function () {
+            if (new URLSearchParams(location.search).get('figure') !== '3.2') return;
+            document.documentElement.classList.add('figure-capture');
+            const light = () => { document.documentElement.dataset.theme = 'light'; document.body.classList.add('theme-light'); };
+            light();
+            window.addEventListener('load', light);
+            [1, 2, 3, 4, 5].forEach(id => openTopicIds.add(id));
+            const go = () => {
+                const t = window.globalAllTopics || (typeof allData !== 'undefined' && allData && allData.topics) || [];
+                if (t.length) { light(); window.switchView('field-structure'); window.renderTopicGrid(); }
+                else setTimeout(go, 200);
+            };
+            go();
+        })();
 
         window.openInNetwork = function (topicId, event) {
             event.stopPropagation(); // Don't toggle the card
