@@ -1107,7 +1107,14 @@
             align-items: start;
         }
         .temporal-grid > .stitch-card { margin: 0; min-width: 0; }
-        @media (max-width: 1100px) {
+        /* Desktop: all four cards share one fixed external height (685px = Corpus Growth with its
+           Audit Table expanded, which scrolls internally), so toggling the table never moves row 2.
+           Content stays top-aligned; overflow-y is a safety net, never expected to engage. */
+        @media (min-width: 1101px) {
+            .temporal-grid { grid-auto-rows: 685px; align-items: stretch; }
+            .temporal-grid > .stitch-card { overflow-y: auto; }
+        }
+         @media (max-width: 1100px) {
             .temporal-grid { grid-template-columns: minmax(0, 1fr); padding: 8px 16px 24px; }
         }
 
