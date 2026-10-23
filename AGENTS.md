@@ -13,3 +13,4 @@
 
 - Temporal Evolution charts 1–3 measure width at draw time; a debounced width-only ResizeObserver redraws them from cached data (never refetches), while Chart 4 scales via viewBox and is never redrawn, preserving its selection.
 - The Paper Library (`LibraryManager`) never inherits Network sidebar state (topic URL, year range, journals); only its own search and connected filter apply, so the full corpus is always searchable.
+- In topic mode, the Network tab returns to the Topic View (`switchView` remaps it) and never moves the canvas to the full page; size changes made while hidden are applied on return by resizing the canvas and shifting pan only, never restarting the simulation.
